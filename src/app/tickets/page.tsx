@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Star, Calculator, ArrowRight, Clock, Users, AlertTriangle } from "lucide-react";
+import { Check, Star, Calculator, ArrowRight, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,8 +20,21 @@ export default function Tickets() {
   const [workshopTrack, setWorkshopTrack] = useState('cloud');
   const [competitionTrack, setCompetitionTrack] = useState('');
   const [comboCompetition, setComboCompetition] = useState('hackathon');
-  const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<{
+    remaining_total: number;
+    remaining_cloud: number;
+    remaining_ai: number;
+    total_registrations: number;
+    max_total: number;
+    cloud_workshop: number;
+    max_cloud: number;
+    ai_workshop: number;
+    max_ai: number;
+    direct_join_available: boolean;
+    direct_join_hackathon_price: number;
+    direct_join_pitch_price: number;
+  } | null>(null);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -115,17 +128,17 @@ export default function Tickets() {
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white mb-1">{stats.remaining_total}</div>
                       <div className="text-sm text-gray-400 mb-2">Total Slots Left</div>
-                      <Progress value={(stats.total_registrations / stats.max_total) * 100} className="h-2" />
+                      <Progress value={(stats.total_registrations / stats.max_total) * 100} className="h-2 bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-violet-500" />
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-400 mb-1">{stats.remaining_cloud}</div>
                       <div className="text-sm text-gray-400 mb-2">Cloud Workshop</div>
-                      <Progress value={(stats.cloud_workshop / stats.max_cloud) * 100} className="h-2" />
+                      <Progress value={(stats.cloud_workshop / stats.max_cloud) * 100} className="h-2 bg-blue-900/20 [&>div]:bg-blue-500" />
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-violet-400 mb-1">{stats.remaining_ai}</div>
                       <div className="text-sm text-gray-400 mb-2">AI Workshop</div>
-                      <Progress value={(stats.ai_workshop / stats.max_ai) * 100} className="h-2" />
+                      <Progress value={(stats.ai_workshop / stats.max_ai) * 100} className="h-2 bg-violet-900/20 [&>div]:bg-violet-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -190,13 +203,13 @@ export default function Tickets() {
                 onClick={() => setTicketChoice('entry_workshop')}
                 className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full transition-all ${ticketChoice === 'entry_workshop' ? 'ring-2 ring-blue-500' : 'hover:border-gray-600'}`}
               >
-                <CardHeader className="component-padding">
+                <CardHeader>
                   <div className="text-spacing">
                     <CardTitle className="text-white text-xl sm:text-2xl">Entry + Workshop Pass</CardTitle>
                     <p className="text-2xl sm:text-3xl font-bold text-white">₹800 <span className="text-base sm:text-lg font-normal text-gray-400">/ person</span></p>
                   </div>
                 </CardHeader>
-                <CardContent className="component-padding">
+                <CardContent>
                   <div className="card-gap flex flex-col">
                     <p className="text-sm sm:text-base text-gray-400">Core access to the summit and one hands-on workshop track.</p>
                   
@@ -207,27 +220,27 @@ export default function Tickets() {
                           <RadioGroup value={workshopTrack} onValueChange={setWorkshopTrack} className="space-y-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="cloud" id="cloud" disabled={stats?.remaining_cloud <= 0} />
-                                <Label htmlFor="cloud" className={`text-xs sm:text-sm ${stats?.remaining_cloud <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
+                                <RadioGroupItem value="cloud" id="cloud" disabled={(stats?.remaining_cloud ?? 0) <= 0} />
+                                <Label htmlFor="cloud" className={`text-xs sm:text-sm ${(stats?.remaining_cloud ?? 0) <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
                                   Cloud Computing (AWS)
                                 </Label>
                               </div>
                               {stats && (
-                                <Badge className={`text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                                  {stats.remaining_cloud} left
+                                <Badge className={`text-xs ${(stats.remaining_cloud ?? 0) <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                  {stats.remaining_cloud ?? 0} left
                                 </Badge>
                               )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="ai" id="ai" disabled={stats?.remaining_ai <= 0} />
-                                <Label htmlFor="ai" className={`text-xs sm:text-sm ${stats?.remaining_ai <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
+                                <RadioGroupItem value="ai" id="ai" disabled={(stats?.remaining_ai ?? 0) <= 0} />
+                                <Label htmlFor="ai" className={`text-xs sm:text-sm ${(stats?.remaining_ai ?? 0) <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
                                   AI & Machine Learning (Google)
                                 </Label>
                               </div>
                               {stats && (
-                                <Badge className={`text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
-                                  {stats.remaining_ai} left
+                                <Badge className={`text-xs ${(stats.remaining_ai ?? 0) <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
+                                  {stats.remaining_ai ?? 0} left
                                 </Badge>
                               )}
                             </div>
@@ -285,13 +298,13 @@ export default function Tickets() {
                 onClick={() => setTicketChoice('combo')}
                 className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full transition-all ${ticketChoice === 'combo' ? 'ring-2 ring-violet-500' : 'hover:border-gray-600'}`}
               >
-                <CardHeader className="component-padding">
+                <CardHeader>
                   <div className="text-spacing">
                     <CardTitle className="text-white text-xl sm:text-2xl">Combo Pack</CardTitle>
                     <p className="text-2xl sm:text-3xl font-bold text-white">₹900 - ₹950 <span className="text-base sm:text-lg font-normal text-gray-400">/ person</span></p>
                   </div>
                 </CardHeader>
-                <CardContent className="component-padding">
+                <CardContent>
                   <div className="card-gap flex flex-col">
                     <p className="text-sm sm:text-base text-gray-400">Everything included, plus entry into a competition track.</p>
                     

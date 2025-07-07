@@ -18,7 +18,12 @@ export default function DirectJoin() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    totalRegistrations: number;
+    availableSlots: number;
+    workshopCapacity: number;
+    competitionSeats: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {

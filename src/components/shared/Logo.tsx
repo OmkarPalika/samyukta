@@ -8,7 +8,7 @@ interface LogoProps {
   showText?: boolean;
 }
 
-export default function Logo({ href = "/", size = 'md', showText = true }: LogoProps) {
+export default function Logo({ href = "/", size = 'lg', showText = true }: LogoProps) {
   const sizeClasses = {
     sm: '24',
     md: '32',

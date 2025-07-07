@@ -24,6 +24,7 @@ import {
   Train
 } from "lucide-react";
 import PublicLayout from "@/components/layout/PublicLayout";
+import InteractiveMap from "@/components/shared/InteractiveMap";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -62,22 +63,22 @@ export default function Contact() {
 
   const contacts = [
     {
-      role: "Event Director",
-      name: "Dr. Rajesh Kumar",
-      email: "director@samyukta.anits.edu.in",
+      role: "Participant Assist",
+      name: "M. Mohith Kumar",
+      email: "samyukta.anits.edu.in",
       phone: "+91-9876543210",
-      department: "CSE Department"
+      department: "Helpline Team"
     },
     {
       role: "Technical Lead",
-      name: "Priya Sharma",
+      name: "K. Praneeth",
       email: "tech@samyukta.anits.edu.in",
       phone: "+91-9876543211",
       department: "Event Tech Team"
     },
     {
       role: "Sponsorship Head",
-      name: "Arjun Patel",
+      name: "Omkar Palika",
       email: "sponsors@samyukta.anits.edu.in",
       phone: "+91-9876543212",
       department: "Corporate Relations"
@@ -118,14 +119,14 @@ export default function Contact() {
     {
       icon: Plane,
       title: "By Air",
-      description: "Visakhapatnam Airport (VTZ) - 45 minutes drive",
-      details: "Regular flights from major cities. Airport shuttle available."
+      description: "Visakhapatnam Airport (VTZ) - 95 minutes drive",
+      details: "Regular flights from major cities."
     },
     {
       icon: Train,
       title: "By Train",
-      description: "Visakhapatnam Railway Station - 30 minutes drive",
-      details: "Well connected to all major cities. Pre-book station pickup."
+      description: "Visakhapatnam Railway Station - 60 minutes drive",
+      details: "Well connected to all major cities."
     },
     {
       icon: Car,
@@ -225,17 +226,9 @@ export default function Contact() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full">
-                  <CardContent className="p-0">
-                    <div className="aspect-video bg-gray-700 rounded-t-lg flex items-center justify-center">
-                      <div className="text-center">
-                        <MapPin className="w-16 h-16 text-gray-500 mx-auto mb-4" />
-                        <p className="text-gray-400">Interactive Map</p>
-                        <p className="text-gray-500 text-sm">Click &quot;Get Directions&quot; to view in Google Maps</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <div className="h-full">
+                  <InteractiveMap />
+                </div>
               </motion.div>
             </div>
 

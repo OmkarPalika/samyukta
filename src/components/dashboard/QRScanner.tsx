@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -31,7 +30,7 @@ export default function QRScanner({ onScan, onClose, title, description }: QRSca
         videoRef.current.srcObject = stream;
         setIsScanning(true);
       }
-    } catch (err) {
+    } catch {
       setError('Camera access denied. Please use manual input.');
     }
   };

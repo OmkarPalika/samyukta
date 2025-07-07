@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { GalleryData } from '@/entities/Gallery';
-import { Camera, Heart, Share2, Download, Filter, Grid, Calendar, User } from "lucide-react";
+import { Camera, Heart, Share2, Download, Filter, Grid, Calendar, User, MessageCircle, Hash, Eye, Copy, Facebook, Twitter, Instagram, Linkedin, ExternalLink, Send } from "lucide-react";
 import PublicLayout from "@/components/layout/PublicLayout";
 import Image from "next/image";
 
@@ -15,6 +16,9 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [viewMode, setViewMode] = useState<'grid' | 'masonry'>('grid');
+  const [selectedPhoto, setSelectedPhoto] = useState<GalleryData | null>(null);
+  const [comments, setComments] = useState<{[key: string]: Array<{id: string, user: string, text: string, time: string}>}>({});
+  const [newComment, setNewComment] = useState('');
 
   // Sample gallery data - Replace with API call
   const samplePhotos: GalleryData[] = useMemo(() => [
@@ -27,6 +31,9 @@ export default function Gallery() {
       category: 'ceremony',
 
       likes: 45,
+      views: 234,
+      comments: 12,
+      tags: ['opening', 'ceremony', 'samyukta2025'],
       created_at: '2024-08-06T09:00:00Z'
     },
     {
@@ -37,6 +44,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'workshop',
       likes: 32,
+      views: 156,
+      comments: 8,
+      tags: ['aws', 'workshop', 'cloud'],
       created_at: '2024-08-06T11:30:00Z'
     },
     {
@@ -47,6 +57,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'hackathon',
       likes: 67,
+      views: 289,
+      comments: 15,
+      tags: ['hackathon', 'teamwork', 'coding'],
       created_at: '2024-08-08T14:00:00Z'
     },
     {
@@ -57,6 +70,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'cultural',
       likes: 89,
+      views: 345,
+      comments: 23,
+      tags: ['cultural', 'dance', 'music'],
       created_at: '2024-08-06T19:00:00Z'
     },
     {
@@ -67,6 +83,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'networking',
       likes: 28,
+      views: 123,
+      comments: 5,
+      tags: ['networking', 'industry', 'experts'],
       created_at: '2024-08-07T16:00:00Z'
     },
     {
@@ -77,6 +96,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'workshop',
       likes: 43,
+      views: 187,
+      comments: 9,
+      tags: ['ai', 'ml', 'google'],
       created_at: '2024-08-07T10:00:00Z'
     },
     {
@@ -87,6 +109,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'ceremony',
       likes: 76,
+      views: 267,
+      comments: 18,
+      tags: ['awards', 'winners', 'celebration'],
       created_at: '2024-08-08T18:00:00Z'
     },
     {
@@ -97,6 +122,9 @@ export default function Gallery() {
       status: 'approved',
       category: 'group',
       likes: 120,
+      views: 456,
+      comments: 34,
+      tags: ['group', 'memories', 'finale'],
       created_at: '2024-08-08T17:00:00Z'
     }
   ], []);
@@ -158,6 +186,52 @@ export default function Gallery() {
     } catch (error) {
       console.error('Error downloading photo:', error);
     }
+  };
+
+  const handleShare = async (photo: GalleryData, platform?: string) => {
+    const url = window.location.origin + '/gallery/' + photo.id;
+    const text = `Check out this amazing moment from Samyukta 2025! ${photo.caption}`;
+    
+    if (platform) {
+      const shareUrls = {
+        facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`,
+        instagram: url, // Instagram doesn't support direct sharing
+        linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`
+      };
+      window.open(shareUrls[platform as keyof typeof shareUrls], '_blank');
+    } else if (navigator.share) {
+      await navigator.share({ url, title: photo.caption, text });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert('Link copied to clipboard!');
+    }
+  };
+
+  const handleComment = (photoId: string) => {
+    if (!newComment.trim()) return;
+    
+    const comment = {
+      id: Date.now().toString(),
+      user: 'Current User',
+      text: newComment,
+      time: new Date().toISOString()
+    };
+    
+    setComments(prev => ({
+      ...prev,
+      [photoId]: [...(prev[photoId] || []), comment]
+    }));
+    
+    setNewComment('');
+  };
+
+  const incrementViews = (photoId: string) => {
+    setPhotos(photos.map(photo =>
+      photo.id === photoId
+        ? { ...photo, views: (photo.views || 0) + 1 }
+        : photo
+    ));
   };
 
   const formatDate = (dateString: string) => {
@@ -295,10 +369,21 @@ export default function Gallery() {
                           <Button
                             size="sm"
                             variant="secondary"
-                            onClick={() => navigator.share?.({ url: photo.file_url, title: photo.caption })}
+                            onClick={() => handleShare(photo)}
                             className="bg-white/20 hover:bg-white/30 text-white border-0"
                           >
                             <Share2 className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => {
+                              setSelectedPhoto(photo);
+                              incrementViews(photo.id);
+                            }}
+                            className="bg-white/20 hover:bg-white/30 text-white border-0"
+                          >
+                            <Eye className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
@@ -322,9 +407,19 @@ export default function Gallery() {
                         </div>
 
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-1 text-pink-400">
-                            <Heart className="w-4 h-4" />
-                            <span className="text-sm">{photo.likes || 0}</span>
+                          <div className="flex items-center space-x-4 text-xs">
+                            <div className="flex items-center space-x-1 text-pink-400">
+                              <Heart className="w-3 h-3" />
+                              <span>{photo.likes || 0}</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-blue-400">
+                              <Eye className="w-3 h-3" />
+                              <span>{photo.views || 0}</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-green-400">
+                              <MessageCircle className="w-3 h-3" />
+                              <span>{photo.comments || 0}</span>
+                            </div>
                           </div>
 
                           {photo.category && (
@@ -336,6 +431,19 @@ export default function Gallery() {
                             </Badge>
                           )}
                         </div>
+
+                        {photo.tags && photo.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {photo.tags.slice(0, 3).map((tag, tagIndex) => (
+                              <span key={tagIndex} className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">
+                                #{tag}
+                              </span>
+                            ))}
+                            {photo.tags.length > 3 && (
+                              <span className="text-xs text-gray-400">+{photo.tags.length - 3} more</span>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -383,6 +491,115 @@ export default function Gallery() {
             </motion.div>
           </div>
         </section>
+
+        {/* Photo Modal */}
+        {selectedPhoto && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-gray-800 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+              <div className="flex">
+                <div className="flex-1">
+                  <div className="relative aspect-square">
+                    <Image
+                      src={selectedPhoto.file_url}
+                      alt={selectedPhoto.caption || 'Gallery image'}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                
+                <div className="w-80 p-6 border-l border-gray-700 flex flex-col">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-white">Photo Details</h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedPhoto(null)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      ×
+                    </Button>
+                  </div>
+                  
+                  <div className="space-y-4 flex-1">
+                    <div>
+                      <p className="text-white font-medium">{selectedPhoto.caption}</p>
+                      <p className="text-sm text-gray-400 mt-1">by {selectedPhoto.uploaded_by}</p>
+                      <p className="text-xs text-gray-500">{formatDate(selectedPhoto.created_at || '')}</p>
+                    </div>
+                    
+                    <div className="flex items-center space-x-4 text-sm">
+                      <div className="flex items-center space-x-1 text-pink-400">
+                        <Heart className="w-4 h-4" />
+                        <span>{selectedPhoto.likes || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1 text-blue-400">
+                        <Eye className="w-4 h-4" />
+                        <span>{selectedPhoto.views || 0}</span>
+                      </div>
+                      <div className="flex items-center space-x-1 text-green-400">
+                        <MessageCircle className="w-4 h-4" />
+                        <span>{comments[selectedPhoto.id]?.length || 0}</span>
+                      </div>
+                    </div>
+                    
+                    {selectedPhoto.tags && (
+                      <div className="flex flex-wrap gap-1">
+                        {selectedPhoto.tags.map((tag, index) => (
+                          <span key={index} className="text-xs text-blue-400 bg-blue-400/10 px-2 py-1 rounded">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="border-t border-gray-700 pt-4">
+                      <h4 className="text-sm font-medium text-white mb-2">Share</h4>
+                      <div className="flex space-x-2">
+                        <Button size="sm" variant="outline" onClick={() => handleShare(selectedPhoto, 'facebook')} className="p-2">
+                          <Facebook className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleShare(selectedPhoto, 'twitter')} className="p-2">
+                          <Twitter className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleShare(selectedPhoto, 'linkedin')} className="p-2">
+                          <Linkedin className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleShare(selectedPhoto)} className="p-2">
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="border-t border-gray-700 pt-4 flex-1">
+                      <h4 className="text-sm font-medium text-white mb-2">Comments</h4>
+                      <div className="space-y-2 max-h-32 overflow-y-auto mb-3">
+                        {comments[selectedPhoto.id]?.map((comment) => (
+                          <div key={comment.id} className="text-xs">
+                            <span className="text-blue-400 font-medium">{comment.user}</span>
+                            <p className="text-gray-300">{comment.text}</p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex space-x-2">
+                        <Input
+                          placeholder="Add a comment..."
+                          value={newComment}
+                          onChange={(e) => setNewComment(e.target.value)}
+                          className="flex-1 bg-gray-700 border-gray-600 text-white text-sm"
+                          onKeyPress={(e) => e.key === 'Enter' && handleComment(selectedPhoto.id)}
+                        />
+                        <Button size="sm" onClick={() => handleComment(selectedPhoto.id)}>
+                          <Send className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PublicLayout>
   );

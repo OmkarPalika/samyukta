@@ -20,26 +20,33 @@ export default function Register() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    remaining_cloud: number;
+    remaining_ai: number;
+    remaining_total: number;
+  } | null>(null);
 
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await fetch('/api/registrations/stats');
-        const data = await response.json();
-        setStats(data);
-      } catch (error) {
-        console.error('Failed to fetch stats:', error);
-      }
-    };
-    fetchStats();
-  }, []);
   const [completedRegistration, setCompletedRegistration] = useState<{
-    team_id: string;
     college: string;
-    team_size: number;
+    members: Array<{
+      participant_id: string;
+      passkey: string;
+      full_name: string;
+      email: string;
+      whatsapp: string;
+      year: string;
+      department: string;
+      accommodation: boolean;
+      food_preference: string;
+      workshop_track: string;
+      competition_track: string;
+    }>;
+    ticket_type: string;
+    workshop_track: string;
+    competition_track: string;
     total_amount: number;
-    status: string;
+    transaction_id: string;
+    payment_screenshot_url: string;
   } | null>(null);
 
   const [formData, setFormData] = useState({
@@ -53,7 +60,6 @@ export default function Register() {
         whatsapp: "",
         year: "",
         department: "",
-        workshopTrack: "",
         accommodation: false,
         foodPreference: "veg" as "veg" | "non-veg"
       }
@@ -63,17 +69,45 @@ export default function Register() {
       workshop: "",
       competition: ""
     },
+    memberTracks: [] as Array<{
+      workshopTrack: string;
+      competitionTrack: string;
+    }>,
     payment: {
       transactionId: "",
       screenshot: null as File | null
     }
   });
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch('/api/registrations/stats');
+        const data = await response.json();
+        setStats(data);
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+    fetchStats();
+    
+    // Initialize memberTracks array
+    if (formData.memberTracks.length === 0) {
+      setFormData(prev => ({
+        ...prev,
+        memberTracks: Array(prev.teamSize).fill(null).map(() => ({
+          workshopTrack: "",
+          competitionTrack: ""
+        }))
+      }));
+    }
+  }, [formData.memberTracks.length]);
+
   const steps = [
     { id: 1, title: "College & Team", icon: Users },
     { id: 2, title: "Team Details", icon: UserIcon },
     { id: 3, title: "Ticket Selection", icon: FileText },
-    { id: 4, title: "Track Selection", icon: Star },
+    { id: 4, title: "Member Tracks", icon: Star },
     { id: 5, title: "Payment", icon: CreditCard },
     { id: 6, title: "Confirmation", icon: Check }
   ];
@@ -130,7 +164,6 @@ export default function Register() {
           if (!member.whatsapp) newErrors[`member${index}Phone`] = "WhatsApp number is required";
           if (!member.year) newErrors[`member${index}Year`] = "Year is required";
           if (!member.department) newErrors[`member${index}Department`] = "Department is required";
-          if (!member.workshopTrack) newErrors[`member${index}Workshop`] = "Workshop track is required";
 
           // Validate phone number (10 digits)
           if (member.whatsapp && !/^\d{10}$/.test(member.whatsapp)) {
@@ -144,10 +177,15 @@ export default function Register() {
         });
         break;
 
-      case 3:
-        if (!formData.tickets.combo && !formData.tickets.workshop) {
-          newErrors.tickets = "Please select a workshop track";
-        }
+      case 4:
+        formData.memberTracks.forEach((track, index) => {
+          if (!track.workshopTrack) {
+            newErrors[`member${index}Workshop`] = "Workshop track is required";
+          }
+          if (formData.tickets.combo && !track.competitionTrack) {
+            newErrors[`member${index}Competition`] = "Competition track is required for combo pass";
+          }
+        });
         break;
 
       case 5:
@@ -173,6 +211,7 @@ export default function Register() {
 
   const handleTeamSizeChange = (size: number) => {
     const newMembers = [...formData.members];
+    const newMemberTracks = [...formData.memberTracks];
 
     if (size > formData.teamSize) {
       // Add new members
@@ -183,20 +222,25 @@ export default function Register() {
           whatsapp: "",
           year: "",
           department: "",
-          workshopTrack: "",
           accommodation: false,
           foodPreference: "veg" as "veg" | "non-veg"
+        });
+        newMemberTracks.push({
+          workshopTrack: "",
+          competitionTrack: ""
         });
       }
     } else if (size < formData.teamSize) {
       // Remove members
       newMembers.splice(size);
+      newMemberTracks.splice(size);
     }
 
     setFormData({
       ...formData,
       teamSize: size,
-      members: newMembers
+      members: newMembers,
+      memberTracks: newMemberTracks
     });
   };
 
@@ -222,23 +266,30 @@ export default function Register() {
         year: member.year,
         department: member.department,
         accommodation: member.accommodation || false,
-        food_preference: member.foodPreference as "veg" | "non-veg"
+        food_preference: member.foodPreference as "veg" | "non-veg",
+        workshop_track: formData.memberTracks[index]?.workshopTrack || "",
+        competition_track: formData.memberTracks[index]?.competitionTrack || ""
       }));
 
+      // Determine primary workshop track (most common among members)
+      const workshopTracks = formData.memberTracks.map(t => t.workshopTrack).filter(Boolean);
+      const primaryWorkshop = workshopTracks.length > 0 ? 
+        (workshopTracks.includes("Cloud Computing (AWS)") ? "Cloud" : "AI") : "None";
+      
+      // Determine primary competition track
+      const competitionTracks = formData.memberTracks.map(t => t.competitionTrack).filter(Boolean);
+      const primaryCompetition = competitionTracks.length > 0 ?
+        (competitionTracks.includes("Hackathon") ? "Hackathon" : "Pitch") : "None";
+
       const registrationData = {
-        team_id: teamId,
         college: formData.college === "Other" ? formData.customCollege : formData.college,
-        team_size: formData.teamSize,
         members: membersData,
         ticket_type: (formData.tickets.combo ? "Combo" : "Custom") as "Combo" | "Custom",
-        workshop_track: (formData.tickets.workshop === "Cloud Computing (AWS)" ? "Cloud" :
-          formData.tickets.workshop === "AI/ML (Google)" ? "AI" : "None") as "Cloud" | "AI" | "None",
-        competition_track: (formData.tickets.competition === "Hackathon" ? "Hackathon" :
-          formData.tickets.competition === "Startup Pitch" ? "Pitch" : "None") as "Hackathon" | "Pitch" | "None",
+        workshop_track: primaryWorkshop as "Cloud" | "AI" | "None",
+        competition_track: primaryCompetition as "Hackathon" | "Pitch" | "None",
         total_amount: calculatePrice().totalForTeam,
         transaction_id: formData.payment.transactionId,
-        payment_screenshot_url: "",
-        status: "completed"
+        payment_screenshot_url: ""
       };
 
       await Registration.create(registrationData);
@@ -401,42 +452,7 @@ export default function Register() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Workshop Track</Label>
-                      <Select
-                        value={member.workshopTrack}
-                        onValueChange={(value) => handleMemberChange(index, 'workshopTrack', value)}
-                      >
-                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                          <SelectValue placeholder="Select workshop track" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Cloud Computing (AWS)" disabled={stats?.remaining_cloud <= 0}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>Cloud Computing (AWS)</span>
-                              {stats && (
-                                <Badge className={`ml-2 text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                  {stats.remaining_cloud} left
-                                </Badge>
-                              )}
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="AI/ML (Google)" disabled={stats?.remaining_ai <= 0}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>AI/ML (Google)</span>
-                              {stats && (
-                                <Badge className={`ml-2 text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                  {stats.remaining_ai} left
-                                </Badge>
-                              )}
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                      {errors[`member${index}Workshop`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`member${index}Workshop`]}</p>
-                      )}
-                    </div>
+
                   </div>
 
                   <div className="space-y-3">
@@ -536,125 +552,94 @@ export default function Register() {
               </motion.div>
             </div>
 
-            {!formData.tickets.combo && (
-              <div>
-                <Label className="text-white text-lg mb-4 block">Workshop Track</Label>
-                <RadioGroup
-                  value={formData.tickets.workshop}
-                  onValueChange={(value) => setFormData({ ...formData, tickets: { ...formData.tickets, workshop: value } })}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="Cloud Computing (AWS)" id="aws" disabled={stats?.remaining_cloud <= 0} />
-                      <Label htmlFor="aws" className={`${stats?.remaining_cloud <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>Cloud Computing (AWS)</Label>
-                    </div>
-                    {stats && (
-                      <Badge className={`text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                        {stats.remaining_cloud} slots left
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="AI/ML (Google)" id="google" disabled={stats?.remaining_ai <= 0} />
-                      <Label htmlFor="google" className={`${stats?.remaining_ai <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>AI/ML (Google)</Label>
-                    </div>
-                    {stats && (
-                      <Badge className={`text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
-                        {stats.remaining_ai} slots left
-                      </Badge>
-                    )}
-                  </div>
-                </RadioGroup>
-                {errors.tickets && <p className="text-red-400 text-sm mt-2">{errors.tickets}</p>}
-              </div>
-            )}
+
           </div>
         );
 
       case 4:
         return (
           <div className="space-y-8">
-            <h3 className="text-xl font-bold text-white">Select Your Tracks</h3>
-
-            {formData.tickets.combo && (
-              <div>
-                <Label className="text-white text-lg mb-4 block">Workshop Track</Label>
-                <RadioGroup
-                  value={formData.tickets.workshop}
-                  onValueChange={(value) => setFormData({ ...formData, tickets: { ...formData.tickets, workshop: value } })}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="Cloud Computing (AWS)" id="combo-aws" disabled={stats?.remaining_cloud <= 0} />
-                      <Label htmlFor="combo-aws" className={`${stats?.remaining_cloud <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>Cloud Computing (AWS)</Label>
+            <h3 className="text-xl font-bold text-white">Member Track Selection</h3>
+            <p className="text-gray-300">Select workshop and competition tracks for each team member</p>
+            
+            {formData.members.map((member, index) => {
+              const memberTrack = formData.memberTracks[index] || { workshopTrack: "", competitionTrack: "" };
+              return (
+                <Card key={index} className="bg-gray-800/40 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-white">
+                      {member.fullName || `Member ${index + 1}`} {index === 0 && "(Team Lead)"}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Workshop Track</Label>
+                      <Select
+                        value={memberTrack.workshopTrack}
+                        onValueChange={(value) => {
+                          const newTracks = [...formData.memberTracks];
+                          newTracks[index] = { ...memberTrack, workshopTrack: value };
+                          setFormData({ ...formData, memberTracks: newTracks });
+                        }}
+                      >
+                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+                          <SelectValue placeholder="Select workshop track" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Cloud Computing (AWS)" disabled={!stats || stats.remaining_cloud <= 0}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>Cloud Computing (AWS)</span>
+                              {stats && (
+                                <Badge className={`ml-2 text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                  {stats.remaining_cloud} left
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="AI/ML (Google)" disabled={!stats || stats.remaining_ai <= 0}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>AI/ML (Google)</span>
+                              {stats && (
+                                <Badge className={`ml-2 text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-violet-500/10 text-violet-400'}`}>
+                                  {stats.remaining_ai} left
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors[`member${index}Workshop`] && (
+                        <p className="text-red-400 text-sm mt-1">{errors[`member${index}Workshop`]}</p>
+                      )}
                     </div>
-                    {stats && (
-                      <Badge className={`text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                        {stats.remaining_cloud} slots left
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value="AI/ML (Google)" id="combo-google" disabled={stats?.remaining_ai <= 0} />
-                      <Label htmlFor="combo-google" className={`${stats?.remaining_ai <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>AI/ML (Google)</Label>
+
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Competition Track</Label>
+                      <Select
+                        value={memberTrack.competitionTrack}
+                        onValueChange={(value) => {
+                          const newTracks = [...formData.memberTracks];
+                          newTracks[index] = { ...memberTrack, competitionTrack: value };
+                          setFormData({ ...formData, memberTracks: newTracks });
+                        }}
+                        disabled={!formData.tickets.combo}
+                      >
+                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+                          <SelectValue placeholder={formData.tickets.combo ? "Select competition track" : "Available with Combo Pass only"} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Hackathon">Hackathon</SelectItem>
+                          <SelectItem value="Startup Pitch">Startup Pitch</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errors[`member${index}Competition`] && (
+                        <p className="text-red-400 text-sm mt-1">{errors[`member${index}Competition`]}</p>
+                      )}
                     </div>
-                    {stats && (
-                      <Badge className={`text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
-                        {stats.remaining_ai} slots left
-                      </Badge>
-                    )}
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
-
-            {formData.tickets.combo && (
-              <div>
-                <Label className="text-white text-lg mb-4 block">Competition Track</Label>
-                <RadioGroup
-                  value={formData.tickets.competition}
-                  onValueChange={(value) => setFormData({ ...formData, tickets: { ...formData.tickets, competition: value } })}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="Hackathon" id="hackathon" />
-                    <Label htmlFor="hackathon" className="text-gray-300">Hackathon (+₹50)</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="Startup Pitch" id="pitch" />
-                    <Label htmlFor="pitch" className="text-gray-300">Startup Pitch (Included)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
-
-            {!formData.tickets.combo && (
-              <div>
-                <Label className="text-white text-lg mb-4 block">Add Competition (Optional)</Label>
-                <RadioGroup
-                  value={formData.tickets.competition}
-                  onValueChange={(value) => setFormData({ ...formData, tickets: { ...formData.tickets, competition: value } })}
-                  className="space-y-3"
-                >
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="" id="none" />
-                    <Label htmlFor="none" className="text-gray-300">No Competition</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="Hackathon" id="custom-hackathon" />
-                    <Label htmlFor="custom-hackathon" className="text-gray-300">Hackathon (+₹150)</Label>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="Startup Pitch" id="custom-pitch" />
-                    <Label htmlFor="custom-pitch" className="text-gray-300">Startup Pitch (+₹100)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-            )}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
             <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-700">
               <h4 className="text-lg font-bold text-white mb-4">Price Summary</h4>
@@ -768,11 +753,10 @@ export default function Register() {
                 <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-700 text-left">
                   <h4 className="text-lg font-bold text-white mb-4">Registration Details</h4>
                   <div className="space-y-2 text-gray-300">
-                    <p><strong>Team ID:</strong> {completedRegistration.team_id}</p>
                     <p><strong>College:</strong> {completedRegistration.college}</p>
-                    <p><strong>Team Size:</strong> {completedRegistration.team_size}</p>
+                    <p><strong>Ticket Type:</strong> {completedRegistration.ticket_type}</p>
                     <p><strong>Total Amount:</strong> ₹{completedRegistration.total_amount}</p>
-                    <p><strong>Status:</strong> {completedRegistration.status}</p>
+                    <p><strong>Transaction ID:</strong> {completedRegistration.transaction_id}</p>
                   </div>
                 </div>
 
