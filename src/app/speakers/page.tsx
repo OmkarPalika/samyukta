@@ -6,20 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Linkedin, Twitter, Globe, MapPin, Calendar, Clock } from "lucide-react";
 import Link from "next/link";
-import { MOCK_SPEAKERS } from "@/lib/mock-data";
+import { MOCK_SPEAKERS, MOCK_SPEAKER_TRACKS, MOCK_SPEAKING_BENEFITS } from "@/lib/mock-data";
 
 export default function Speakers() {
 
 
-  const tracks = [
-    { name: "All Tracks", color: "from-gray-500 to-gray-600" },
-    { name: "Cloud Computing", color: "from-blue-500 to-cyan-500" },
-    { name: "AI & Machine Learning", color: "from-violet-500 to-purple-500" },
-    { name: "Entrepreneurship", color: "from-green-500 to-emerald-500" },
-    { name: "Healthcare Technology", color: "from-pink-500 to-rose-500" },
-    { name: "Software Engineering", color: "from-orange-500 to-red-500" },
-    { name: "Cybersecurity", color: "from-indigo-500 to-purple-500" }
-  ];
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
@@ -66,7 +58,7 @@ export default function Speakers() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12"
           >
-            {tracks.map((track) => (
+            {MOCK_SPEAKER_TRACKS.map((track) => (
               <Badge
                 key={track.name}
                 className={`bg-gradient-to-r ${track.color} text-white border-0 px-3 sm:px-4 py-2 text-xs sm:text-sm cursor-pointer hover:scale-105 transition-transform`}
@@ -182,11 +174,7 @@ export default function Speakers() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {[
-              { icon: "🎯", title: "Expert Recognition", description: "Establish yourself as a thought leader in your field" },
-              { icon: "🌟", title: "Network Building", description: "Connect with 500+ passionate students and professionals" },
-              { icon: "💡", title: "Impact Creation", description: "Inspire and mentor the next generation of innovators" }
-            ].map((benefit, index) => (
+            {MOCK_SPEAKING_BENEFITS.map((benefit, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}

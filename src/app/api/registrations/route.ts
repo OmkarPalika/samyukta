@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { RegistrationCreateRequest, RegistrationResponse } from '@/lib/types';
-
-// Use centralized mock data
-const mockRegistrations: RegistrationResponse[] = [];
+import { MOCK_REGISTRATIONS } from '@/lib/mock-data';
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,7 +52,7 @@ export async function POST(request: NextRequest) {
       qr_code_url: `https://example.com/qr/${Date.now()}.png`,
     };
 
-    mockRegistrations.push(newRegistration);
+    MOCK_REGISTRATIONS.push(newRegistration);
     return NextResponse.json(newRegistration, { status: 201 });
   } catch (error) {
     console.error('Error creating registration:', error);
@@ -67,7 +65,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    return NextResponse.json(mockRegistrations);
+    return NextResponse.json(MOCK_REGISTRATIONS);
   } catch (error) {
     console.error('Error fetching registrations:', error);
     return NextResponse.json(

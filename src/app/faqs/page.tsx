@@ -1,7 +1,21 @@
+import { Metadata } from 'next';
+import { generateSEO, generateFAQStructuredData } from '@/lib/seo';
+
+export const metadata: Metadata = generateSEO({
+  title: "FAQs - Samyukta 2025 Tech Summit | Common Questions Answered",
+  description: "Find answers to frequently asked questions about Samyukta 2025. Registration, events, accommodation, travel, prizes, and more. Get all the information you need for India's premier student tech summit.",
+  keywords: [
+    "samyukta faqs", "tech summit questions", "registration help", "event information", 
+    "ANITS tech fest", "student summit help", "hackathon questions", "workshop details"
+  ],
+  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/faqs`
+});
+
 'use client';
 
 import { useState } from 'react';
 import { motion } from "framer-motion";
+import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,6 +27,14 @@ export default function FAQs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
   const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  
+  // Generate FAQ structured data
+  const faqStructuredData = generateFAQStructuredData(
+    MOCK_FAQS.map(faq => ({
+      question: faq.question,
+      answer: faq.answer
+    }))
+  );
 
   const filteredFAQs = MOCK_FAQS.filter(faq => {
     const matchesCategory = activeCategory === 'all' || faq.category === activeCategory;
@@ -27,7 +49,16 @@ export default function FAQs() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <>
+      <Script
+        id="faq-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqStructuredData),
+        }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
       <section className="section-padding">
         <div className="container-responsive">
@@ -243,5 +274,6 @@ export default function FAQs() {
         </div>
       </section>
     </div>
+    </>
   );
 }

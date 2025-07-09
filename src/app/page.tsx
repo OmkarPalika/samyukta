@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import Script from "next/script";
+import { generateEventStructuredData, generateOrganizationStructuredData } from "@/lib/seo";
 
 import Link from "next/link";
 import {
@@ -25,6 +27,38 @@ import { User as UserType } from "@/lib/types";
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
   const [user, setUser] = useState<UserType | null>(null);
+  
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in';
+  
+  const eventStructuredData = generateEventStructuredData({
+    name: "Samyukta 2025 - India's Premier Student Innovation Summit",
+    description: "Join 400+ innovators at India's biggest student-led national tech summit featuring hackathons, AI/ML workshops, cloud computing, and pitch competitions.",
+    startDate: "2025-08-06T09:00:00+05:30",
+    endDate: "2025-08-09T18:00:00+05:30",
+    location: {
+      name: "Anil Neerukonda Institute of Technology and Sciences",
+      address: {
+        streetAddress: "Sangivalasa",
+        addressLocality: "Visakhapatnam",
+        addressRegion: "Andhra Pradesh",
+        postalCode: "531162",
+        addressCountry: "IN"
+      }
+    },
+    organizer: {
+      name: "ANITS Samyukta Team",
+      url: "https://anits.edu.in"
+    },
+    offers: {
+      price: "299",
+      priceCurrency: "INR",
+      url: `${baseUrl}/register`
+    },
+    image: [`${baseUrl}/og-image.jpg`],
+    url: baseUrl
+  });
+  
+  const organizationStructuredData = generateOrganizationStructuredData();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -84,7 +118,23 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <>
+      <Script
+        id="event-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(eventStructuredData),
+        }}
+      />
+      <Script
+        id="organization-structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationStructuredData),
+        }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
         {/* Hero Section */}
         <section className="section-padding relative overflow-hidden">
           <div className="container-responsive">
@@ -295,5 +345,6 @@ export default function Home() {
           </div>
         </section>
       </div>
+    </>
   );
 }

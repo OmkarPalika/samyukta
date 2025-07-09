@@ -1,12 +1,26 @@
+import { Metadata } from 'next';
+import { generateSEO } from '@/lib/seo';
+
+export const metadata: Metadata = generateSEO({
+  title: "About Samyukta 2025 - India's Premier Student Innovation Summit",
+  description: "Learn about Samyukta 2025, India's biggest student-led tech summit at ANITS Visakhapatnam. Discover our mission, vision, and what makes us different from other tech events.",
+  keywords: ["about samyukta", "ANITS tech summit", "student innovation", "tech community", "Visakhapatnam tech event"],
+  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/about`
+});
+
 'use client';
 
 import { motion } from "framer-motion";
 import Image from "next/image";
+import Script from "next/script";
 import { Target, Heart, Users, Globe, Lightbulb, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { generateOrganizationStructuredData } from "@/lib/seo";
 
 export default function About() {
+  const organizationData = generateOrganizationStructuredData();
+  
   const values = [
     {
       icon: Target,
@@ -50,7 +64,16 @@ export default function About() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <>
+      <Script
+        id="about-organization-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationData),
+        }}
+      />
+      
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
       <section className="section-padding">
         <div className="container-responsive">
@@ -270,5 +293,6 @@ export default function About() {
         </div>
       </section>
     </div>
+    </>
   );
 }

@@ -440,6 +440,87 @@ export const MOCK_EVENT_BENEFITS = [
   "Lifetime membership to Samyukta alumni network"
 ];
 
+// Mock Speaker Tracks
+export const MOCK_SPEAKER_TRACKS = [
+  { name: "All Tracks", color: "from-gray-500 to-gray-600" },
+  { name: "Cloud Computing", color: "from-blue-500 to-cyan-500" },
+  { name: "AI & Machine Learning", color: "from-violet-500 to-purple-500" },
+  { name: "Entrepreneurship", color: "from-green-500 to-emerald-500" },
+  { name: "Healthcare Technology", color: "from-pink-500 to-rose-500" },
+  { name: "Software Engineering", color: "from-orange-500 to-red-500" },
+  { name: "Cybersecurity", color: "from-indigo-500 to-purple-500" }
+];
+
+// Mock Speaking Benefits
+export const MOCK_SPEAKING_BENEFITS = [
+  { icon: "🎯", title: "Expert Recognition", description: "Establish yourself as a thought leader in your field" },
+  { icon: "🌟", title: "Network Building", description: "Connect with 500+ passionate students and professionals" },
+  { icon: "💡", title: "Impact Creation", description: "Inspire and mentor the next generation of innovators" }
+];
+
+// Mock Sponsorship Benefits
+export const MOCK_SPONSORSHIP_BENEFITS = [
+  {
+    tier: "Title Sponsor",
+    benefits: [
+      "Exclusive naming rights to the event",
+      "Logo on all marketing materials and banners",
+      "30-minute keynote speaking slot",
+      "Premium booth space at venue",
+      "Logo on participant certificates",
+      "Dedicated social media campaigns",
+      "Access to participant database",
+      "VIP seating for leadership team",
+      "Recognition in all press releases",
+      "Lifetime partnership status"
+    ]
+  },
+  {
+    tier: "Platinum",
+    benefits: [
+      "Logo on main stage backdrop",
+      "15-minute speaking opportunity",
+      "Premium exhibition booth",
+      "Logo on event t-shirts",
+      "Social media mentions",
+      "Inclusion in event app",
+      "Networking dinner invitation",
+      "Certificate co-branding"
+    ]
+  },
+  {
+    tier: "Gold",
+    benefits: [
+      "Logo on event materials",
+      "Exhibition booth space",
+      "Logo on participant badges",
+      "Social media recognition",
+      "Inclusion in event program",
+      "Networking session access",
+      "Recruitment opportunities"
+    ]
+  },
+  {
+    tier: "Silver",
+    benefits: [
+      "Logo on event website",
+      "Small exhibition space",
+      "Social media mentions",
+      "Inclusion in event brochure",
+      "Networking opportunities",
+      "Talent recruitment access"
+    ]
+  }
+];
+
+// Mock Event Stats
+export const MOCK_EVENT_STATS = [
+  { number: "500+", label: "Participants", icon: "Users" },
+  { number: "50+", label: "Colleges", icon: "Target" },
+  { number: "4", label: "Days", icon: "Globe" },
+  { number: "15+", label: "Partners", icon: "Star" }
+];
+
 // Mock Contact Data
 export const MOCK_CONTACTS = [
   {

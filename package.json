@@ -7,7 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seo:audit": "next build && next start & sleep 5 && lighthouse http://localhost:3000 --output=html --output-path=./seo-audit.html --chrome-flags='--headless' && pkill -f 'next start'",
+    "seo:sitemap": "next build && node -e \"console.log('Sitemap generated at /sitemap.xml')\"",
+    "analyze": "cross-env ANALYZE=true next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -43,7 +46,8 @@
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "uuid": "^11.1.0",
-    "zod": "^3.25.74"
+    "zod": "^3.25.74",
+    "@next/bundle-analyzer": "^15.3.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

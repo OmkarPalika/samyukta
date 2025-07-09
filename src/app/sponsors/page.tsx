@@ -6,69 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Crown, Award, Users, Target, Globe, Mail, Phone } from "lucide-react";
 import Link from "next/link";
-import { MOCK_SPONSOR_TIERS } from "@/lib/mock-data";
+import { MOCK_SPONSOR_TIERS, MOCK_SPONSORSHIP_BENEFITS, MOCK_EVENT_STATS } from "@/lib/mock-data";
 
 export default function Sponsors() {
-  const sponsorshipBenefits = [
-    {
-      tier: "Title Sponsor",
-      benefits: [
-        "Exclusive naming rights to the event",
-        "Logo on all marketing materials and banners",
-        "30-minute keynote speaking slot",
-        "Premium booth space at venue",
-        "Logo on participant certificates",
-        "Dedicated social media campaigns",
-        "Access to participant database",
-        "VIP seating for leadership team",
-        "Recognition in all press releases",
-        "Lifetime partnership status"
-      ]
-    },
-    {
-      tier: "Platinum",
-      benefits: [
-        "Logo on main stage backdrop",
-        "15-minute speaking opportunity",
-        "Premium exhibition booth",
-        "Logo on event t-shirts",
-        "Social media mentions",
-        "Inclusion in event app",
-        "Networking dinner invitation",
-        "Certificate co-branding"
-      ]
-    },
-    {
-      tier: "Gold",
-      benefits: [
-        "Logo on event materials",
-        "Exhibition booth space",
-        "Logo on participant badges",
-        "Social media recognition",
-        "Inclusion in event program",
-        "Networking session access",
-        "Recruitment opportunities"
-      ]
-    },
-    {
-      tier: "Silver",
-      benefits: [
-        "Logo on event website",
-        "Small exhibition space",
-        "Social media mentions",
-        "Inclusion in event brochure",
-        "Networking opportunities",
-        "Talent recruitment access"
-      ]
-    }
-  ];
 
-  const stats = [
-    { number: "500+", label: "Participants", icon: Users },
-    { number: "50+", label: "Colleges", icon: Target },
-    { number: "4", label: "Days", icon: Globe },
-    { number: "15+", label: "Partners", icon: Star }
-  ];
 
   return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
@@ -95,7 +36,7 @@ export default function Sponsors() {
 
             {/* Event Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-              {stats.map((stat, index) => (
+              {MOCK_EVENT_STATS.map((stat, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, scale: 0.9 }}
@@ -107,7 +48,10 @@ export default function Sponsors() {
                     <CardContent className="card-padding">
                       <div className="text-spacing text-center">
                         <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-violet-500 rounded-xl flex items-center justify-center mx-auto mb-2">
-                          <stat.icon className="w-6 h-6 text-white" />
+                          {stat.icon === "Users" && <Users className="w-6 h-6 text-white" />}
+                          {stat.icon === "Target" && <Target className="w-6 h-6 text-white" />}
+                          {stat.icon === "Globe" && <Globe className="w-6 h-6 text-white" />}
+                          {stat.icon === "Star" && <Star className="w-6 h-6 text-white" />}
                         </div>
                         <div className="text-2xl font-bold text-white">{stat.number}</div>
                         <div className="text-gray-400 text-sm">{stat.label}</div>
@@ -200,7 +144,7 @@ export default function Sponsors() {
             </motion.div>
 
             <div className="grid md:grid-cols-2 gap-8">
-              {sponsorshipBenefits.map((package_, index) => (
+              {MOCK_SPONSORSHIP_BENEFITS.map((package_, index) => (
                 <motion.div
                   key={index}
                   initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
