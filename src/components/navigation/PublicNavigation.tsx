@@ -35,10 +35,12 @@ export default function PublicNavigation({ user, onLogout }: PublicNavigationPro
 
   const aboutItems = [
     { href: "About", label: "About Us", path: "/about" },
+    { href: "Team", label: "Our Team", path: "/about/team" },
     { href: "Speakers", label: "Speakers", path: "/speakers" },
     { href: "Sponsors", label: "Sponsors", path: "/sponsors" },
   ];
 
+  // Ensure team page is properly included in mobile navigation
   const allNavItems = [...navItems, ...aboutItems];
 
   return (

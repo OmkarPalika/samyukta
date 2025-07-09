@@ -355,6 +355,42 @@ export interface MapLocation {
   estimatedTime?: string;
 }
 
+// Speaker Types
+export interface Speaker {
+  id: string;
+  name: string;
+  designation: string;
+  company: string;
+  bio: string;
+  track: string;
+  session: string;
+  day: string;
+  time: string;
+  expertise: string[];
+  social: {
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+}
+
+export interface SpeakerTrack {
+  name: string;
+  color: string;
+}
+
+export interface SpeakingBenefit {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export interface SpeakersStatus {
+  isReady: boolean;
+  message: string;
+  expectedUpdateDate: string;
+}
+
 // Registration Form Types
 export interface RegistrationFormMember {
   fullName: string;

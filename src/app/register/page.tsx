@@ -13,7 +13,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Registration } from "@/entities/Registration";
 import { RegistrationFormData, CompletedRegistrationData } from "@/lib/types";
+import { uploadFile, validateFile } from "@/lib/file-upload";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function Register() {
   const router = useRouter();
@@ -168,6 +170,9 @@ export default function Register() {
         if (!formData.payment.transactionId) {
           newErrors.transactionId = "Transaction ID is required";
         }
+        if (!formData.payment.screenshot) {
+          newErrors.paymentScreenshot = "Payment screenshot is required";
+        }
         break;
     }
 
@@ -232,6 +237,21 @@ export default function Register() {
     setLoading(true);
     try {
       const teamId = `team-${Date.now()}`;
+      let paymentScreenshotUrl = "";
+
+      // Upload payment screenshot if available
+      if (formData.payment.screenshot) {
+        try {
+          validateFile(formData.payment.screenshot);
+          const uploadResult = await uploadFile(formData.payment.screenshot, '/api/registrations/upload-payment');
+          paymentScreenshotUrl = uploadResult.file_url;
+        } catch (uploadError) {
+          console.error("Payment screenshot upload failed:", uploadError);
+          setErrors({ submit: "Payment screenshot upload failed. Please try again." });
+          setLoading(false);
+          return;
+        }
+      }
 
       const membersData = formData.members.map((member, index) => ({
         participant_id: `${teamId}-${index + 1}`,
@@ -265,7 +285,7 @@ export default function Register() {
         competition_track: primaryCompetition as "Hackathon" | "Pitch" | "None",
         total_amount: calculatePrice().totalForTeam,
         transaction_id: formData.payment.transactionId,
-        payment_screenshot_url: ""
+        payment_screenshot_url: paymentScreenshotUrl
       };
 
       await Registration.create(registrationData);
@@ -694,20 +714,60 @@ export default function Register() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Payment Screenshot</Label>
+                <Label className="text-gray-300">Payment Screenshot <span className="text-red-400">*</span></Label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg">
                   <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-400">
-                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-400 hover:text-blue-300">
-                        <span>Upload a file</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                    {formData.payment.screenshot ? (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={URL.createObjectURL(formData.payment.screenshot)}
+                          alt="Payment Screenshot"
+                          width={100}
+                          height={100}
+                          className="h-32 object-contain mb-2"
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setFormData({ ...formData, payment: { ...formData.payment, screenshot: null } })}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="flex text-sm text-gray-400">
+                          <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-400 hover:text-blue-300">
+                            <span>Upload a file</span>
+                            <input
+                              id="file-upload"
+                              name="file-upload"
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setFormData({
+                                    ...formData,
+                                    payment: {
+                                      ...formData.payment,
+                                      screenshot: e.target.files[0]
+                                    }
+                                  });
+                                }
+                              }}
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                      </>
+                    )}
                   </div>
                 </div>
+                {errors.paymentScreenshot && <p className="text-red-400 text-sm mt-1">{errors.paymentScreenshot}</p>}
               </div>
             </div>
           </div>

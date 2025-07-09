@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import LayoutProvider from "@/components/layout/LayoutProvider";
-import { GoogleAnalytics, GoogleTagManager, FacebookPixel, HotjarTracking } from "@/components/shared/Analytics";
+import { GoogleAnalytics, HotjarTracking } from "@/components/shared/Analytics";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   },
   description: "Join 400+ innovators at India's biggest student-led national tech summit. 4-day event featuring hackathons, AI/ML workshops, cloud computing, pitch competitions, and industry networking at ANITS Visakhapatnam, August 6-9, 2025.",
   keywords: [
-    "Samyukta 2025", "ANITS", "tech summit", "innovation summit", "hackathon", "student event", 
+    "Samyukta 2025", "ANITS", "tech summit", "innovation summit", "hackathon", "student event",
     "Visakhapatnam", "AI workshop", "ML workshop", "cloud computing", "AWS", "Google Cloud",
     "pitch competition", "startup event", "tech conference", "student innovation", "national summit",
     "technology event", "coding competition", "engineering summit", "tech fest", "innovation challenge"
@@ -129,10 +129,10 @@ export default function RootLayout({
     "offers": {
       "@type": "Offer",
       "url": `${baseUrl}/register`,
-      "price": "299",
+      "price": "800",
       "priceCurrency": "INR",
       "availability": "https://schema.org/InStock",
-      "validFrom": "2024-12-01T00:00:00+05:30"
+      "validFrom": "2025-07-10T00:00:00+05:30"
     },
     "image": [`${baseUrl}/og-image.jpg`],
     "url": baseUrl,
@@ -146,6 +146,10 @@ export default function RootLayout({
         <link rel="preload" href="/logo.png" as="image" type="image/png" />
         <link rel="preload" href="/og-image.jpg" as="image" type="image/jpeg" />
         <link rel="preload" href="/twitter-image.jpg" as="image" type="image/jpeg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -155,11 +159,8 @@ export default function RootLayout({
         <LayoutProvider>
           {children}
         </LayoutProvider>
-        
         {/* Analytics Components */}
         <GoogleAnalytics />
-        <GoogleTagManager />
-        <FacebookPixel />
         <HotjarTracking />
       </body>
     </html>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import {
   Train
 } from "lucide-react";
 import InteractiveMap from "@/components/shared/InteractiveMap";
-import { MOCK_CONTACTS } from "@/lib/mock-data";
+import { MOCK_CONTACTS, CONTACT_PAGE_DATA } from "@/lib";
 // import { MOCK_EMERGENCY_CONTACTS } from "@/lib/mock-data";
 
 export default function Contact() {
@@ -63,29 +63,15 @@ export default function Contact() {
   };
 
 
-  const transportInfo = [
-    {
-      icon: Plane,
-      title: "By Air",
-      description: "Visakhapatnam Airport (VTZ) - 95 minutes drive",
-      details: "Regular flights from major cities."
-    },
-    {
-      icon: Train,
-      title: "By Train",
-      description: "Visakhapatnam Railway Station - 60 minutes drive",
-      details: "Well connected to all major cities."
-    },
-    {
-      icon: Car,
-      title: "By Road",
-      description: "NH16 connects to major cities",
-      details: "GPS: ANITS, Sangivalasa, Visakhapatnam. Parking available."
-    }
-  ];
+  // Map icon strings to components
+  const iconMap = {
+    'Plane': Plane,
+    'Train': Train,
+    'Car': Car
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 mt-20">
       {/* Hero Section */}
       <section>
         <div className="container-responsive">
@@ -98,11 +84,11 @@ export default function Contact() {
             <div className="text-spacing-lg">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  Contact Us
+                  {CONTACT_PAGE_DATA.title}
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto">
-                Get in touch with our team for any queries, support, or partnerships
+                {CONTACT_PAGE_DATA.description}
               </p>
             </div>
           </motion.div>
@@ -124,25 +110,26 @@ export default function Contact() {
                 <CardContent className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold text-white mb-2">
-                      Anil Neerukonda Institute of Technology & Sciences
+                      {CONTACT_PAGE_DATA.venue.name}
                     </h3>
                     <p className="text-gray-400 mb-4">
-                      Sangivalasa, Bheemunipatnam Mandal,<br />
-                      Visakhapatnam District, Andhra Pradesh 531162
+                      {CONTACT_PAGE_DATA.venue.address.split('\n').map((line, i) => (
+                        i === 0 ? line : <React.Fragment key={i}><br />{line}</React.Fragment>
+                      ))}
                     </p>
 
                     <div className="space-y-3">
                       <div className="flex items-center space-x-3">
                         <Phone className="w-4 h-4 text-green-400" />
-                        <span className="text-gray-300">+91-9876543210</span>
+                        <span className="text-gray-300">{CONTACT_PAGE_DATA.venue.phone}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Mail className="w-4 h-4 text-blue-400" />
-                        <span className="text-gray-300">info@samyukta.anits.edu.in</span>
+                        <span className="text-gray-300">{CONTACT_PAGE_DATA.supportChannels[0].contact}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Clock className="w-4 h-4 text-violet-400" />
-                        <span className="text-gray-300">Event: Aug 6-9, 2025</span>
+                        <span className="text-gray-300">Event: {CONTACT_PAGE_DATA.venue.eventDates}</span>
                       </div>
                     </div>
                   </div>
@@ -364,15 +351,15 @@ export default function Contact() {
             className="text-center mb-8 sm:mb-12"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-              How to <span className="text-blue-400">Reach Us</span>
+              {CONTACT_PAGE_DATA.reachUsSection.title.split('Reach')[0]}<span className="text-blue-400">Reach Us</span>
             </h2>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              Multiple convenient ways to reach ANITS, Visakhapatnam for Samyukta 2025
+              {CONTACT_PAGE_DATA.reachUsSection.description}
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {transportInfo.map((transport, index) => (
+            {CONTACT_PAGE_DATA.transportInfo.map((transport, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -384,7 +371,7 @@ export default function Contact() {
                   <CardContent className="card-padding">
                     <div className="card-gap flex flex-col items-center text-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center mb-4">
-                        <transport.icon className="w-8 h-8 text-white" />
+                        {React.createElement(iconMap[transport.icon as keyof typeof iconMap], { className: "w-8 h-8 text-white" })}
                       </div>
                       <h3 className="text-lg font-bold text-white">{transport.title}</h3>
                       <p className="text-blue-400 font-semibold text-sm">{transport.description}</p>

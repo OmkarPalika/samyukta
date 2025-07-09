@@ -114,7 +114,112 @@ export const MOCK_HELP_TICKETS: HelpTicket[] = [
 ];
 
 // Mock Social Items (mutable for API operations)
-export const MOCK_SOCIAL_ITEMS: SocialItem[] = [];
+export const MOCK_SOCIAL_ITEMS: SocialItem[] = [
+  {
+    id: '1',
+    file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+    caption: 'Opening ceremony with 500+ enthusiastic participants',
+    uploaded_by: 'event_team',
+    status: 'approved',
+    category: 'ceremony',
+    likes: 45,
+    comments: 12,
+    shares: 8,
+    tags: ['opening', 'ceremony', 'samyukta2025'],
+    created_at: '2024-08-06T09:00:00Z'
+  },
+  {
+    id: '2',
+    file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
+    caption: 'AWS workshop in progress - Cloud computing mastery',
+    uploaded_by: 'coordinator_1',
+    status: 'approved',
+    category: 'workshop',
+    likes: 32,
+    comments: 8,
+    shares: 5,
+    tags: ['aws', 'workshop', 'cloud'],
+    created_at: '2024-08-06T11:30:00Z'
+  },
+  {
+    id: '3',
+    file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+    caption: 'Team collaboration during hackathon',
+    uploaded_by: 'participant_23',
+    status: 'approved',
+    category: 'hackathon',
+    likes: 67,
+    comments: 15,
+    shares: 12,
+    tags: ['hackathon', 'teamwork', 'coding'],
+    created_at: '2024-08-08T14:00:00Z'
+  },
+  {
+    id: '4',
+    file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
+    caption: 'Cultural night performances and celebrations',
+    uploaded_by: 'cultural_team',
+    status: 'approved',
+    category: 'cultural',
+    likes: 89,
+    comments: 23,
+    shares: 18,
+    tags: ['cultural', 'dance', 'music'],
+    created_at: '2024-08-06T19:00:00Z'
+  },
+  {
+    id: '5',
+    file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
+    caption: 'Networking session with industry experts',
+    uploaded_by: 'networking_team',
+    status: 'approved',
+    category: 'networking',
+    likes: 28,
+    comments: 5,
+    shares: 3,
+    tags: ['networking', 'industry', 'experts'],
+    created_at: '2024-08-07T16:00:00Z'
+  },
+  {
+    id: '6',
+    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+    caption: 'AI/ML workshop with Google Cloud experts',
+    uploaded_by: 'tech_team',
+    status: 'approved',
+    category: 'workshop',
+    likes: 43,
+    comments: 9,
+    shares: 6,
+    tags: ['ai', 'ml', 'google'],
+    created_at: '2024-08-07T10:00:00Z'
+  },
+  {
+    id: '7',
+    file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
+    caption: 'Prize distribution ceremony',
+    uploaded_by: 'admin_team',
+    status: 'approved',
+    category: 'ceremony',
+    likes: 76,
+    comments: 18,
+    shares: 14,
+    tags: ['awards', 'winners', 'celebration'],
+    created_at: '2024-08-08T18:00:00Z'
+  },
+  {
+    id: '8',
+    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+    caption: 'Group photo with all participants',
+    uploaded_by: 'photo_team',
+    status: 'approved',
+    category: 'group',
+    likes: 120,
+    comments: 34,
+    shares: 28,
+    tags: ['group', 'memories', 'finale'],
+    created_at: '2024-08-08T17:00:00Z'
+  }
+];
 
 // Mock Game Data (mutable for API operations)
 export const MOCK_GAME_DATA: GameAction[] = [];
@@ -151,6 +256,40 @@ export const MOCK_PITCH_RATINGS: unknown[] = [];
 // Mock Registrations (mutable for API operations)
 export const MOCK_REGISTRATIONS: import('./types').RegistrationResponse[] = [];
 
+// Mock Speakers Data
+// Original speakers data commented out for now
+/*
+export const MOCK_SPEAKERS = [
+  {
+    id: 'speaker-1',
+    name: 'Dr. Jane Smith',
+    title: 'AI Research Lead, Google',
+    bio: 'Leading researcher in artificial intelligence with over 15 years of experience.',
+    image: '/images/speakers/jane-smith.jpg',
+    topics: ['Artificial Intelligence', 'Machine Learning'],
+    schedule: '2025-02-21T10:00:00Z',
+    venue: 'Main Auditorium'
+  },
+  {
+    id: 'speaker-2',
+    name: 'John Davis',
+    title: 'Cloud Architect, AWS',
+    bio: 'Expert in cloud infrastructure and serverless architecture.',
+    image: '/images/speakers/john-davis.jpg',
+    topics: ['Cloud Computing', 'DevOps'],
+    schedule: '2025-02-21T14:00:00Z',
+    venue: 'Tech Hall'
+  }
+];
+*/
+
+// Current speakers status
+export const SPEAKERS_STATUS = {
+  isReady: false,
+  message: 'Speakers will be updated soon',
+  expectedUpdateDate: '2025-07-20T00:00:00Z'
+};
+
 // Mock Map Locations
 export const MOCK_MAP_LOCATIONS: unknown[] = [
   {
@@ -183,7 +322,7 @@ export const MOCK_EVENT_DAYS = [
       { time: "4:30–5:00 PM", duration: 0.5, unified: { title: "Discussion, Icebreaker Game & Wind-up", type: "game" } },
       { time: "5:00–6:00 PM", duration: 1, unified: { title: "Refreshments & Logistics", type: "networking" } },
       { time: "6:30–8:00 PM", duration: 1.5, unified: { title: "Cultural Night", description: "Performances and Entertainment", type: "cultural" } },
-      { time: "8:00 PM", duration: 1, unified: { title: "Dinner (for hostellers)", type: "networking" } }
+      // { time: "8:00 PM", duration: 1, unified: { title: "Dinner (for hostellers)", type: "networking" } }
     ]
   },
   {
@@ -199,7 +338,7 @@ export const MOCK_EVENT_DAYS = [
       { time: "2:00–4:30 PM", duration: 1.5, trackA: { title: "Workshop Session 4", description: "DevOps with AWS", type: "workshop" }, trackB: { title: "Workshop Session 4", description: "AI Ethics & Deployment", type: "workshop" } },
       { time: "4:30–5:00 PM", duration: 0.5, unified: { title: "Feedback Collection, Quiz & Giveaways", type: "game" } },
       { time: "5:00–6:00 PM", duration: 1, unified: { title: "Refreshments & Logistics", type: "networking" } },
-      { time: "7:30 PM", duration: 1, unified: { title: "Dinner (for hostellers)", type: "networking" } }
+      // { time: "7:30 PM", duration: 1, unified: { title: "Dinner (for hostellers)", type: "networking" } }
     ]
   },
   {
@@ -430,23 +569,7 @@ export const MOCK_SPONSOR_TIERS = [
 // Mock Event Benefits
 export const MOCK_EVENT_BENEFITS = EVENT_CONFIG.benefits;
 
-// Mock Speaker Tracks
-export const MOCK_SPEAKER_TRACKS = [
-  { name: "All Tracks", color: "from-gray-500 to-gray-600" },
-  { name: "Cloud Computing", color: "from-blue-500 to-cyan-500" },
-  { name: "AI & Machine Learning", color: "from-violet-500 to-purple-500" },
-  { name: "Entrepreneurship", color: "from-green-500 to-emerald-500" },
-  { name: "Healthcare Technology", color: "from-pink-500 to-rose-500" },
-  { name: "Software Engineering", color: "from-orange-500 to-red-500" },
-  { name: "Cybersecurity", color: "from-indigo-500 to-purple-500" }
-];
-
-// Mock Speaking Benefits
-export const MOCK_SPEAKING_BENEFITS = [
-  { icon: "🎯", title: "Expert Recognition", description: "Establish yourself as a thought leader in your field" },
-  { icon: "🌟", title: "Network Building", description: "Connect with 500+ passionate students and professionals" },
-  { icon: "💡", title: "Impact Creation", description: "Inspire and mentor the next generation of innovators" }
-];
+// Speaker tracks and benefits are commented out as they're not currently used
 
 // Mock Sponsorship Benefits
 export const MOCK_SPONSORSHIP_BENEFITS = [
@@ -514,37 +637,23 @@ export const MOCK_EVENT_STATS = [
 // Mock Contact Data
 export const MOCK_CONTACTS = [
   {
-    role: "Participant Assist",
+    role: "Public Relations and Outreach",
+    name: "Afeefa Shahzadi",
+    email: EVENT_CONFIG.contacts.pr_email,
+    phone: EVENT_CONFIG.contacts.pr_phone,
+    department: "Helpline Team"
+  },
+  {
+    role: "Participant Support",
     name: "M. Mohith Kumar",
     email: EVENT_CONFIG.contacts.main_email,
     phone: EVENT_CONFIG.contacts.helpline,
     department: "Helpline Team"
-  },
-  {
-    role: "Technical Lead",
-    name: "K. Praneeth",
-    email: EVENT_CONFIG.contacts.tech_email,
-    phone: "+91-9876543211",
-    department: "Event Tech Team"
-  },
-  {
-    role: "Sponsorship Head",
-    name: "Omkar Palika",
-    email: EVENT_CONFIG.contacts.sponsor_email,
-    phone: "+91-9876543212",
-    department: "Corporate Relations"
-  },
-  {
-    role: "Accommodation Coordinator",
-    name: "Meena Iyer",
-    email: EVENT_CONFIG.contacts.accommodation_email,
-    phone: "+91-9876543213",
-    department: "Hospitality Team"
   }
 ];
 
 // Mock Emergency Contacts
-export const MOCK_EMERGENCY_CONTACTS = EVENT_CONFIG.emergency;
+// export const MOCK_EMERGENCY_CONTACTS = EVENT_CONFIG.emergency;
 
 // Mock FAQ Data
 export const MOCK_FAQ_CATEGORIES = [
@@ -568,7 +677,7 @@ export const MOCK_FAQS = [
     id: 2,
     category: 'registration',
     question: 'What is the registration fee?',
-    answer: 'Registration fees vary by package: Individual (₹999), Team of 3 (₹2499), Team of 5 (₹3999). All packages include workshops, meals, swag, certificates, and access to all events. Early bird discounts are available!'
+    answer: 'Registration fees vary by package: Entry + Workshop Pass (₹800/person), Combo Pack with Startup Pitch (₹900/person), or Combo Pack with Hackathon (₹950/person). Team discounts available for groups of 2-5 members. All packages include workshops, meals, swag, certificates, and access to events.'
   },
   {
     id: 3,
@@ -592,7 +701,7 @@ export const MOCK_FAQS = [
     id: 6,
     category: 'event',
     question: 'What should I bring to the event?',
-    answer: 'Bring your laptop, phone charger, notebook, pen, and enthusiasm! We provide meals, swag, and materials. Don\'t forget your QR code (digital or printed) for entry and games. Optional: business cards for networking.'
+    answer: 'Bring your laptop (with accessories), phone charger, notebook, pen, and enthusiasm! We provide meals, swag, and materials. Don\'t forget your QR code (digital or printed) for entry and games. Optional: business cards for networking.'
   },
   {
     id: 7,
@@ -628,7 +737,7 @@ export const MOCK_FAQS = [
     id: 12,
     category: 'sponsorship',
     question: 'How can my company sponsor Samyukta?',
-    answer: 'We offer various sponsorship tiers: Title (₹5L+), Platinum (₹2L+), Gold (₹1L+), and Silver (₹50K+). Each tier includes different benefits like branding, speaking slots, and recruitment opportunities. Contact sponsors@samyukta.anits.edu.in'
+    answer: 'We offer various sponsorship tiers. Reach out to samyukta.summit@gmail.com for sponsorship details.'
   },
   {
     id: 13,
@@ -652,7 +761,7 @@ export const MOCK_FAQS = [
     id: 16,
     category: 'general',
     question: 'Can I get a certificate?',
-    answer: 'Yes! All participants receive digital certificates of participation. Winners of hackathons and competitions get special recognition certificates. Certificates are available for download from your dashboard post-event.'
+    answer: 'Yes! All participants receive digital certificates of participation. Winners of hackathons and competitions get special recognition certificates.'
   },
   {
     id: 17,
@@ -664,6 +773,6 @@ export const MOCK_FAQS = [
     id: 18,
     category: 'general',
     question: 'What if I need to cancel my registration?',
-    answer: 'Cancellations made 30+ days before the event get full refund. 15-30 days: 50% refund. Less than 15 days: no refund but you can transfer your registration to another person. Contact us for assistance.'
+    answer: 'Contact us for assistance.'
   }
 ];

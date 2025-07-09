@@ -10,7 +10,7 @@ export const EVENT_CONFIG = {
     start: '2025-08-06T09:00:00',
     end: '2025-08-09T18:00:00',
     display: 'August 6-9, 2025',
-    registration_deadline: '2025-02-15T23:59:59Z'
+    registration_deadline: '2025-07-29T23:59:59Z'
   },
   
   // Location
@@ -30,9 +30,10 @@ export const EVENT_CONFIG = {
   capacity: {
     total_participants: 400,
     max_total: 400,
-    colleges: 50,
+    colleges: 30,
+    clubs: 10,
     days: 4,
-    partners: 15,
+    partners: 5,
     cloud_workshop: 200,
     ai_workshop: 200
   },
@@ -49,16 +50,16 @@ export const EVENT_CONFIG = {
   
   // Prizes
   prizes: {
-    total: "₹5L+",
+    total: "₹20,000 + Incentives",
     hackathon: {
-      first: "₹50,000",
-      second: "₹25,000", 
-      third: "₹10,000"
+      first: "₹5,000",
+      second: "₹3,000", 
+      third: "₹2,000"
     },
     pitch: {
-      first: "₹30,000 + Incubation",
-      second: "₹15,000",
-      third: "₹5,000"
+      first: "₹5,000 + Mentorship",
+      second: "₹3,000",
+      third: "₹2,000"
     }
   },
   
@@ -78,7 +79,7 @@ export const EVENT_CONFIG = {
     },
     {
       title: "Hackathon & Pitch",
-      description: "Compete for ₹5L+ in prizes and recognition", 
+      description: "Compete for ₹20k+ in prizes and recognition", 
       color: "from-pink-500 to-rose-500",
       icon: "Trophy"
     },
@@ -93,54 +94,49 @@ export const EVENT_CONFIG = {
   // Partners
   partners: [
     "AWS Educate", "Google Cloud", "GeeksforGeeks",
-    "Innovation Council", "AMTZ"
+    "Institute's Innovation Council", "AMTZ",
+    "UniGlobal", "Interview Buddy", "MMK Universe"
   ],
   
   // Contact Information
   contacts: {
-    main_email: "samyukta@anits.edu.in",
-    sponsor_email: "sponsors@samyukta.anits.edu.in",
-    tech_email: "tech@samyukta.anits.edu.in",
-    accommodation_email: "accommodation@samyukta.anits.edu.in",
-    helpline: "+91-9876543210",
-    campus_security: "+91-9876543214",
-    event_helpline: "+91-9876543215"
+    main_email: "samyukta.summit@gmail.com",
+    pr_email: "samyukta.summit@gmail.com",
+    sponsor_email: "samyukta.summit@gmail.com",
+    helpline: "+91-9014247180",
+    pr_phone: "+91-9059614659"
   },
   
   // Social Media
   social: {
     twitter: "@samyukta_anits",
-    instagram: "@samyukta_anits", 
-    linkedin: "company/anits-samyukta",
-    youtube: "@anits-official"
+    instagram: "@samyukta.2025", 
+    linkedin: "groups/14723748/",
+    // youtube: "@anits-official"
   },
   
   // Benefits
   benefits: [
-    "AWS Educate Account with $100+ credits",
-    "Google Cloud Platform credits and certifications", 
     "Exclusive starter kit with swag and resources",
     "Access to all interactive games and competitions",
     "Meals, snacks, and refreshments throughout the event",
     "Evening cultural events and entertainment",
     "Networking opportunities with industry leaders",
-    "Certificate of participation and skill validation",
-    "Priority access to internship and job opportunities",
-    "Lifetime membership to Samyukta alumni network"
+    "Certificate of participation and skill validation"
   ],
   
   // Emergency Contacts
-  emergency: [
-    { title: "Medical Emergency", contact: "108 (Ambulance)", description: "24/7 emergency medical services" },
-    { title: "Campus Security", contact: "+91-9876543214", description: "ANITS security helpline" },
-    { title: "Event Helpline", contact: "+91-9876543215", description: "24/7 during event dates" },
-    { title: "Police Station", contact: "100 (Police)", description: "Local police emergency" }
-  ]
+  // emergency: [
+  //   { title: "Medical Emergency", contact: "108 (Ambulance)", description: "24/7 emergency medical services" },
+  //   { title: "Campus Security", contact: "+91-9876543214", description: "ANITS security helpline" },
+  //   { title: "Event Helpline", contact: "+91-9876543215", description: "24/7 during event dates" },
+  //   { title: "Police Station", contact: "100 (Police)", description: "Local police emergency" }
+  // ]
 };
 
 // URL Configuration
 export const URL_CONFIG = {
-  base: process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in',
+  base: process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.vercel.app',
   register: '/register',
   login: '/login',
   dashboard: '/dashboard',

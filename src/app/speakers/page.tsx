@@ -1,18 +1,14 @@
 'use client';
 
+import { Suspense } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Linkedin, Twitter, Globe, MapPin, Calendar, Clock } from "lucide-react";
+import { MapPin, Calendar, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { MOCK_SPEAKERS, MOCK_SPEAKER_TRACKS, MOCK_SPEAKING_BENEFITS } from "@/lib/mock-data";
+import { SPEAKERS_PAGE_DATA, SPEAKERS_STATUS } from "@/lib";
 
-export default function Speakers() {
-
-
-
-
+function SpeakersContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
@@ -27,32 +23,36 @@ export default function Speakers() {
             <div className="text-spacing-lg">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  Industry Experts
+                  {SPEAKERS_PAGE_DATA.title}
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto">
-                Learn from the best minds in technology, innovation, and entrepreneurship
+                {SPEAKERS_PAGE_DATA.description}
               </p>
 
               <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-                <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base">
-                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  6 Expert Sessions
-                </Badge>
-                <Badge className="bg-violet-500/10 text-violet-400 border-violet-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base">
-                  <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  Industry Leaders
-                </Badge>
-                <Badge className="bg-pink-500/10 text-pink-400 border-pink-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base">
-                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  Interactive Sessions
-                </Badge>
+                {SPEAKERS_PAGE_DATA.badges.map((badge, index) => {
+                  let IconComponent;
+                  if (badge.icon === 'Calendar') IconComponent = Calendar;
+                  else if (badge.icon === 'MapPin') IconComponent = MapPin;
+                  else if (badge.icon === 'Clock') IconComponent = Clock;
+                  
+                  return (
+                    <Badge 
+                      key={index}
+                      className={`bg-${index === 0 ? 'blue' : index === 1 ? 'violet' : 'pink'}-500/10 text-${index === 0 ? 'blue' : index === 1 ? 'violet' : 'pink'}-400 border-${index === 0 ? 'blue' : index === 1 ? 'violet' : 'pink'}-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base`}
+                    >
+                      {IconComponent && <IconComponent className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />}
+                      {badge.text}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           </motion.div>
 
-          {/* Track Filters */}
-          <motion.div
+          {/* Track Filters - Commented out until speakers are ready */}
+          {/* <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -66,10 +66,44 @@ export default function Speakers() {
                 {track.name}
               </Badge>
             ))}
-          </motion.div>
+          </motion.div> */}
 
-          {/* Speakers Grid */}
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+          {/* Speakers Coming Soon Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="max-w-3xl mx-auto"
+          >
+            <Card className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-gray-700 hover:border-blue-500/50 transition-all duration-500 overflow-hidden">
+              <CardContent className="p-8 sm:p-10 text-center">
+                <div className="flex flex-col items-center gap-6">
+                  <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <AlertCircle className="w-10 h-10 text-blue-400" />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                      Speakers Will Be Updated Soon
+                    </h3>
+                    <p className="text-gray-300 max-w-xl mx-auto">
+                      {SPEAKERS_STATUS.message}. We&apos;re finalizing our lineup of industry experts and thought leaders who will share their insights at Samyukta 2025.
+                    </p>
+                    
+                    <div className="pt-4">
+                      <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-4 py-2">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        Expected by {new Date(SPEAKERS_STATUS.expectedUpdateDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+          
+          {/* Original Speakers Grid - Commented out */}
+          {/* <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
             {MOCK_SPEAKERS.map((speaker, index) => (
               <motion.div
                 key={speaker.id}
@@ -82,7 +116,6 @@ export default function Speakers() {
                 <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all duration-300 h-full">
                   <CardContent className="card-padding">
                     <div className="card-gap flex flex-col">
-                      {/* Speaker Avatar & Basic Info */}
                       <div className="text-center">
                         <Avatar className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4">
                           <AvatarFallback className="bg-gradient-to-r from-blue-500 to-violet-500 text-2xl font-bold text-white">
@@ -93,7 +126,6 @@ export default function Speakers() {
                         <p className="text-sm sm:text-base text-gray-300">{speaker.designation}</p>
                         <p className="text-xs sm:text-sm text-gray-400 mb-3">{speaker.company}</p>
 
-                        {/* Social Links */}
                         <div className="flex justify-center space-x-3 mb-4">
                           {speaker.social.linkedin && (
                             <Link href={speaker.social.linkedin} className="text-blue-400 hover:text-blue-300 transition-colors">
@@ -113,7 +145,6 @@ export default function Speakers() {
                         </div>
                       </div>
 
-                      {/* Session Details */}
                       <div className="space-y-3">
                         <div>
                           <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 mb-2">
@@ -132,7 +163,6 @@ export default function Speakers() {
 
                         <p className="text-sm text-gray-400 line-clamp-3">{speaker.bio}</p>
 
-                        {/* Expertise Tags */}
                         <div className="flex flex-wrap gap-1 sm:gap-2">
                           {speaker.expertise.map((skill, idx) => (
                             <Badge
@@ -150,7 +180,7 @@ export default function Speakers() {
                 </Card>
               </motion.div>
             ))}
-          </div>
+          </div> */}
         </div>
       </section>
 
@@ -165,16 +195,32 @@ export default function Speakers() {
           >
             <div className="text-spacing-lg">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                Want to <span className="text-blue-400">Speak</span> at Samyukta?
+                {SPEAKERS_PAGE_DATA.speakingOpportunities.title.split('Speak')[0]}<span className="text-blue-400">Speak</span>{SPEAKERS_PAGE_DATA.speakingOpportunities.title.split('Speak')[1]}
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
-                Join our community of expert speakers and share your knowledge with the next generation of innovators
+                {SPEAKERS_PAGE_DATA.speakingOpportunities.description}
               </p>
             </div>
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {MOCK_SPEAKING_BENEFITS.map((benefit, index) => (
+            {[
+              {
+                icon: '🎯',
+                title: 'Reach Tech Talent',
+                description: 'Connect with 500+ students and young professionals passionate about technology'
+              },
+              {
+                icon: '🌟',
+                title: 'Brand Visibility',
+                description: 'Showcase your expertise and enhance your personal and company brand'
+              },
+              {
+                icon: '🤝',
+                title: 'Networking',
+                description: 'Connect with industry leaders, academics, and government officials'
+              }
+            ].map((benefit, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -203,7 +249,7 @@ export default function Speakers() {
             className="text-center mt-8"
           >
             <Link
-              href="mailto:speakers@samyukta.anits.edu.in?subject=Speaking Opportunity - Samyukta 2025"
+              href={`mailto:${SPEAKERS_PAGE_DATA.speakingOpportunities.contactEmail}?subject=Speaking Opportunity - Samyukta 2025`}
               className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold rounded-xl transition-all duration-300 neon-glow"
             >
               Apply to Speak
@@ -212,5 +258,13 @@ export default function Speakers() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function Speakers() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+      <SpeakersContent />
+    </Suspense>
   );
 }

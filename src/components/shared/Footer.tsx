@@ -8,7 +8,7 @@ export default function Footer() {
       <div className="container-responsive component-padding text-center">
         <div className="text-spacing-lg">
           <div className="flex justify-center" style={{ gap: 'var(--gap-md)' }}>
-            <Button variant="ghost" size="sm" asChild className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="sm" asChild className="text-gray-400 hover:text-red-500">
               <a 
                 href="https://instagram.com/samyukta.2025" 
                 target="_blank" 
@@ -17,7 +17,7 @@ export default function Footer() {
                 <Instagram className="w-6 h-6" />
               </a>
             </Button>
-            <Button variant="ghost" size="sm" asChild className="text-gray-400 hover:text-white">
+            <Button variant="ghost" size="sm" asChild className="text-gray-400 hover:text-blue-500">
               <a 
                 href="https://www.linkedin.com/groups/14723748/" 
                 target="_blank" 

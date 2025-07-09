@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SocialItem } from '@/lib/types';
 import { Heart, MessageCircle, Share2, Search, Download, Bookmark, X, Send, Sparkles, Zap, Eye } from "lucide-react";
 import Image from "next/image";
 import Loading from "@/components/shared/Loading";
+// import { MOCK_SOCIAL_ITEMS } from '@/lib/mock-data';
 
-export default function Social() {
+function SocialContent() {
   const [posts, setPosts] = useState<SocialItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -21,126 +22,13 @@ export default function Social() {
   const [comments, setComments] = useState<{ [key: string]: Array<{ id: string, user: string, text: string, time: string }> }>({});
   const [selectedHashtag, setSelectedHashtag] = useState<string>('');
 
-  const samplePosts: SocialItem[] = useMemo(() => [
-    {
-      id: '1',
-      file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
-      caption: 'Opening ceremony with 500+ enthusiastic participants',
-      uploaded_by: 'event_team',
-      status: 'approved',
-      category: 'ceremony',
-
-      likes: 45,
-      comments: 12,
-      shares: 8,
-
-      tags: ['opening', 'ceremony', 'samyukta2025'],
-      created_at: '2024-08-06T09:00:00Z'
-    },
-    {
-      id: '2',
-      file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
-      caption: 'AWS workshop in progress - Cloud computing mastery',
-      uploaded_by: 'coordinator_1',
-      status: 'approved',
-      category: 'workshop',
-      likes: 32,
-      comments: 8,
-      shares: 5,
-
-      tags: ['aws', 'workshop', 'cloud'],
-      created_at: '2024-08-06T11:30:00Z'
-    },
-    {
-      id: '3',
-      file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
-      caption: 'Team collaboration during hackathon',
-      uploaded_by: 'participant_23',
-      status: 'approved',
-      category: 'hackathon',
-      likes: 67,
-      comments: 15,
-      shares: 12,
-
-      tags: ['hackathon', 'teamwork', 'coding'],
-      created_at: '2024-08-08T14:00:00Z'
-    },
-    {
-      id: '4',
-      file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
-      caption: 'Cultural night performances and celebrations',
-      uploaded_by: 'cultural_team',
-      status: 'approved',
-      category: 'cultural',
-      likes: 89,
-      comments: 23,
-      shares: 18,
-
-      tags: ['cultural', 'dance', 'music'],
-      created_at: '2024-08-06T19:00:00Z'
-    },
-    {
-      id: '5',
-      file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
-      caption: 'Networking session with industry experts',
-      uploaded_by: 'networking_team',
-      status: 'approved',
-      category: 'networking',
-      likes: 28,
-      comments: 5,
-      shares: 3,
-
-      tags: ['networking', 'industry', 'experts'],
-      created_at: '2024-08-07T16:00:00Z'
-    },
-    {
-      id: '6',
-      file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-      caption: 'AI/ML workshop with Google Cloud experts',
-      uploaded_by: 'tech_team',
-      status: 'approved',
-      category: 'workshop',
-      likes: 43,
-      comments: 9,
-      shares: 6,
-
-      tags: ['ai', 'ml', 'google'],
-      created_at: '2024-08-07T10:00:00Z'
-    },
-    {
-      id: '7',
-      file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
-      caption: 'Prize distribution ceremony',
-      uploaded_by: 'admin_team',
-      status: 'approved',
-      category: 'ceremony',
-      likes: 76,
-      comments: 18,
-      shares: 14,
-
-      tags: ['awards', 'winners', 'celebration'],
-      created_at: '2024-08-08T18:00:00Z'
-    },
-    {
-      id: '8',
-      file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-      caption: 'Group photo with all participants',
-      uploaded_by: 'photo_team',
-      status: 'approved',
-      category: 'group',
-      likes: 120,
-      comments: 34,
-      shares: 28,
-
-      tags: ['group', 'memories', 'finale'],
-      created_at: '2024-08-08T17:00:00Z'
-    }
-  ], []);
-
+  // Comment out the mock data to show empty state
+  // Using centralized mock data from lib/mock-data.ts
   useEffect(() => {
-    setPosts(samplePosts);
+    // Uncomment the line below to show social posts
+    // setPosts(MOCK_SOCIAL_ITEMS);
     setLoading(false);
-  }, [samplePosts]);
+  }, []);
 
   const filteredPosts = posts.filter(post => {
     const matchesSearch = post.caption?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -171,8 +59,6 @@ export default function Social() {
         : post
     ));
   };
-
-
 
   const handleBookmark = (postId: string) => {
     const newBookmarkedPosts = new Set(bookmarkedPosts);
@@ -259,8 +145,8 @@ export default function Social() {
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 text-white overflow-hidden">
+    <div className="h-full">
+      <div className="bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 text-white overflow-hidden min-h-screen">
         {/* Floating orbs background */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -268,7 +154,7 @@ export default function Social() {
           <div className="absolute top-3/4 left-3/4 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse delay-2000"></div>
         </div>
 
-        <div className="relative z-10">
+        <div className="relative z-10 pb-0">
           {/* Immersive Header */}
           <div className="sticky z-40">
             <div className="bg-black/20 backdrop-blur-2xl border-b border-white/10 shadow-2xl">
@@ -590,7 +476,7 @@ export default function Social() {
           </div>
 
           {filteredPosts.length === 0 && (
-            <div className="max-w-4xl mx-auto text-center py-12 px-4">
+            <div className="max-w-4xl mx-auto text-center py-8 px-4">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl blur-3xl"></div>
                 <div className="relative bg-black/40 backdrop-blur-2xl rounded-3xl border border-white/10 p-6">
@@ -656,4 +542,12 @@ export default function Social() {
       )}
     </div>
   );
-};
+}
+
+export default function Social() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 flex items-center justify-center"><div className="text-white">Loading...</div></div>}>
+      <SocialContent />
+    </Suspense>
+  );
+}

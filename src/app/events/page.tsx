@@ -1,16 +1,3 @@
-import { Metadata } from 'next';
-import { generateSEO } from '@/lib/seo';
-
-export const metadata: Metadata = generateSEO({
-  title: "Events & Schedule - Samyukta 2025 Tech Summit",
-  description: "Explore the complete 4-day schedule of Samyukta 2025. Hackathons, AI/ML workshops, cloud computing sessions, pitch competitions, and networking events at ANITS Visakhapatnam, August 6-9, 2025.",
-  keywords: [
-    "samyukta events", "tech summit schedule", "hackathon timeline", "AI workshop", "ML workshop", 
-    "cloud computing", "pitch competition", "tech conference agenda", "ANITS events", "student tech events"
-  ],
-  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/events`
-});
-
 'use client';
 
 import { motion } from "framer-motion";
@@ -45,7 +32,7 @@ export default function Events() {
       url: "https://anits.edu.in"
     },
     offers: {
-      price: "299",
+      price: "800",
       priceCurrency: "INR",
       url: `${baseUrl}/register`
     },
@@ -94,7 +81,7 @@ export default function Events() {
                 </Badge>
                 <Badge className="bg-pink-500/10 text-pink-400 border-pink-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base">
                   <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  500+ Participants
+                  400+ Participants
                 </Badge>
               </div>
             </div>
@@ -102,7 +89,7 @@ export default function Events() {
 
           {/* Timeline Tabs */}
           <Tabs defaultValue="day1" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-gray-800/40 mb-8 sm:mb-10 lg:mb-12 h-20">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-gray-800/40 mb-8 sm:mb-10 lg:mb-12 h-30 lg:h-20">
               {MOCK_EVENT_DAYS.map((day) => (
                 <TabsTrigger
                   key={day.id}
@@ -111,7 +98,7 @@ export default function Events() {
                 >
                   <div className="text-center">
                     <div className="font-semibold">{day.title.split(":")[0]}</div>
-                    <div className="text-xs opacity-70">{day.title.split(":")[1]}</div>
+                    <div className="text-xs opacity-70 hidden sm:block">{day.title.split(":")[1]}</div>
                   </div>
                 </TabsTrigger>
               ))}
@@ -186,7 +173,7 @@ export default function Events() {
       </section>
 
       {/* Interactive Map Section */}
-      <section className="section-padding bg-gray-800/20">
+      {/* <section className="section-padding bg-gray-800/20">
         <div className="container-responsive">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -204,7 +191,7 @@ export default function Events() {
             </div>
           </motion.div>
         </div>
-      </section>
+      </section> */}
     </div>
     </>
   );

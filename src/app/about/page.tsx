@@ -3,56 +3,14 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Script from "next/script";
-import { Target, Heart, Users, Globe, Lightbulb, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { generateOrganizationStructuredData } from "@/lib/seo";
-import { EVENT_CONFIG } from "@/lib/config";
+import { generateOrganizationStructuredData, EVENT_CONFIG, ABOUT_PAGE_DATA } from "@/lib";
 
 export default function About() {
   const organizationData = generateOrganizationStructuredData();
   
-  const values = [
-    {
-      icon: Target,
-      title: "Mission",
-      description: "To create a platform where innovation meets opportunity, fostering collaboration between students, industry leaders, and tech enthusiasts.",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: Heart,
-      title: "Vision",
-      description: "Building India's most impactful tech community by uniting diverse talents and igniting breakthrough innovations.",
-      color: "from-violet-500 to-purple-500"
-    },
-    {
-      icon: Users,
-      title: "Community",
-      description: "Bringing together 500+ participants, 50+ clubs, industry experts, and government dignitaries under one roof.",
-      color: "from-pink-500 to-rose-500"
-    }
-  ];
-
-  const differentiators = [
-    {
-      icon: Globe,
-      title: "Industry Integration",
-      description: "Direct collaboration with AWS, Google Cloud, and leading tech companies providing real-world exposure.",
-      stats: "15+ Partners"
-    },
-    {
-      icon: Lightbulb,
-      title: "Innovation Focus",
-      description: "Hands-on workshops, hackathons, and pitch competitions designed to turn ideas into reality.",
-      stats: "4 Tracks"
-    },
-    {
-      icon: Award,
-      title: "Recognition Platform",
-      description: "Showcase your talents to industry leaders and government officials, opening doors to new opportunities.",
-      stats: "₹5L+ Prizes"
-    }
-  ];
+  const { values, differentiators, anitsAdvantage, communityImpact } = ABOUT_PAGE_DATA;
 
   return (
     <>
@@ -183,27 +141,15 @@ export default function About() {
                   The <span className="text-violet-400">ANITS</span> Advantage
                 </h2>
                 <div className="space-y-4 sm:space-y-6">
-                  <div className="flex items-start space-x-3 sm:space-x-4">
-                    <div className="w-2 h-2 rounded-full bg-blue-400 mt-2 sm:mt-3 flex-shrink-0"></div>
-                    <div className="text-spacing">
-                      <h3 className="text-base sm:text-lg font-semibold text-white">Strategic Location</h3>
-                      <p className="text-sm sm:text-base text-gray-400">Located in Visakhapatnam, the emerging tech hub of South India, with proximity to AMTZ (Andhra Pradesh MedTech Zone).</p>
+                  {anitsAdvantage.points.map((point, index) => (
+                    <div key={point.title} className="flex items-start space-x-3 sm:space-x-4">
+                      <div className={`w-2 h-2 rounded-full ${index === 0 ? 'bg-blue-400' : index === 1 ? 'bg-violet-400' : 'bg-pink-400'} mt-2 sm:mt-3 flex-shrink-0`}></div>
+                      <div className="text-spacing">
+                        <h3 className="text-base sm:text-lg font-semibold text-white">{point.title}</h3>
+                        <p className="text-sm sm:text-base text-gray-400">{point.description}</p>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-start space-x-3 sm:space-x-4">
-                    <div className="w-2 h-2 rounded-full bg-violet-400 mt-2 sm:mt-3 flex-shrink-0"></div>
-                    <div className="text-spacing">
-                      <h3 className="text-base sm:text-lg font-semibold text-white">Industry Connections</h3>
-                      <p className="text-sm sm:text-base text-gray-400">Strong partnerships with leading tech companies and government initiatives supporting digital transformation.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start space-x-3 sm:space-x-4">
-                    <div className="w-2 h-2 rounded-full bg-pink-400 mt-2 sm:mt-3 flex-shrink-0"></div>
-                    <div className="text-spacing">
-                      <h3 className="text-base sm:text-lg font-semibold text-white">Innovation Ecosystem</h3>
-                      <p className="text-sm sm:text-base text-gray-400">Home to vibrant student communities, startup incubators, and research initiatives driving technological advancement.</p>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -218,15 +164,15 @@ export default function About() {
                 <CardContent className="card-padding">
                   <div className="card-gap flex flex-col">
                     <Image
-                      src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop"
+                      src="/anits-campus.png"
                       alt="ANITS Campus"
                       width={800}
                       height={600}
                       className="w-full h-48 sm:h-56 lg:h-64 object-cover rounded-xl"
                     />
-                    <h3 className="text-lg sm:text-xl font-bold text-white">ANITS, Visakhapatnam</h3>
+                    <h3 className="text-lg sm:text-xl font-bold text-white">{anitsAdvantage.campus.title}</h3>
                     <p className="text-sm sm:text-base text-gray-400">
-                      A premier engineering institution fostering innovation, research, and industry collaboration for over two decades.
+                      {anitsAdvantage.campus.description}
                     </p>
                   </div>
                 </CardContent>
@@ -246,21 +192,15 @@ export default function About() {
           >
             <div className="text-spacing-lg mb-8 sm:mb-12">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                Building Tomorrow&apos;s <span className="text-pink-400">Tech Leaders</span>
+                {communityImpact.title.split('Tech Leaders')[0]}<span className="text-pink-400">Tech Leaders</span>
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto">
-                {EVENT_CONFIG.name} isn&apos;t just about the four days in August — it&apos;s about creating lasting connections,
-                fostering innovation, and building a community that continues to grow and impact the tech ecosystem.
+                {communityImpact.description}
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 md:grid-cols-4 grid-gap">
-              {[
-                { number: `${EVENT_CONFIG.capacity.total_participants}+`, label: "Participants" },
-                { number: `${EVENT_CONFIG.capacity.colleges}+`, label: "Clubs United" },
-                { number: `${EVENT_CONFIG.capacity.partners}+`, label: "Industry Partners" },
-                { number: EVENT_CONFIG.capacity.days.toString(), label: "Days of Innovation" }
-              ].map((stat, index) => (
+              {communityImpact.stats.map((stat, index) => (
                 <motion.div
                   key={stat.label}
                   initial={{ opacity: 0, scale: 0.8 }}

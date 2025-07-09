@@ -174,7 +174,7 @@ export default function Tickets() {
                       <div className="text-2xl font-bold text-green-400 mb-2">₹{stats.direct_join_hackathon_price}</div>
                       <ul className="text-sm text-gray-300 space-y-1">
                         <li>• Hackathon participation</li>
-                        <li>• Starter kit included</li>
+                        <li>• Lunch and Refreshments</li>
                         <li>• Certificate of participation</li>
                       </ul>
                     </div>
@@ -183,7 +183,7 @@ export default function Tickets() {
                       <div className="text-2xl font-bold text-green-400 mb-2">₹{stats.direct_join_pitch_price}</div>
                       <ul className="text-sm text-gray-300 space-y-1">
                         <li>• Startup pitch competition</li>
-                        <li>• Starter kit included</li>
+                        <li>• Lunch and Refreshments</li>
                         <li>• Certificate of participation</li>
                       </ul>
                     </div>
@@ -337,7 +337,6 @@ export default function Tickets() {
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Competition Entry</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Team Discount Eligible</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Priority Access</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Premium Kit</li>
                     </ul>
                   </div>
                 </CardContent>

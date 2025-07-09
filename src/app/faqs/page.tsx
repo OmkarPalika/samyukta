@@ -1,16 +1,3 @@
-import { Metadata } from 'next';
-import { generateSEO, generateFAQStructuredData } from '@/lib/seo';
-
-export const metadata: Metadata = generateSEO({
-  title: "FAQs - Samyukta 2025 Tech Summit | Common Questions Answered",
-  description: "Find answers to frequently asked questions about Samyukta 2025. Registration, events, accommodation, travel, prizes, and more. Get all the information you need for India's premier student tech summit.",
-  keywords: [
-    "samyukta faqs", "tech summit questions", "registration help", "event information", 
-    "ANITS tech fest", "student summit help", "hackathon questions", "workshop details"
-  ],
-  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/faqs`
-});
-
 'use client';
 
 import { useState } from 'react';
@@ -20,13 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ChevronDown, ChevronUp, Search, HelpCircle, Mail, Phone, MessageCircle } from "lucide-react";
-import { MOCK_FAQS, MOCK_FAQ_CATEGORIES } from "@/lib/mock-data";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Search, HelpCircle } from "lucide-react";
+import { MOCK_FAQS, MOCK_FAQ_CATEGORIES, generateFAQStructuredData, FAQS_PAGE_DATA, CONTACT_PAGE_DATA } from "@/lib";
 
 export default function FAQs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
   
   // Generate FAQ structured data
   const faqStructuredData = generateFAQStructuredData(
@@ -43,10 +30,6 @@ export default function FAQs() {
       faq.answer.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
-
-  const toggleFAQ = (id: number) => {
-    setOpenFAQ(openFAQ === id ? null : id);
-  };
 
   return (
     <>
@@ -66,16 +49,16 @@ export default function FAQs() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-8 sm:mb-12"
+            className="text-center mb-8 sm:mb-12 px-4 sm:px-6"
           >
             <div className="text-spacing-lg">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  Frequently Asked Questions
+                  {FAQS_PAGE_DATA.title}
                 </span>
               </h1>
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto">
-                Got questions? We&apos;ve got answers! Find everything you need to know about Samyukta 2025.
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto mt-4">
+                {FAQS_PAGE_DATA.description}
               </p>
             </div>
           </motion.div>
@@ -85,15 +68,15 @@ export default function FAQs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="max-w-2xl mx-auto mb-8"
+            className="max-w-2xl mx-auto mb-8 px-4 sm:px-6"
           >
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 placeholder="Search FAQs..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 h-12 text-lg"
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-gray-800 border-gray-700 text-white placeholder-gray-400 h-10 sm:h-12 text-base sm:text-lg"
               />
             </div>
           </motion.div>
@@ -103,7 +86,7 @@ export default function FAQs() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12"
+            className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 px-4 sm:px-0"
           >
             {MOCK_FAQ_CATEGORIES.map((category) => (
               <Button
@@ -125,24 +108,21 @@ export default function FAQs() {
           </motion.div>
 
           {/* FAQs List */}
-          <div className="max-w-4xl mx-auto space-y-4">
-            {filteredFAQs.map((faq, index) => (
-              <motion.div
-                key={faq.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all duration-300">
-                  <CardContent className="p-0">
-                    <Button
-                      variant="ghost"
-                      onClick={() => toggleFAQ(faq.id)}
-                      className="w-full justify-between p-6 text-left h-auto hover:bg-gray-700/30"
-                    >
-                      <div className="flex items-start space-x-4">
-                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                          <HelpCircle className="w-4 h-4 text-white" />
+          <div className="max-w-4xl mx-auto space-y-4 px-4 sm:px-6 md:px-0">
+            <Accordion type="single" collapsible className="w-full accordion-glow">
+              {filteredFAQs.map((faq, index) => (
+                <motion.div
+                  key={faq.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="mb-4"
+                >
+                  <AccordionItem value={`item-${faq.id}`} className="bg-gray-800/40 backdrop-blur-sm border border-gray-700 hover:border-gray-600 transition-all duration-500 rounded-lg overflow-hidden">
+                    <AccordionTrigger className="px-4 sm:px-6 py-4 hover:no-underline">
+                      <div className="flex items-start space-x-3 sm:space-x-4 w-full">
+                        <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                          <HelpCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                         </div>
                         <div className="text-left">
                           <div className="flex items-center space-x-2 mb-1">
@@ -153,39 +133,25 @@ export default function FAQs() {
                               {MOCK_FAQ_CATEGORIES.find(c => c.id === faq.category)?.name}
                             </Badge>
                           </div>
-                          <h3 className="text-lg font-semibold text-white pr-4">
+                          <h3 className="text-base sm:text-lg font-semibold text-white pr-2 sm:pr-4">
                             {faq.question}
                           </h3>
                         </div>
                       </div>
-                      <div className="flex-shrink-0">
-                        {openFAQ === faq.id ? (
-                          <ChevronUp className="w-5 h-5 text-gray-400" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        )}
-                      </div>
-                    </Button>
-
-                    {openFAQ === faq.id && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="px-6 pb-6"
-                      >
-                        <div className="ml-12 pt-4 border-t border-gray-700">
-                          <p className="text-gray-300 leading-relaxed">
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      <div className="px-4 sm:px-6 pb-2">
+                        <div className="ml-10 sm:ml-12 pt-2 border-t border-gray-700">
+                          <p className="text-sm sm:text-base text-gray-300 leading-relaxed">
                             {faq.answer}
                           </p>
                         </div>
-                      </motion.div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </motion.div>
+              ))}
+            </Accordion>
           </div>
 
           {filteredFAQs.length === 0 && (
@@ -200,7 +166,7 @@ export default function FAQs() {
 
       {/* Still Have Questions */}
       <section className="section-padding bg-gray-800/20">
-        <div className="container-responsive">
+        <div className="container-responsive px-4 sm:px-6 md:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -209,38 +175,16 @@ export default function FAQs() {
           >
             <div className="text-spacing-lg">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                Still Have <span className="text-blue-400">Questions?</span>
+                {FAQS_PAGE_DATA.supportSection.title.split('Questions')[0]}<span className="text-blue-400">Questions?</span>
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
-                Can&apos;t find what you&apos;re looking for? Our team is here to help! Reach out to us through any of these channels.
+                {FAQS_PAGE_DATA.supportSection.description}
               </p>
             </div>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6 mt-12 max-w-4xl mx-auto">
-            {[
-              {
-                icon: Mail,
-                title: "Email Support",
-                description: "Get detailed answers to your questions",
-                contact: "samyukta.summit@gmail.com",
-                action: "mailto:samyukta.summit@gmail.com"
-              },
-              {
-                icon: Phone,
-                title: "Phone Support",
-                description: "Speak directly with our team",
-                contact: "+91-9876543210",
-                action: "tel:+91-9876543210"
-              },
-              {
-                icon: MessageCircle,
-                title: "Live Chat",
-                description: "Real-time assistance from our volunteers",
-                contact: "Available 9 AM - 6 PM",
-                action: "/dashboard"
-              }
-            ].map((contact, index) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12 max-w-4xl mx-auto">
+            {CONTACT_PAGE_DATA.supportChannels.map((contact, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -250,7 +194,7 @@ export default function FAQs() {
                 className="text-center"
               >
                 <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all duration-300">
-                  <CardContent className="card-padding">
+                  <CardContent>
                     <div className="card-gap flex flex-col items-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center mb-4">
                         <contact.icon className="w-8 h-8 text-white" />

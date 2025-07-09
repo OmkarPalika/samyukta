@@ -1,6 +1,4 @@
 import { ImageResponse } from 'next/og';
-
-export const runtime = 'edge';
 export const alt = 'Samyukta 2025 - India\'s Premier Student Innovation Summit';
 export const size = {
   width: 1200,
@@ -54,7 +52,7 @@ export default async function Image() {
               maxWidth: '800px',
             }}
           >
-            India's Premier Student Innovation Summit
+            India&apos;s Premier Student Innovation Summit
           </div>
           <div
             style={{

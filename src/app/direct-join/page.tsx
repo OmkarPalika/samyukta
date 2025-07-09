@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { PageLoading } from "@/components/shared/Loading";
+import Image from "next/image";
 
 export default function DirectJoin() {
   const router = useRouter();
@@ -113,6 +114,9 @@ export default function DirectJoin() {
         if (!formData.payment.transactionId) {
           newErrors.transactionId = "Transaction ID is required";
         }
+        if (!formData.payment.screenshot) {
+          newErrors.paymentScreenshot = "Payment screenshot is required";
+        }
         break;
     }
 
@@ -166,8 +170,59 @@ export default function DirectJoin() {
 
     setLoading(true);
     try {
-      // Mock submission - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const teamId = `team-${Date.now()}`;
+      let paymentScreenshotUrl = "";
+      
+      // Upload payment screenshot if available
+      if (formData.payment.screenshot) {
+        try {
+          const { uploadFile, validateFile } = await import('@/lib/file-upload');
+          validateFile(formData.payment.screenshot);
+          const uploadResult = await uploadFile(formData.payment.screenshot, '/api/registrations/upload-payment');
+          paymentScreenshotUrl = uploadResult.file_url;
+        } catch (uploadError) {
+          console.error("Payment screenshot upload failed:", uploadError);
+          setErrors({ submit: "Payment screenshot upload failed. Please try again." });
+          setLoading(false);
+          return;
+        }
+      }
+
+      const membersData = formData.members.map((member, index) => ({
+        participant_id: `${teamId}-${index + 1}`,
+        passkey: Math.random().toString(36).substring(2, 8).toUpperCase(),
+        full_name: member.fullName,
+        email: member.email,
+        whatsapp: member.whatsapp,
+        year: member.year,
+        department: member.department,
+        food_preference: member.foodPreference
+      }));
+
+      const registrationData = {
+        college: formData.college === "Other" ? formData.customCollege : formData.college,
+        members: membersData,
+        ticket_type: "Custom",
+        workshop_track: "None",
+        competition_track: formData.competition === "hackathon" ? "Hackathon" : "Pitch" as "Hackathon" | "Pitch",
+        total_amount: calculatePrice(),
+        transaction_id: formData.payment.transactionId,
+        payment_screenshot_url: paymentScreenshotUrl
+      };
+
+      // Make the actual API call
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Registration submission failed');
+      }
+
       setCurrentStep(4);
     } catch (error) {
       console.error("Registration failed:", error);
@@ -451,20 +506,60 @@ export default function DirectJoin() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Payment Screenshot</Label>
+                <Label className="text-gray-300">Payment Screenshot <span className="text-red-400">*</span></Label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg">
                   <div className="space-y-1 text-center">
-                    <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-400">
-                      <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-400 hover:text-blue-300">
-                        <span>Upload a file</span>
-                        <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/*" />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                    {formData.payment.screenshot ? (
+                      <div className="flex flex-col items-center">
+                        <Image
+                          src={URL.createObjectURL(formData.payment.screenshot)}
+                          alt="Payment Screenshot"
+                          width={200}
+                          height={200}
+                          className="h-32 object-contain mb-2"
+                        />
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => setFormData({ ...formData, payment: { ...formData.payment, screenshot: null } })}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+                        <div className="flex text-sm text-gray-400">
+                          <label htmlFor="file-upload" className="relative cursor-pointer rounded-md font-medium text-blue-400 hover:text-blue-300">
+                            <span>Upload a file</span>
+                            <input 
+                              id="file-upload" 
+                              name="file-upload" 
+                              type="file" 
+                              className="sr-only" 
+                              accept="image/*" 
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                  setFormData({ 
+                                    ...formData, 
+                                    payment: { 
+                                      ...formData.payment, 
+                                      screenshot: e.target.files[0] 
+                                    } 
+                                  });
+                                }
+                              }}
+                            />
+                          </label>
+                          <p className="pl-1">or drag and drop</p>
+                        </div>
+                        <p className="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+                      </>
+                    )}
                   </div>
                 </div>
+                {errors.paymentScreenshot && <p className="text-red-400 text-sm mt-1">{errors.paymentScreenshot}</p>}
               </div>
             </div>
           </div>

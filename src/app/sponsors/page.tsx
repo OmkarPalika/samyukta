@@ -2,15 +2,13 @@
 
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Crown, Award, Users, Target, Globe, Mail, Phone } from "lucide-react";
+import { Star, Award, Users, Target, Globe, Mail, Building, Code, Briefcase, Factory, Gift } from "lucide-react";
 import Link from "next/link";
-import { MOCK_SPONSOR_TIERS, MOCK_SPONSORSHIP_BENEFITS, MOCK_EVENT_STATS } from "@/lib/mock-data";
+import { MOCK_EVENT_STATS, SPONSORS_PAGE_DATA, SPONSORS_DATA } from "@/lib";
 
 export default function Sponsors() {
-
-
   return (
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
         {/* Hero Section */}
@@ -25,11 +23,11 @@ export default function Sponsors() {
               <div className="text-spacing-lg">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                   <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                    Our Sponsors
+                    {SPONSORS_PAGE_DATA.title}
                   </span>
                 </h1>
                 <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto">
-                  Partnering with industry leaders to create an unforgettable experience
+                  {SPONSORS_PAGE_DATA.description}
                 </p>
               </div>
             </motion.div>
@@ -64,7 +62,7 @@ export default function Sponsors() {
 
             {/* Sponsors by Tier */}
             <div className="space-y-12">
-              {MOCK_SPONSOR_TIERS.map((tier, tierIndex) => (
+              {SPONSORS_DATA.map((tier, tierIndex) => (
                 <motion.div
                   key={tier.tier}
                   initial={{ opacity: 0, y: 30 }}
@@ -74,10 +72,12 @@ export default function Sponsors() {
                   <div className="text-center mb-8">
                     <div className="flex items-center justify-center mb-4">
                       <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tier.color} flex items-center justify-center`}>
-                        {tier.tier === "Title Sponsor" && <Crown className="w-8 h-8 text-white" />}
-                      {tier.tier === "Platinum Sponsors" && <Award className="w-8 h-8 text-white" />}
-                      {tier.tier === "Gold Sponsors" && <Star className="w-8 h-8 text-white" />}
-                      {tier.tier === "Silver Sponsors" && <Users className="w-8 h-8 text-white" />}
+                        {tier.tier === "Hosting Sponsor" && <Building className="w-8 h-8 text-white" />}
+                        {tier.tier === "Workshop Sponsors" && <Code className="w-8 h-8 text-white" />}
+                        {tier.tier === "Hackathon Sponsor" && <Award className="w-8 h-8 text-white" />}
+                        {tier.tier === "Startup Pitch Sponsors" && <Briefcase className="w-8 h-8 text-white" />}
+                        {tier.tier === "Industrial Visit" && <Factory className="w-8 h-8 text-white" />}
+                        {tier.tier === "Swags Partners" && <Gift className="w-8 h-8 text-white" />}
                       </div>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tier.tier}</h2>
@@ -100,7 +100,7 @@ export default function Sponsors() {
                           <CardContent className="card-padding">
                             <div className="card-gap flex flex-col items-center text-center">
                               <div className="w-full h-24 bg-white rounded-lg flex items-center justify-center p-4 mb-4">
-                                <div className="text-gray-900 font-bold text-lg">
+                                <div className="text-gray-900 font-bold text-lg text-center">
                                   {sponsor.name}
                                 </div>
                               </div>
@@ -124,7 +124,7 @@ export default function Sponsors() {
           </div>
         </section>
 
-        {/* Sponsorship Benefits */}
+        {/* Contact Card
         <section className="section-padding bg-gray-800/20">
           <div className="container-responsive">
             <motion.div
@@ -135,43 +135,69 @@ export default function Sponsors() {
             >
               <div className="text-spacing-lg">
                 <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-                  Sponsorship <span className="text-blue-400">Benefits</span>
+                  Contact <span className="text-blue-400">Us</span>
                 </h2>
                 <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
-                  Maximize your brand exposure and connect with India&apos;s brightest tech talent
+                  Interested in sponsoring Samyukta 2025? Reach out to our team for more information.
                 </p>
               </div>
             </motion.div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              {MOCK_SPONSORSHIP_BENEFITS.map((package_, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full">
-                    <CardHeader>
-                      <CardTitle className="text-white text-xl">{package_.tier} Benefits</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ul className="space-y-3">
-                        {package_.benefits.map((benefit, benefitIndex) => (
-                          <li key={benefitIndex} className="flex items-start space-x-3">
-                            <div className="w-2 h-2 rounded-full bg-blue-400 mt-2 flex-shrink-0"></div>
-                            <span className="text-gray-300 text-sm">{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+            <div className="flex justify-center">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="w-full max-w-2xl"
+              >
+                <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-transparent to-violet-500/10 z-0"></div>
+                  <CardContent className="relative z-10 p-8">
+                    <div className="flex flex-col items-center text-center space-y-6">
+                      <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 flex items-center justify-center">
+                        <Mail className="w-10 h-10 text-white" />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <h3 className="text-2xl font-bold text-white">Sponsorship Inquiries</h3>
+                        <p className="text-gray-300">For custom sponsorship packages and partnership opportunities</p>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                        <div className="bg-gray-700/30 p-4 rounded-lg">
+                          <p className="text-gray-400 text-sm">Email</p>
+                          <p className="text-blue-400 font-medium">{SPONSORS_PAGE_DATA.ctaSection.contactEmail}</p>
+                        </div>
+                        <div className="bg-gray-700/30 p-4 rounded-lg">
+                          <p className="text-gray-400 text-sm">Phone</p>
+                          <p className="text-blue-400 font-medium">{SPONSORS_PAGE_DATA.ctaSection.contactPhone}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <Button
+                          onClick={() => window.open(`mailto:${SPONSORS_PAGE_DATA.ctaSection.contactEmail}?subject=Sponsorship Inquiry - Samyukta 2025`, '_blank')}
+                          className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white"
+                        >
+                          <Mail className="w-4 h-4 mr-2" />
+                          Send Email
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => window.open(`tel:${SPONSORS_PAGE_DATA.ctaSection.contactPhone}`, '_blank')}
+                          className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                        >
+                          <Phone className="w-4 h-4 mr-2" />
+                          Call Now
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         {/* Become a Sponsor CTA */}
         <section className="section-padding bg-gradient-to-r from-blue-600/10 to-violet-600/10">
@@ -187,34 +213,17 @@ export default function Sponsors() {
                   Ready to <span className="text-pink-400">Partner</span> with Us?
                 </h2>
                 <p className="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto">
-                  Join leading brands in supporting India&apos;s most innovative tech summit and connect with tomorrow&apos;s technology leaders.
+                  Join leading brands in supporting India&apos;s most innovative tech summit
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <div className="flex justify-center mt-8">
                   <Button
-                    onClick={() => window.open('mailto:sponsors@samyukta.anits.edu.in?subject=Sponsorship Inquiry - Samyukta 2025', '_blank')}
+                    onClick={() => window.open(`mailto:${SPONSORS_PAGE_DATA.ctaSection.contactEmail}?subject=Sponsorship Inquiry - Samyukta 2025`, '_blank')}
                     className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold rounded-xl transition-all duration-300 neon-glow"
                   >
                     <Mail className="w-5 h-5 mr-2" />
                     Become a Sponsor
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => window.open('tel:+91-9876543210', '_blank')}
-                    className="px-8 py-4 bg-transparent border-gray-600 text-gray-300 hover:bg-white hover:text-blue-500 hover:border-white rounded-xl transition-all duration-300"
-                  >
-                    <Phone className="w-5 h-5 mr-2" />
-                    Call Us
-                  </Button>
-                </div>
-
-                <div className="mt-8 text-center">
-                  <p className="text-gray-400 text-sm">
-                    For custom sponsorship packages and partnership opportunities
-                  </p>
-                  <p className="text-blue-400 text-sm mt-1">
-                    Contact: sponsors@samyukta.anits.edu.in | +91-9876543210
-                  </p>
                 </div>
               </div>
             </motion.div>
