@@ -1,11 +1,13 @@
 import { Metadata } from 'next';
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in';
+import { EVENT_CONFIG, URL_CONFIG } from '@/lib/config';
+
+const baseUrl = URL_CONFIG.base;
 
 export const siteConfig = {
-  name: "Samyukta 2025",
-  title: "Samyukta 2025 - India's Premier Student Innovation Summit | ANITS",
-  description: "Join 400+ innovators at India's biggest student-led national tech summit. 4-day event featuring hackathons, AI/ML workshops, cloud computing, pitch competitions, and industry networking at ANITS Visakhapatnam, August 6-9, 2025.",
+  name: EVENT_CONFIG.name,
+  title: `${EVENT_CONFIG.name} - India's Premier Student Innovation Summit | ANITS`,
+  description: `${EVENT_CONFIG.description} ${EVENT_CONFIG.dates.display}.`,
   url: baseUrl,
   ogImage: `${baseUrl}/og-image.jpg`,
   twitterImage: `${baseUrl}/twitter-image.jpg`,
@@ -19,12 +21,7 @@ export const siteConfig = {
   authors: [{ name: "ANITS Samyukta Team", url: "https://anits.edu.in" }],
   creator: "ANITS Samyukta Team",
   publisher: "Anil Neerukonda Institute of Technology and Sciences",
-  social: {
-    twitter: "@samyukta_anits",
-    instagram: "@samyukta_anits",
-    linkedin: "company/anits-samyukta",
-    youtube: "@anits-official"
-  }
+  social: EVENT_CONFIG.social
 };
 
 interface SEOProps {
@@ -33,7 +30,7 @@ interface SEOProps {
   image?: string;
   url?: string;
   keywords?: string[];
-  type?: 'website' | 'article' | 'event';
+  type?: 'website' | 'article';
   publishedTime?: string;
   modifiedTime?: string;
   authors?: string[];
@@ -68,7 +65,7 @@ export function generateSEO({
     creator: siteConfig.creator,
     publisher: siteConfig.publisher,
     openGraph: {
-      type: type as any,
+      type,
       locale: 'en_IN',
       url,
       siteName: siteConfig.name,

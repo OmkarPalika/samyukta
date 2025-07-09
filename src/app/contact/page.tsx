@@ -16,7 +16,7 @@ import {
   Navigation,
   User,
   Users,
-  AlertCircle,
+  // AlertCircle,
   Send,
   ExternalLink,
   Car,
@@ -24,7 +24,8 @@ import {
   Train
 } from "lucide-react";
 import InteractiveMap from "@/components/shared/InteractiveMap";
-import { MOCK_CONTACTS, MOCK_EMERGENCY_CONTACTS } from "@/lib/mock-data";
+import { MOCK_CONTACTS } from "@/lib/mock-data";
+// import { MOCK_EMERGENCY_CONTACTS } from "@/lib/mock-data";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -325,7 +326,7 @@ export default function Contact() {
               </Card>
 
               {/* Emergency Contacts */}
-              <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+              {/* <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                 <CardHeader>
                   <CardTitle className="flex items-center text-white">
                     <AlertCircle className="w-5 h-5 mr-2 text-red-400" />
@@ -347,7 +348,7 @@ export default function Contact() {
                     ))}
                   </div>
                 </CardContent>
-              </Card>
+              </Card> */}
             </motion.div>
           </div>
         </div>

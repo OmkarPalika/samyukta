@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import Script from "next/script";
 import { generateEventStructuredData, generateOrganizationStructuredData } from "@/lib/seo";
@@ -23,26 +23,30 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User } from "@/entities/User";
 import { User as UserType } from "@/lib/types";
+import { EVENT_CONFIG, URL_CONFIG } from "@/lib/config";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
   const [user, setUser] = useState<UserType | null>(null);
   
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in';
+  const baseUrl = useMemo(() => 
+    process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in', 
+    []
+  );
   
-  const eventStructuredData = generateEventStructuredData({
-    name: "Samyukta 2025 - India's Premier Student Innovation Summit",
-    description: "Join 400+ innovators at India's biggest student-led national tech summit featuring hackathons, AI/ML workshops, cloud computing, and pitch competitions.",
-    startDate: "2025-08-06T09:00:00+05:30",
-    endDate: "2025-08-09T18:00:00+05:30",
+  const eventStructuredData = useMemo(() => generateEventStructuredData({
+    name: `${EVENT_CONFIG.name} - India's Premier Student Innovation Summit`,
+    description: EVENT_CONFIG.description,
+    startDate: `${EVENT_CONFIG.dates.start}+05:30`,
+    endDate: `${EVENT_CONFIG.dates.end}+05:30`,
     location: {
-      name: "Anil Neerukonda Institute of Technology and Sciences",
+      name: EVENT_CONFIG.location.full_name,
       address: {
-        streetAddress: "Sangivalasa",
-        addressLocality: "Visakhapatnam",
-        addressRegion: "Andhra Pradesh",
-        postalCode: "531162",
-        addressCountry: "IN"
+        streetAddress: EVENT_CONFIG.location.address.street,
+        addressLocality: EVENT_CONFIG.location.address.city,
+        addressRegion: EVENT_CONFIG.location.address.state,
+        postalCode: EVENT_CONFIG.location.address.pincode,
+        addressCountry: EVENT_CONFIG.location.address.country
       }
     },
     organizer: {
@@ -50,19 +54,22 @@ export default function Home() {
       url: "https://anits.edu.in"
     },
     offers: {
-      price: "299",
+      price: EVENT_CONFIG.pricing.combo_discount.toString(),
       priceCurrency: "INR",
-      url: `${baseUrl}/register`
+      url: `${baseUrl}${URL_CONFIG.register}`
     },
     image: [`${baseUrl}/og-image.jpg`],
     url: baseUrl
-  });
+  }), [baseUrl]);
   
-  const organizationStructuredData = generateOrganizationStructuredData();
+  const organizationStructuredData = useMemo(() => 
+    generateOrganizationStructuredData(), 
+    []
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      const eventDate = new Date('2025-08-06T09:00:00');
+      const eventDate = new Date(EVENT_CONFIG.dates.start);
       const now = new Date();
       const difference = eventDate.getTime() - now.getTime();
 
@@ -85,37 +92,17 @@ export default function Home() {
       .catch(() => setUser(null));
   }, []);
 
-  const highlights = [
-    {
-      icon: Cloud,
-      title: "Cloud Computing Track",
-      description: "AWS-powered workshops and certifications",
-      color: "from-blue-500 to-cyan-500"
-    },
-    {
-      icon: Brain,
-      title: "AI & ML Workshop",
-      description: "Google AI training and hands-on projects",
-      color: "from-violet-500 to-purple-500"
-    },
-    {
-      icon: Trophy,
-      title: "Hackathon & Pitch",
-      description: "Compete for ₹5L+ in prizes and recognition",
-      color: "from-pink-500 to-rose-500"
-    },
-    {
-      icon: Target,
-      title: "Interactive Games",
-      description: "QR Quest and Imposter Hunt across campus",
-      color: "from-green-500 to-emerald-500"
-    }
-  ];
+  const iconMap = useMemo(() => ({ Cloud, Brain, Trophy, Target }), []);
+  
+  const highlights = useMemo(() => 
+    EVENT_CONFIG.tracks.map(track => ({
+      ...track,
+      icon: iconMap[track.icon as keyof typeof iconMap]
+    })), 
+    [iconMap]
+  );
 
-  const partners = [
-    "AWS Educate", "Google Cloud", "GeeksforGeeks",
-    "Innovation Council", "AMTZ"
-  ];
+  const partners = useMemo(() => EVENT_CONFIG.partners, []);
 
   return (
     <>
@@ -147,49 +134,48 @@ export default function Home() {
             >
               <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-2">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  Samyukta 2025
+                  {EVENT_CONFIG.name}
                 </span>
               </h1>
               <p className="text-xl md:text-3xl text-gray-300 font-light mb-6 text-center">
-                Igniting Innovation. Uniting Talent.
+                {EVENT_CONFIG.tagline}
               </p>
               <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-8 text-center">
-                India&apos;s premier student-led national innovation summit bringing together 400+ participants,
-                30+ colleges, and industry leaders for 4 days of learning, building, and celebrating.
+                {EVENT_CONFIG.description}
               </p>
 
               {/* Event Details */}
               <div className="flex flex-wrap justify-center text-gray-300" style={{ gap: 'var(--gap-md)', margin: 'var(--gap-xl) 0' }}>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-blue-400" />
-                  <span>August 6-9, 2025</span>
+                  <span>{EVENT_CONFIG.dates.display}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-violet-400" />
-                  <span>ANITS, Visakhapatnam</span>
+                  <span>{EVENT_CONFIG.location.venue}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-5 h-5 text-pink-400" />
-                  <span>400+ Participants</span>
+                  <span>{EVENT_CONFIG.capacity.total_participants}+ Participants</span>
                 </div>
               </div>
 
               {/* CTA Buttons */}
               <div className="flex flex-col md:flex-row justify-center" style={{ gap: 'var(--gap-sm)' }}>
-                <Link href={user ? "/dashboard" : "/register"}>
+                <Link href={user ? URL_CONFIG.dashboard : URL_CONFIG.register}>
                   <Button className="px-12 py-6 text-lg bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 rounded-xl neon-glow">
                     {user ? "Access Dashboard" : "Register Now"}
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
-                <Link href="/events">
+                <Link href={URL_CONFIG.events}>
                   <Button variant="outline" className="px-12 py-6 text-lg bg-transparent border-gray-600 text-gray-300 hover:bg-white hover:text-blue-500 hover:border-white rounded-xl">
                     Explore Events
                     <ChevronRight className="w-5 h-5 ml-2" />
                   </Button>
                 </Link>
                 <Button 
-                  onClick={() => window.open('mailto:sponsors@samyukta.anits.edu.in?subject=Sponsorship Inquiry - Samyukta 2025', '_blank')}
+                  onClick={() => window.open(`mailto:${EVENT_CONFIG.contacts.sponsor_email}?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
                   className="w-fit mx-auto md:mx-0 px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
                 >
                   Sponsor Us
@@ -334,7 +320,7 @@ export default function Home() {
                 <p className="text-xl text-gray-400">
                   Join 400+ innovators, learn from industry experts, compete for prizes, and be part of India&apos;s most exciting tech summit.
                 </p>
-                <Link href={user ? "/dashboard" : "/register"}>
+                <Link href={user ? URL_CONFIG.dashboard : URL_CONFIG.register}>
                   <Button className="mt-5 px-16 py-6 text-xl bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 rounded-xl neon-glow">
                     {user ? "Access Dashboard" : "Secure Your Spot"}
                     {user ? <ArrowRight className="w-6 h-6 ml-2" /> : <Star className="w-6 h-6 ml-2" />}

@@ -1,13 +1,3 @@
-import { Metadata } from 'next';
-import { generateSEO } from '@/lib/seo';
-
-export const metadata: Metadata = generateSEO({
-  title: "About Samyukta 2025 - India's Premier Student Innovation Summit",
-  description: "Learn about Samyukta 2025, India's biggest student-led tech summit at ANITS Visakhapatnam. Discover our mission, vision, and what makes us different from other tech events.",
-  keywords: ["about samyukta", "ANITS tech summit", "student innovation", "tech community", "Visakhapatnam tech event"],
-  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/about`
-});
-
 'use client';
 
 import { motion } from "framer-motion";
@@ -17,6 +7,7 @@ import { Target, Heart, Users, Globe, Lightbulb, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { generateOrganizationStructuredData } from "@/lib/seo";
+import { EVENT_CONFIG } from "@/lib/config";
 
 export default function About() {
   const organizationData = generateOrganizationStructuredData();
@@ -86,7 +77,7 @@ export default function About() {
             <div className="text-spacing-lg">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  About Samyukta 2025
+                  About {EVENT_CONFIG.name}
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
@@ -258,17 +249,17 @@ export default function About() {
                 Building Tomorrow&apos;s <span className="text-pink-400">Tech Leaders</span>
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto">
-                Samyukta 2025 isn&apos;t just about the four days in August — it&apos;s about creating lasting connections,
+                {EVENT_CONFIG.name} isn&apos;t just about the four days in August — it&apos;s about creating lasting connections,
                 fostering innovation, and building a community that continues to grow and impact the tech ecosystem.
               </p>
             </div>
 
             <div className="grid sm:grid-cols-2 md:grid-cols-4 grid-gap">
               {[
-                { number: "500+", label: "Participants" },
-                { number: "50+", label: "Clubs United" },
-                { number: "15+", label: "Industry Partners" },
-                { number: "4", label: "Days of Innovation" }
+                { number: `${EVENT_CONFIG.capacity.total_participants}+`, label: "Participants" },
+                { number: `${EVENT_CONFIG.capacity.colleges}+`, label: "Clubs United" },
+                { number: `${EVENT_CONFIG.capacity.partners}+`, label: "Industry Partners" },
+                { number: EVENT_CONFIG.capacity.days.toString(), label: "Days of Innovation" }
               ].map((stat, index) => (
                 <motion.div
                   key={stat.label}

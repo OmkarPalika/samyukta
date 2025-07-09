@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Clock, MapPin, Users, Trophy, Code, Music, LucideIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { useMemo } from 'react';
 
 interface TimelineEvent {
   time: string;
@@ -37,7 +38,7 @@ interface EventTimelineProps {
 }
 
 export default function EventTimeline({ day }: EventTimelineProps) {
-  const typeIcons: Record<string, LucideIcon> = {
+  const typeIcons: Record<string, LucideIcon> = useMemo(() => ({
     ceremony: Trophy,
     workshop: Code,
     game: Users,
@@ -47,9 +48,9 @@ export default function EventTimeline({ day }: EventTimelineProps) {
     visit: MapPin,
     break: Users,
     logistics: Users
-  };
+  }), []);
 
-  const typeColors: Record<string, string> = {
+  const typeColors: Record<string, string> = useMemo(() => ({
     ceremony: 'from-yellow-500 to-orange-500',
     workshop: 'from-blue-500 to-cyan-500',
     game: 'from-green-500 to-emerald-500',
@@ -59,7 +60,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
     visit: 'from-pink-500 to-rose-500',
     break: 'from-gray-500 to-gray-600',
     logistics: 'from-indigo-500 to-purple-500'
-  };
+  }), []);
 
   return (
     <div className="relative">

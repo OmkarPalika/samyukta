@@ -15,7 +15,7 @@ export class User {
     const { getCollection } = await import('@/lib/db-utils')
     const users = await getCollection('users')
     const user = await users.findOne({ email })
-    return user ? { id: user._id.toString(), ...user } as UserData : null
+    return user ? { id: user._id.toString(), ...user } as unknown as UserData : null
   }
   static async me(): Promise<UserData> {
     try {

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import Logo from '@/components/shared/Logo';
 import UserMenu from '@/components/shared/UserMenu';
 import MobileMenu, { MobileMenuItem, MobileMenuSection, MobileMenuButton } from '@/components/shared/MobileMenu';
@@ -18,14 +18,14 @@ interface DashboardNavigationProps {
 }
 
 export default function DashboardNavigation({ user, onLogout, mobileMenuOpen, onMobileMenuToggle }: DashboardNavigationProps) {
-  const dashboardItems = [
+  const dashboardItems = useMemo(() => [
     { href: '/dashboard', label: 'Dashboard' },
     { href: '/dashboard#games', label: 'Games' },
     { href: '/dashboard#competitions', label: 'Competitions' },
     { href: '/dashboard#team', label: 'Team' },
     { href: '/social', label: 'Social' },
     { href: '/dashboard#help', label: 'Help' }
-  ];
+  ], []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/90 backdrop-blur-lg border-b border-gray-800">

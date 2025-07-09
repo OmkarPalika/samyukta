@@ -436,6 +436,32 @@ body {
   }
 }
 
+/* Ensure navigation is always visible and responsive */
+@media (max-width: 767px) {
+  .nav-height {
+    height: 3rem;
+    min-height: 3rem;
+  }
+  
+  .nav-offset {
+    padding-top: 3rem;
+  }
+  
+  /* Ensure mobile navigation is properly spaced */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+  }
+  
+  /* Prevent horizontal scroll on mobile */
+  body {
+    overflow-x: hidden;
+  }
+}
+
 /* Social page specific spacing */
 .social-header {
   top: 4rem;

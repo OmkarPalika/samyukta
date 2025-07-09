@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { User } from '@/entities/User';
 import { Game } from '@/entities/Game';
@@ -51,6 +51,19 @@ export default function ParticipantDashboard() {
   });
   const [joinLoading, setJoinLoading] = useState(false);
   const [joinMessage, setJoinMessage] = useState('');
+
+  const teamMembers = useMemo(() => [
+    { name: user?.full_name || 'You', role: 'Team Lead', email: user?.email || '' },
+    { name: 'Member 2', role: 'Member', email: 'member2@example.com' },
+    { name: 'Member 3', role: 'Member', email: 'member3@example.com' }
+  ], [user]);
+
+  const availableCompetitions = useMemo(() => 
+    competitions.filter(comp => 
+      !userCompetitions.some(uc => uc.competition.id === comp.id)
+    ), 
+    [competitions, userCompetitions]
+  );
 
   const loadCompetitions = useCallback(async () => {
     if (!user) return;
@@ -554,9 +567,7 @@ export default function ParticipantDashboard() {
                               <SelectValue placeholder="Select competition" />
                             </SelectTrigger>
                             <SelectContent className="bg-gray-700 border-gray-600">
-                              {competitions.filter(comp => 
-                                !userCompetitions.some(uc => uc.competition.id === comp.id)
-                              ).map((comp) => (
+                              {availableCompetitions.map((comp) => (
                                 <SelectItem key={comp.id} value={comp.id} className="text-white">
                                   {comp.name} - ₹{comp.registration_fee}
                                 </SelectItem>
@@ -672,9 +683,7 @@ export default function ParticipantDashboard() {
                     </CardHeader>
                     <CardContent className="p-3 sm:p-6">
                       <div className="space-y-2 sm:space-y-3">
-                        {competitions.filter(comp => 
-                          !userCompetitions.some(uc => uc.competition.id === comp.id)
-                        ).map((comp) => (
+                        {availableCompetitions.map((comp) => (
                           <div key={comp.id} className="p-2 sm:p-3 bg-gray-700/30 rounded-lg">
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
                               <div className="min-w-0 flex-1">
@@ -733,11 +742,7 @@ export default function ParticipantDashboard() {
                     </CardHeader>
                     <CardContent className="p-3 sm:p-6">
                       <div className="space-y-2 sm:space-y-3">
-                        {[
-                          { name: user.full_name, role: 'Team Lead', email: user.email },
-                          { name: 'Member 2', role: 'Member', email: 'member2@example.com' },
-                          { name: 'Member 3', role: 'Member', email: 'member3@example.com' }
-                        ].map((member, index) => (
+                        {teamMembers.map((member, index) => (
                           <div key={index} className="flex items-center space-x-2 sm:space-x-3 p-2 sm:p-3 bg-gray-700/30 rounded-lg">
                             <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
                               <AvatarFallback className="bg-gradient-to-r from-blue-500 to-violet-500 text-white text-sm">
@@ -766,17 +771,13 @@ export default function ParticipantDashboard() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                      {[
-                        { name: user.full_name, id: 'TEAM-001-1' },
-                        { name: 'Member 2', id: 'TEAM-001-2' },
-                        { name: 'Member 3', id: 'TEAM-001-3' }
-                      ].map((member, index) => (
+                      {teamMembers.map((member, index) => (
                         <div key={index} className="text-center p-3 sm:p-4 bg-gray-700/30 rounded-lg">
                           <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-lg flex items-center justify-center mx-auto mb-2">
                             <QrCode className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500/50" />
                           </div>
                           <p className="text-white font-medium text-sm sm:text-base truncate">{member.name}</p>
-                          <p className="text-gray-400 text-xs">{member.id}</p>
+                          <p className="text-gray-400 text-xs">TEAM-001-{index + 1}</p>
                         </div>
                       ))}
                     </div>

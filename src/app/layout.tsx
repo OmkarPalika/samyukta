@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import LayoutProvider from "@/components/layout/LayoutProvider";
-import Script from "next/script";
 import { GoogleAnalytics, GoogleTagManager, FacebookPixel, HotjarTracking } from "@/components/shared/Analytics";
 
 const inter = Inter({
@@ -144,10 +143,6 @@ export default function RootLayout({
   return (
     <html lang="en-IN">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
         <link rel="preload" href="/logo.png" as="image" type="image/png" />
         <link rel="preload" href="/og-image.jpg" as="image" type="image/jpeg" />
         <link rel="preload" href="/twitter-image.jpg" as="image" type="image/jpeg" />

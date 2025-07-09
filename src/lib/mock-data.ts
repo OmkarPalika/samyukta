@@ -8,27 +8,28 @@ import {
   GameStats,
   RegistrationStats
 } from './types';
+import { EVENT_CONFIG, DEMO_CREDENTIALS } from './config';
 
 // Mock Users Database
 export const MOCK_USERS: LoginUser[] = [
   {
     id: 'admin1',
-    email: 'admin@samyukta.com',
-    password: 'admin123',
+    email: DEMO_CREDENTIALS.admin.email,
+    password: DEMO_CREDENTIALS.admin.password,
     full_name: 'System Administrator',
     role: 'admin'
   },
   {
     id: 'coord1',
-    email: 'coordinator@samyukta.com',
-    password: 'coord123',
+    email: DEMO_CREDENTIALS.coordinator.email,
+    password: DEMO_CREDENTIALS.coordinator.password,
     full_name: 'Event Coordinator',
     role: 'coordinator'
   },
   {
     id: 'part1',
-    email: 'participant@samyukta.com',
-    password: 'part123',
+    email: DEMO_CREDENTIALS.participant.email,
+    password: DEMO_CREDENTIALS.participant.password,
     full_name: 'John Participant',
     role: 'participant',
     college: 'ANITS',
@@ -47,14 +48,14 @@ export const MOCK_COMPETITIONS: Competition[] = [
     category: 'Hackathon',
     max_team_size: 4,
     min_team_size: 2,
-    registration_fee: 500,
+    registration_fee: EVENT_CONFIG.pricing.individual,
     slots_available: 50,
     slots_filled: 23,
-    registration_deadline: '2025-02-15T23:59:59Z',
+    registration_deadline: EVENT_CONFIG.dates.registration_deadline,
     competition_date: '2025-02-20T09:00:00Z',
     status: 'open',
     requirements: ['Laptop', 'Programming skills', 'Team collaboration'],
-    prizes: ['₹50,000 First Prize', '₹25,000 Second Prize', '₹10,000 Third Prize']
+    prizes: [`${EVENT_CONFIG.prizes.hackathon.first} First Prize`, `${EVENT_CONFIG.prizes.hackathon.second} Second Prize`, `${EVENT_CONFIG.prizes.hackathon.third} Third Prize`]
   },
   {
     id: 'comp-2',
@@ -63,14 +64,14 @@ export const MOCK_COMPETITIONS: Competition[] = [
     category: 'Pitch',
     max_team_size: 3,
     min_team_size: 1,
-    registration_fee: 300,
+    registration_fee: EVENT_CONFIG.pricing.direct_join_pitch,
     slots_available: 30,
     slots_filled: 12,
     registration_deadline: '2025-02-18T23:59:59Z',
     competition_date: '2025-02-22T14:00:00Z',
     status: 'open',
     requirements: ['Business plan', 'Presentation slides', 'Demo (optional)'],
-    prizes: ['₹30,000 + Incubation', '₹15,000', '₹5,000']
+    prizes: [EVENT_CONFIG.prizes.pitch.first, EVENT_CONFIG.prizes.pitch.second, EVENT_CONFIG.prizes.pitch.third]
   }
 ];
 
@@ -131,15 +132,15 @@ export const MOCK_REGISTRATION_STATS: RegistrationStats = {
   ai_workshop: 180,
   hackathon_entries: 89,
   pitch_entries: 67,
-  max_total: 400,
-  max_cloud: 200,
-  max_ai: 200,
+  max_total: EVENT_CONFIG.capacity.max_total,
+  max_cloud: EVENT_CONFIG.capacity.cloud_workshop,
+  max_ai: EVENT_CONFIG.capacity.ai_workshop,
   remaining_total: 35,
   remaining_cloud: 15,
   remaining_ai: 20,
   direct_join_available: true,
-  direct_join_hackathon_price: 250,
-  direct_join_pitch_price: 200
+  direct_join_hackathon_price: EVENT_CONFIG.pricing.direct_join_hackathon,
+  direct_join_pitch_price: EVENT_CONFIG.pricing.direct_join_pitch
 };
 
 
@@ -427,18 +428,7 @@ export const MOCK_SPONSOR_TIERS = [
 ];
 
 // Mock Event Benefits
-export const MOCK_EVENT_BENEFITS = [
-  "AWS Educate Account with $100+ credits",
-  "Google Cloud Platform credits and certifications",
-  "Exclusive starter kit with swag and resources",
-  "Access to all interactive games and competitions",
-  "Meals, snacks, and refreshments throughout the event",
-  "Evening cultural events and entertainment",
-  "Networking opportunities with industry leaders",
-  "Certificate of participation and skill validation",
-  "Priority access to internship and job opportunities",
-  "Lifetime membership to Samyukta alumni network"
-];
+export const MOCK_EVENT_BENEFITS = EVENT_CONFIG.benefits;
 
 // Mock Speaker Tracks
 export const MOCK_SPEAKER_TRACKS = [
@@ -515,10 +505,10 @@ export const MOCK_SPONSORSHIP_BENEFITS = [
 
 // Mock Event Stats
 export const MOCK_EVENT_STATS = [
-  { number: "500+", label: "Participants", icon: "Users" },
-  { number: "50+", label: "Colleges", icon: "Target" },
-  { number: "4", label: "Days", icon: "Globe" },
-  { number: "15+", label: "Partners", icon: "Star" }
+  { number: `${EVENT_CONFIG.capacity.total_participants}+`, label: "Participants", icon: "Users" },
+  { number: `${EVENT_CONFIG.capacity.colleges}+`, label: "Colleges", icon: "Target" },
+  { number: EVENT_CONFIG.capacity.days.toString(), label: "Days", icon: "Globe" },
+  { number: `${EVENT_CONFIG.capacity.partners}+`, label: "Partners", icon: "Star" }
 ];
 
 // Mock Contact Data
@@ -526,56 +516,35 @@ export const MOCK_CONTACTS = [
   {
     role: "Participant Assist",
     name: "M. Mohith Kumar",
-    email: "samyukta.anits.edu.in",
-    phone: "+91-9876543210",
+    email: EVENT_CONFIG.contacts.main_email,
+    phone: EVENT_CONFIG.contacts.helpline,
     department: "Helpline Team"
   },
   {
     role: "Technical Lead",
     name: "K. Praneeth",
-    email: "tech@samyukta.anits.edu.in",
+    email: EVENT_CONFIG.contacts.tech_email,
     phone: "+91-9876543211",
     department: "Event Tech Team"
   },
   {
     role: "Sponsorship Head",
     name: "Omkar Palika",
-    email: "sponsors@samyukta.anits.edu.in",
+    email: EVENT_CONFIG.contacts.sponsor_email,
     phone: "+91-9876543212",
     department: "Corporate Relations"
   },
   {
     role: "Accommodation Coordinator",
     name: "Meena Iyer",
-    email: "accommodation@samyukta.anits.edu.in",
+    email: EVENT_CONFIG.contacts.accommodation_email,
     phone: "+91-9876543213",
     department: "Hospitality Team"
   }
 ];
 
 // Mock Emergency Contacts
-export const MOCK_EMERGENCY_CONTACTS = [
-  {
-    title: "Medical Emergency",
-    contact: "108 (Ambulance)",
-    description: "24/7 emergency medical services"
-  },
-  {
-    title: "Campus Security",
-    contact: "+91-9876543214",
-    description: "ANITS security helpline"
-  },
-  {
-    title: "Event Helpline",
-    contact: "+91-9876543215",
-    description: "24/7 during event dates"
-  },
-  {
-    title: "Police Station",
-    contact: "100 (Police)",
-    description: "Local police emergency"
-  }
-];
+export const MOCK_EMERGENCY_CONTACTS = EVENT_CONFIG.emergency;
 
 // Mock FAQ Data
 export const MOCK_FAQ_CATEGORIES = [

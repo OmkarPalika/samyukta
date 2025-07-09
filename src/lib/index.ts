@@ -1,8 +1,6 @@
-// Export all types
+// Export all centralized configurations
+export * from './config';
 export * from './types';
-
-// Export all mock data
-export * from './mock-data';
-
-// Export utilities
 export * from './utils';
+export * from './seo';
+export * from './mock-data';
