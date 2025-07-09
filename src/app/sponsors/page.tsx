@@ -5,111 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, Crown, Award, Users, Target, Globe, Mail, Phone } from "lucide-react";
-import PublicLayout from "@/components/layout/PublicLayout";
 import Link from "next/link";
+import { MOCK_SPONSOR_TIERS } from "@/lib/mock-data";
 
 export default function Sponsors() {
-  const sponsorTiers = [
-    {
-      tier: "Title Sponsor",
-      icon: Crown,
-      color: "from-yellow-400 to-orange-500",
-      bgColor: "bg-yellow-500/10",
-      textColor: "text-yellow-400",
-      borderColor: "border-yellow-500/20",
-      amount: "₹5,00,000+",
-      sponsors: [
-        {
-          name: "Amazon Web Services",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/9/93/Amazon_Web_Services_Logo.svg",
-          website: "https://aws.amazon.com",
-          description: "Leading cloud computing platform powering millions of businesses worldwide"
-        }
-      ]
-    },
-    {
-      tier: "Platinum Sponsors",
-      icon: Award,
-      color: "from-gray-300 to-gray-500",
-      bgColor: "bg-gray-500/10",
-      textColor: "text-gray-300",
-      borderColor: "border-gray-500/20",
-      amount: "₹2,00,000+",
-      sponsors: [
-        {
-          name: "Google Cloud",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/5/51/Google_Cloud_logo.svg",
-          website: "https://cloud.google.com",
-          description: "Enterprise-grade cloud computing and AI services"
-        },
-        {
-          name: "Microsoft Azure",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/a/a8/Microsoft_Azure_Logo.svg",
-          website: "https://azure.microsoft.com",
-          description: "Comprehensive cloud platform for modern applications"
-        }
-      ]
-    },
-    {
-      tier: "Gold Sponsors",
-      icon: Star,
-      color: "from-yellow-500 to-yellow-600",
-      bgColor: "bg-yellow-600/10",
-      textColor: "text-yellow-500",
-      borderColor: "border-yellow-600/20",
-      amount: "₹1,00,000+",
-      sponsors: [
-        {
-          name: "GeeksforGeeks",
-          logo: "https://media.geeksforgeeks.org/wp-content/uploads/20210224040124/JSBinCollaborativeJavaScriptDebugging6.png",
-          website: "https://geeksforgeeks.org",
-          description: "Leading programming education platform"
-        },
-        {
-          name: "AMTZ Visakhapatnam",
-          logo: "https://via.placeholder.com/200x100/1e40af/ffffff?text=AMTZ",
-          website: "https://amtz.in",
-          description: "Andhra Pradesh MedTech Zone fostering healthcare innovation"
-        },
-        {
-          name: "Innovation Council",
-          logo: "https://via.placeholder.com/200x100/7c3aed/ffffff?text=IC",
-          website: "#",
-          description: "Promoting innovation and entrepreneurship in education"
-        }
-      ]
-    },
-    {
-      tier: "Silver Sponsors",
-      icon: Users,
-      color: "from-gray-400 to-gray-600",
-      bgColor: "bg-gray-600/10",
-      textColor: "text-gray-400",
-      borderColor: "border-gray-600/20",
-      amount: "₹50,000+",
-      sponsors: [
-        {
-          name: "TechCorp Solutions",
-          logo: "https://via.placeholder.com/200x100/3b82f6/ffffff?text=TechCorp",
-          website: "#",
-          description: "Digital transformation consulting services"
-        },
-        {
-          name: "StartupHub India",
-          logo: "https://via.placeholder.com/200x100/10b981/ffffff?text=StartupHub",
-          website: "#",
-          description: "Startup ecosystem enabler and incubator"
-        },
-        {
-          name: "DevTools Pro",
-          logo: "https://via.placeholder.com/200x100/f59e0b/ffffff?text=DevTools",
-          website: "#",
-          description: "Professional development tools and services"
-        }
-      ]
-    }
-  ];
-
   const sponsorshipBenefits = [
     {
       tier: "Title Sponsor",
@@ -172,7 +71,6 @@ export default function Sponsors() {
   ];
 
   return (
-    <PublicLayout>
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
         {/* Hero Section */}
         <section className="section-padding">
@@ -222,7 +120,7 @@ export default function Sponsors() {
 
             {/* Sponsors by Tier */}
             <div className="space-y-12">
-              {sponsorTiers.map((tier, tierIndex) => (
+              {MOCK_SPONSOR_TIERS.map((tier, tierIndex) => (
                 <motion.div
                   key={tier.tier}
                   initial={{ opacity: 0, y: 30 }}
@@ -232,7 +130,10 @@ export default function Sponsors() {
                   <div className="text-center mb-8">
                     <div className="flex items-center justify-center mb-4">
                       <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${tier.color} flex items-center justify-center`}>
-                        <tier.icon className="w-8 h-8 text-white" />
+                        {tier.tier === "Title Sponsor" && <Crown className="w-8 h-8 text-white" />}
+                      {tier.tier === "Platinum Sponsors" && <Award className="w-8 h-8 text-white" />}
+                      {tier.tier === "Gold Sponsors" && <Star className="w-8 h-8 text-white" />}
+                      {tier.tier === "Silver Sponsors" && <Users className="w-8 h-8 text-white" />}
                       </div>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tier.tier}</h2>
@@ -376,6 +277,5 @@ export default function Sponsors() {
           </div>
         </section>
       </div>
-    </PublicLayout>
   );
 }

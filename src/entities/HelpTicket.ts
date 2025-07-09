@@ -1,49 +1,5 @@
 // HelpTicket entity for support and assistance requests
-export interface HelpTicketData {
-  ticket_id?: string;
-  submitted_by: string;
-  issue: string;
-  description?: string;
-  status?: 'open' | 'in_progress' | 'resolved';
-  priority?: 'low' | 'medium' | 'high';
-  assigned_to?: string;
-  file_url?: string;
-}
-
-export interface HelpTicketCreateRequest {
-  submitted_by: string;
-  issue: string;
-  description?: string;
-  priority?: 'low' | 'medium' | 'high';
-  file_url?: string;
-}
-
-export interface HelpTicketUpdateRequest {
-  issue?: string;
-  description?: string;
-  status?: 'open' | 'in_progress' | 'resolved';
-  priority?: 'low' | 'medium' | 'high';
-  assigned_to?: string;
-  file_url?: string;
-}
-
-export interface HelpTicketResponse extends HelpTicketData {
-  id: string;
-  ticket_id: string;
-  title?: string; // Alias for issue
-  status: 'open' | 'in_progress' | 'resolved';
-  priority: 'low' | 'medium' | 'high';
-  created_at: string;
-  updated_at: string;
-  submitter_details?: {
-    full_name: string;
-    email: string;
-  };
-  assignee_details?: {
-    full_name: string;
-    email: string;
-  };
-}
+import { HelpTicketCreateRequest, HelpTicketUpdateRequest, HelpTicketResponse } from '@/lib/types'
 
 export class HelpTicket {
   static async create(ticketData: HelpTicketCreateRequest): Promise<HelpTicketResponse> {

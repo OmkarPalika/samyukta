@@ -1,100 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { RegistrationCreateRequest, RegistrationResponse } from '@/entities/Registration';
+import { RegistrationCreateRequest, RegistrationResponse } from '@/lib/types';
 
-// GET /api/registrations - Get all registrations with optional filters
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const college = searchParams.get('college');
-    const status = searchParams.get('status') as 'completed' | 'pending_review' | null;
-    const ticketType = searchParams.get('ticket_type') as 'Combo' | 'Custom' | null;
+// Use centralized mock data
+const mockRegistrations: RegistrationResponse[] = [];
 
-    // Mock data - replace with actual database queries
-    const registrations: RegistrationResponse[] = [
-      {
-        id: '1',
-        team_id: 'team_001',
-        college: college || 'ANITS',
-        team_size: 3,
-        members: [
-          {
-            participant_id: 'p001',
-            passkey: 'pass123',
-            full_name: 'John Doe',
-            email: 'john@example.com',
-            whatsapp: '+91 9876543210',
-            year: '3rd',
-            department: 'CSE',
-            accommodation: true,
-            food_preference: 'veg',
-          },
-        ],
-        ticket_type: ticketType || 'Combo',
-        workshop_track: 'AI',
-        competition_track: 'Hackathon',
-        total_amount: 1500,
-        transaction_id: 'TXN123456',
-        payment_screenshot_url: 'https://example.com/payment.jpg',
-        status: status || 'completed',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        registration_code: 'REG001',
-        qr_code_url: 'https://example.com/qr.png',
-      },
-    ];
-
-    return NextResponse.json(registrations);
-  } catch (error) {
-    console.error('Error fetching registrations:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch registrations' },
-      { status: 500 }
-    );
-  }
-}
-
-// POST /api/registrations - Create a new registration
 export async function POST(request: NextRequest) {
   try {
     const body: RegistrationCreateRequest = await request.json();
 
-    // Validate required fields
     if (!body.college || !body.members || body.members.length === 0) {
       return NextResponse.json(
-        { error: 'Missing required fields: college, members' },
+        { error: 'Missing required fields: college and members' },
         { status: 400 }
       );
     }
 
-    // Validate ticket_type
-    if (!['Combo', 'Custom'].includes(body.ticket_type)) {
-      return NextResponse.json(
-        { error: 'Invalid ticket_type. Must be "Combo" or "Custom"' },
-        { status: 400 }
-      );
-    }
-
-    // Validate workshop_track
-    if (!['Cloud', 'AI', 'None'].includes(body.workshop_track)) {
-      return NextResponse.json(
-        { error: 'Invalid workshop_track. Must be "Cloud", "AI", or "None"' },
-        { status: 400 }
-      );
-    }
-
-    // Validate competition_track
-    if (!['Hackathon', 'Pitch', 'None'].includes(body.competition_track)) {
-      return NextResponse.json(
-        { error: 'Invalid competition_track. Must be "Hackathon", "Pitch", or "None"' },
-        { status: 400 }
-      );
-    }
-
-    // Validate team members
     for (const member of body.members) {
-      if (!member.full_name || !member.email || !member.whatsapp) {
+      if (!member.full_name || !member.email || !member.whatsapp || !member.year || !member.department) {
         return NextResponse.json(
-          { error: 'Each member must have full_name, email, and whatsapp' },
+          { error: 'All member fields are required: full_name, email, whatsapp, year, department' },
           { status: 400 }
         );
       }
@@ -107,7 +31,6 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Mock database insert - replace with actual database logic
     const newRegistration: RegistrationResponse = {
       id: `reg_${Date.now()}`,
       team_id: `team_${Date.now()}`,
@@ -131,11 +54,24 @@ export async function POST(request: NextRequest) {
       qr_code_url: `https://example.com/qr/${Date.now()}.png`,
     };
 
+    mockRegistrations.push(newRegistration);
     return NextResponse.json(newRegistration, { status: 201 });
   } catch (error) {
     console.error('Error creating registration:', error);
     return NextResponse.json(
       { error: 'Failed to create registration' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    return NextResponse.json(mockRegistrations);
+  } catch (error) {
+    console.error('Error fetching registrations:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch registrations' },
       { status: 500 }
     );
   }

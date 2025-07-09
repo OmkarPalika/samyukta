@@ -111,7 +111,7 @@ The project includes comprehensive entity management with TypeScript interfaces:
 - **Game** - QR quest and imposter game functionality
 - **HelpTicket** - Support ticket system with priority levels
 - **PitchRating** - Pitch presentation rating system (1-5 scale)
-- **Gallery** - Photo/media gallery with moderation
+- **Social** - Photo/media social with moderation
 - **Registration** - Event registration with team management
 
 ### **Entity Features:**
@@ -119,12 +119,12 @@ The project includes comprehensive entity management with TypeScript interfaces:
 - **API Integration** - Ready-to-use methods for all CRUD operations
 - **Error Handling** - Consistent error patterns across all entities
 - **Bulk Operations** - Administrative efficiency for large datasets
-- **File Support** - Upload capabilities for tickets, gallery, and registrations
+- **File Support** - Upload capabilities for tickets, social, and registrations
 - **Analytics** - Statistics and reporting for all entities
 
 **Example Usage:**
 ```typescript
-import { Registration, Game, Gallery } from '@/entities';
+import { Registration, Game, Social } from '@/entities';
 
 // Create event registration
 const registration = await Registration.create({
@@ -137,8 +137,8 @@ const registration = await Registration.create({
 // Process game interaction
 const gameResult = await Game.scanQR('user123', 'QR_DATA');
 
-// Upload gallery item
-const galleryItem = await Gallery.create({
+// Upload social item
+const socialItem = await Social.create({
   uploaded_by: 'user123',
   file_url: uploadedFile.url,
   caption: 'Amazing event moment!'

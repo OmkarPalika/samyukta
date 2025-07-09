@@ -1,56 +1,5 @@
 // PitchRating entity for rating pitch presentations
-export interface PitchRatingData {
-  pitch_team_id: string;
-  voter_id: string;
-  rating: number; // 1-5
-  comment?: string;
-  pitch_round?: string;
-}
-
-export interface PitchRatingCreateRequest {
-  pitch_team_id: string;
-  voter_id: string;
-  rating: number; // 1-5
-  comment?: string;
-  pitch_round?: string;
-}
-
-export interface PitchRatingUpdateRequest {
-  rating?: number; // 1-5
-  comment?: string;
-  pitch_round?: string;
-}
-
-export interface PitchRatingResponse extends PitchRatingData {
-  id: string;
-  pitch_round: string;
-  created_at: string;
-  updated_at: string;
-  voter_details?: {
-    full_name: string;
-    email: string;
-  };
-  team_details?: {
-    team_name: string;
-    members: Array<{
-      full_name: string;
-      email: string;
-    }>;
-  };
-}
-
-export interface PitchTeamScore {
-  team_id: string;
-  team_name: string;
-  average_rating: number;
-  total_votes: number;
-  ratings_breakdown: Record<string, number>; // rating -> count
-  comments: Array<{
-    rating: number;
-    comment: string;
-    voter_name: string;
-  }>;
-}
+import { PitchTeamScore, PitchRatingCreateRequest, PitchRatingUpdateRequest, PitchRatingResponse } from '@/lib/types'
 
 export class PitchRating {
   static async create(ratingData: PitchRatingCreateRequest): Promise<PitchRatingResponse> {

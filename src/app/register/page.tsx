@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import PublicLayout from "@/components/layout/PublicLayout";
 import { Check, Users, Star, ArrowRight, ChevronLeft, Upload, User as UserIcon, CreditCard, FileText, Clock, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Registration } from "@/entities/Registration";
+import { RegistrationFormData, CompletedRegistrationData } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 export default function Register() {
@@ -26,30 +26,9 @@ export default function Register() {
     remaining_total: number;
   } | null>(null);
 
-  const [completedRegistration, setCompletedRegistration] = useState<{
-    college: string;
-    members: Array<{
-      participant_id: string;
-      passkey: string;
-      full_name: string;
-      email: string;
-      whatsapp: string;
-      year: string;
-      department: string;
-      accommodation: boolean;
-      food_preference: string;
-      workshop_track: string;
-      competition_track: string;
-    }>;
-    ticket_type: string;
-    workshop_track: string;
-    competition_track: string;
-    total_amount: number;
-    transaction_id: string;
-    payment_screenshot_url: string;
-  } | null>(null);
+  const [completedRegistration, setCompletedRegistration] = useState<CompletedRegistrationData | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegistrationFormData>({
     college: "",
     customCollege: "",
     teamSize: 1,
@@ -61,7 +40,7 @@ export default function Register() {
         year: "",
         department: "",
         accommodation: false,
-        foodPreference: "veg" as "veg" | "non-veg"
+        foodPreference: "veg"
       }
     ],
     tickets: {
@@ -69,13 +48,10 @@ export default function Register() {
       workshop: "",
       competition: ""
     },
-    memberTracks: [] as Array<{
-      workshopTrack: string;
-      competitionTrack: string;
-    }>,
+    memberTracks: [],
     payment: {
       transactionId: "",
-      screenshot: null as File | null
+      screenshot: null
     }
   });
 
@@ -90,7 +66,7 @@ export default function Register() {
       }
     };
     fetchStats();
-    
+
     // Initialize memberTracks array
     if (formData.memberTracks.length === 0) {
       setFormData(prev => ({
@@ -266,16 +242,16 @@ export default function Register() {
         year: member.year,
         department: member.department,
         accommodation: member.accommodation || false,
-        food_preference: member.foodPreference as "veg" | "non-veg",
+        food_preference: member.foodPreference,
         workshop_track: formData.memberTracks[index]?.workshopTrack || "",
         competition_track: formData.memberTracks[index]?.competitionTrack || ""
       }));
 
       // Determine primary workshop track (most common among members)
       const workshopTracks = formData.memberTracks.map(t => t.workshopTrack).filter(Boolean);
-      const primaryWorkshop = workshopTracks.length > 0 ? 
+      const primaryWorkshop = workshopTracks.length > 0 ?
         (workshopTracks.includes("Cloud Computing (AWS)") ? "Cloud" : "AI") : "None";
-      
+
       // Determine primary competition track
       const competitionTracks = formData.memberTracks.map(t => t.competitionTrack).filter(Boolean);
       const primaryCompetition = competitionTracks.length > 0 ?
@@ -561,7 +537,7 @@ export default function Register() {
           <div className="space-y-8">
             <h3 className="text-xl font-bold text-white">Member Track Selection</h3>
             <p className="text-gray-300">Select workshop and competition tracks for each team member</p>
-            
+
             {formData.members.map((member, index) => {
               const memberTrack = formData.memberTracks[index] || { workshopTrack: "", competitionTrack: "" };
               return (
@@ -764,25 +740,32 @@ export default function Register() {
                   <h4 className="text-lg font-bold text-blue-400 mb-4">Next Steps</h4>
                   <div className="space-y-3 text-sm text-gray-300">
                     <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <p>Your payment will be verified within 24 hours</p>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <p className="text-left">Your payment will be verified within 24 hours</p>
                     </div>
                     <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <p>QR codes will be generated after payment confirmation</p>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <p className="text-left">QR codes will be generated after payment confirmation</p>
                     </div>
                     <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <p>Access your dashboard to view QR codes and participate in games</p>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <p className="text-left">Access your dashboard to view QR codes and participate in games</p>
                     </div>
                     <div className="flex items-start space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                      <p>Check your email for confirmation and updates</p>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full mt-1.5 flex-shrink-0"></div>
+                      <p className="text-left">Check your email for confirmation and updates</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
+
+            <Button
+              onClick={() => router.push('/dashboard')}
+              className="bg-gradient-to-r from-blue-500 to-violet-500 mt-6"
+            >
+              Go to Dashboard
+            </Button>
           </div>
         );
 
@@ -792,155 +775,159 @@ export default function Register() {
   };
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen max-w-4xl mx-auto">
-        <div className="container-narrow section-padding">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-6 sm:mb-8 lg:mb-12"
-          >
-            <div className="text-spacing-lg">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-                Register for <span className="text-blue-400">Samyukta 2025</span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-300">
-                Join the ultimate tech summit and elevate your skills
-              </p>
-              {stats && (
-                <div className="flex flex-wrap gap-2 justify-center mt-4">
-                  <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">
-                    <Clock className="w-3 h-3 mr-1" />
-                    Only {stats.remaining_total} slots remaining
+    <div className="min-h-screen max-w-4xl mx-auto">
+      <div className="container-narrow section-padding">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6 sm:mb-8 lg:mb-12"
+        >
+          <div className="text-spacing-lg">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
+              Register for <span className="text-blue-400">Samyukta 2025</span>
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-300">
+              Join the ultimate tech summit and elevate your skills
+            </p>
+            {stats && (
+              <div className="flex flex-wrap gap-2 justify-center mt-4">
+                <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Only {stats.remaining_total} slots remaining
+                </Badge>
+                {stats.remaining_total <= 50 && (
+                  <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
+                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    Filling fast!
                   </Badge>
-                  {stats.remaining_total <= 50 && (
-                    <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
-                      <AlertTriangle className="w-3 h-3 mr-1" />
-                      Filling fast!
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Progress Steps */}
-          <div className="mb-6 sm:mb-8 lg:mb-12">
-            {/* Desktop Progress Steps */}
-            <div className="hidden md:flex items-center justify-between mb-6 lg:mb-8">
-              {steps.map((step, index) => (
-                <div
-                  key={step.id}
-                  className={`flex items-center ${index !== steps.length - 1 ? 'flex-1' : ''}`}
-                >
-                  <div
-                    className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= step.id
-                      ? 'bg-blue-500 border-blue-500 text-white'
-                      : 'border-gray-600 text-gray-400'
-                      }`}
-                  >
-                    <step.icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                  </div>
-                  {index !== steps.length - 1 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-2 lg:mx-4 ${currentStep > step.id ? 'bg-blue-500' : 'bg-gray-600'
-                        }`}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile Progress Steps */}
-            <div className="md:hidden mb-4 sm:mb-6">
-              <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-3 sm:mb-4">
-                {steps.map((step) => (
-                  <div
-                    key={step.id}
-                    className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${currentStep >= step.id ? 'bg-blue-500' : 'bg-gray-600'
-                      }`}
-                  />
-                ))}
+                )}
               </div>
-              <div className="text-center">
-                <div className="text-xs sm:text-sm text-gray-400">
-                  Step {currentStep} of {steps.length}
-                </div>
-              </div>
-            </div>
-
-            <div className="text-center">
-              <div className="text-spacing">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
-                  {steps[currentStep - 1].title}
-                </h2>
-                <p className="text-sm sm:text-base text-gray-400 hidden md:block">
-                  Step {currentStep} of {steps.length}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Form Content */}
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-gray-800/40 backdrop-blur-sm rounded-2xl component-padding border border-gray-700 mb-4 sm:mb-6 lg:mb-8 max-w-none overflow-hidden"
-          >
-            <div className="pr-2 sm:pr-3">
-              {renderStepContent()}
-            </div>
-          </motion.div>
-
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
-            <Button
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              variant="outline"
-              className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto order-2 sm:order-1 py-2 sm:py-3 text-sm sm:text-base"
-            >
-              <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-              Previous
-            </Button>
-
-            {currentStep === 6 ? (
-              <Button
-                onClick={() => router.push('/login')}
-                className="bg-gradient-to-r from-blue-500 to-violet-500 w-full sm:w-auto order-1 sm:order-2 py-2 sm:py-3 text-sm sm:text-base"
-              >
-                Continue to Dashboard
-              </Button>
-            ) : currentStep === 5 ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="bg-gradient-to-r from-blue-500 to-violet-500 w-full sm:w-auto order-1 sm:order-2 py-2 sm:py-3 text-sm sm:text-base"
-              >
-                {loading ? 'Processing...' : 'Submit Registration'}
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                className="bg-gradient-to-r from-blue-500 to-violet-500 w-full sm:w-auto order-1 sm:order-2 py-2 sm:py-3 text-sm sm:text-base"
-              >
-                Next
-                <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
-              </Button>
             )}
           </div>
+        </motion.div>
 
-          {errors.submit && (
-            <div className="mt-4 text-center text-red-400">
-              {errors.submit}
+        {/* Progress Steps */}
+        <div className="mb-6 sm:mb-8 lg:mb-12">
+          {/* Desktop Progress Steps */}
+          <div className="hidden md:flex items-center justify-between mb-6 lg:mb-8">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                className={`flex items-center ${index !== steps.length - 1 ? 'flex-1' : ''}`}
+              >
+                <div
+                  className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= step.id
+                    ? 'bg-blue-500 border-blue-500 text-white'
+                    : 'border-gray-600 text-gray-400'
+                    }`}
+                >
+                  <step.icon className="w-4 h-4 lg:w-5 lg:h-5" />
+                </div>
+                {index !== steps.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 lg:mx-4 ${currentStep > step.id ? 'bg-blue-500' : 'bg-gray-600'
+                      }`}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Progress Steps */}
+          <div className="md:hidden mb-4 sm:mb-6">
+            <div className="flex items-center justify-center space-x-1 sm:space-x-2 mb-3 sm:mb-4">
+              {steps.map((step) => (
+                <div
+                  key={step.id}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full ${currentStep >= step.id ? 'bg-blue-500' : 'bg-gray-600'
+                    }`}
+                />
+              ))}
             </div>
+            <div className="text-center">
+              <div className="text-xs sm:text-sm text-gray-400">
+                Step {currentStep} of {steps.length}
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-spacing">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
+                {steps[currentStep - 1].title}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-400 hidden md:block">
+                Step {currentStep} of {steps.length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-gray-800/40 backdrop-blur-sm rounded-2xl component-padding border border-gray-700 mb-4 sm:mb-6 lg:mb-8 max-w-none overflow-hidden"
+        >
+          <div className="pr-2 sm:pr-3">
+            {renderStepContent()}
+          </div>
+        </motion.div>
+
+        {/* Navigation */}
+        <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+          <Button
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            variant="outline"
+            className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto order-2 sm:order-1 py-2 sm:py-3 text-sm sm:text-base"
+          >
+            <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+            Previous
+          </Button>
+
+          {currentStep === 6 ? (
+            <div className="w-full sm:w-auto order-1 sm:order-2">
+              {/* Navigation buttons are hidden on success page */}
+            </div>
+          ) : currentStep === 5 ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-blue-500 to-violet-500 w-full sm:w-auto order-1 sm:order-2 py-2 sm:py-3 text-sm sm:text-base flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Submit Registration
+                  <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNext}
+              className="bg-gradient-to-r from-blue-500 to-violet-500 w-full sm:w-auto order-1 sm:order-2 py-2 sm:py-3 text-sm sm:text-base"
+            >
+              Next
+              <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2" />
+            </Button>
           )}
         </div>
+
+        {errors.submit && currentStep !== 6 && (
+          <div className="mt-4 text-center text-red-400">
+            {errors.submit}
+          </div>
+        )}
       </div>
-    </PublicLayout>
+    </div>
   );
 }

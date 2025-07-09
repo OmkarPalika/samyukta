@@ -13,21 +13,9 @@ import {
   Phone,
   ExternalLink,
   Share2,
-  Copy,
-  type LucideIcon
+  Copy
 } from 'lucide-react';
-
-interface MapLocation {
-  id: string;
-  name: string;
-  type: 'venue' | 'transport' | 'accommodation' | 'food' | 'landmark';
-  coordinates: { lat: number; lng: number };
-  description: string;
-  icon: LucideIcon;
-  color: string;
-  distance?: string;
-  estimatedTime?: string;
-}
+import { MapLocation } from '@/lib/types';
 
 export default function InteractiveMap() {
   const [selectedLocation] = useState<MapLocation | null>(null);
@@ -104,7 +92,7 @@ export default function InteractiveMap() {
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${selectedLocation.color} flex items-center justify-center shrink-0`}>
-                  <selectedLocation.icon className="w-6 h-6 text-white" />
+                  <MapPin className="w-6 h-6 text-white" />
                 </div>
                 <div className="flex-1 space-y-3">
                   <div>

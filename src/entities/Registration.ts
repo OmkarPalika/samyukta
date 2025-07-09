@@ -1,92 +1,12 @@
 // Registration entity for event registration management
-export interface TeamMember {
-  id?: string;
-  participant_id?: string;
-  passkey?: string;
-  full_name: string;
-  name?: string; // Alias for full_name
-  email: string;
-  whatsapp: string;
-  year: string;
-  department: string;
-  accommodation: boolean;
-  food_preference: 'veg' | 'non-veg';
-  present?: boolean; // For attendance tracking
-}
-
-export interface RegistrationData {
-  team_id?: string;
-  college: string;
-  team_size?: number;
-  members: TeamMember[];
-  ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
-  competition_track: 'Hackathon' | 'Pitch' | 'None';
-  total_amount?: number;
-  transaction_id?: string;
-  payment_screenshot_url?: string;
-  status?: 'completed' | 'pending_review';
-}
-
-export interface RegistrationCreateRequest {
-  college: string;
-  members: TeamMember[];
-  ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
-  competition_track: 'Hackathon' | 'Pitch' | 'None';
-  total_amount?: number;
-  transaction_id?: string;
-  payment_screenshot_url?: string;
-}
-
-export interface RegistrationUpdateRequest {
-  college?: string;
-  members?: TeamMember[];
-  ticket_type?: 'Combo' | 'Custom';
-  workshop_track?: 'Cloud' | 'AI' | 'None';
-  competition_track?: 'Hackathon' | 'Pitch' | 'None';
-  total_amount?: number;
-  transaction_id?: string;
-  payment_screenshot_url?: string;
-  status?: 'completed' | 'pending_review';
-}
-
-export interface RegistrationResponse extends RegistrationData {
-  id: string;
-  team_id: string;
-  team_size: number;
-  total_amount: number;
-  status: 'completed' | 'pending_review' | 'confirmed' | 'pending';
-  created_at: string;
-  updated_at: string;
-  team_leader?: TeamMember;
-  registration_code?: string;
-  qr_code_url?: string;
-}
-
-export interface RegistrationFilters {
-  college?: string;
-  ticket_type?: 'Combo' | 'Custom';
-  workshop_track?: 'Cloud' | 'AI' | 'None';
-  competition_track?: 'Hackathon' | 'Pitch' | 'None';
-  status?: 'completed' | 'pending_review';
-  date_from?: string;
-  date_to?: string;
-  search?: string;
-}
-
-export interface RegistrationStats {
-  total_registrations: number;
-  total_participants: number;
-  by_status: Record<string, number>;
-  by_ticket_type: Record<string, number>;
-  by_workshop_track: Record<string, number>;
-  by_competition_track: Record<string, number>;
-  by_college: Array<{ college: string; count: number }>;
-  accommodation_requests: number;
-  food_preferences: Record<string, number>;
-  total_revenue: number;
-}
+import {
+  TeamMember,
+  RegistrationCreateRequest,
+  RegistrationUpdateRequest,
+  RegistrationResponse,
+  RegistrationFilters,
+  RegistrationStats
+} from '@/lib/types'
 
 export class Registration {
   static async create(registrationData: RegistrationCreateRequest): Promise<RegistrationResponse> {
@@ -171,19 +91,9 @@ export class Registration {
   }
 
   static async uploadPaymentScreenshot(file: File): Promise<{ file_url: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/registrations/upload-payment', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload payment screenshot');
-    }
-
-    return response.json();
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    validateFile(file);
+    return uploadFile(file, '/api/registrations/upload-payment');
   }
 
   static async approveRegistration(registrationId: string): Promise<RegistrationResponse> {

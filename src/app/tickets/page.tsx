@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import PublicLayout from "@/components/layout/PublicLayout";
+import Loading from "@/components/shared/Loading";
 
 export default function Tickets() {
   const [teamSize, setTeamSize] = useState([1]);
@@ -34,7 +34,7 @@ export default function Tickets() {
     direct_join_hackathon_price: number;
     direct_join_pitch_price: number;
   } | null>(null);
-  const [, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -62,14 +62,14 @@ export default function Tickets() {
     } else {
       basePrice = 800;
       breakdown.push({ item: "Entry + Workshop Pass", price: 800 });
-      
+
       if (competitionTrack) {
         const competitionPrice = competitionTrack === 'hackathon' ? 150 : 100;
         basePrice += competitionPrice;
         breakdown.push({ item: `${competitionTrack} Entry`, price: competitionPrice });
       }
     }
-    
+
     const teamDiscount = (ticketChoice === 'combo' && currentTeamSize > 1) ? currentTeamSize * 10 : 0;
     const totalForTeam = (basePrice * currentTeamSize) - teamDiscount;
     const totalPerPerson = totalForTeam / currentTeamSize;
@@ -80,7 +80,6 @@ export default function Tickets() {
   const pricing = calculatePrice();
 
   return (
-    <PublicLayout>
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800 text-gray-200">
       {/* Hero Section */}
       <section className="section-padding">
@@ -115,8 +114,15 @@ export default function Tickets() {
             </div>
           </motion.div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="max-w-4xl mx-auto mb-8 sm:mb-12">
+              <Loading size="md" text="Loading ticket information..." className="py-8" />
+            </div>
+          )}
+
           {/* Slots Overview */}
-          {stats && (
+          {stats && !loading && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -199,7 +205,7 @@ export default function Tickets() {
           <div className="grid lg:grid-cols-2 grid-gap mb-8 sm:mb-12 lg:mb-16 max-w-4xl mx-auto">
             {/* Entry + Workshop Card */}
             <motion.div whileHover={{ y: -10 }}>
-              <Card 
+              <Card
                 onClick={() => setTicketChoice('entry_workshop')}
                 className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full transition-all ${ticketChoice === 'entry_workshop' ? 'ring-2 ring-blue-500' : 'hover:border-gray-600'}`}
               >
@@ -212,7 +218,7 @@ export default function Tickets() {
                 <CardContent>
                   <div className="card-gap flex flex-col">
                     <p className="text-sm sm:text-base text-gray-400">Core access to the summit and one hands-on workshop track.</p>
-                  
+
                     {ticketChoice === 'entry_workshop' && (
                       <div className="space-y-3 sm:space-y-4 border-t border-gray-600 pt-3 sm:pt-4">
                         <div className="text-spacing">
@@ -251,8 +257,8 @@ export default function Tickets() {
                           <Label className="text-white text-xs sm:text-sm font-medium">Optional Competition Entry</Label>
                           <div className="space-y-1 sm:space-y-2">
                             <div className="flex items-center space-x-2">
-                              <Checkbox 
-                                id="hackathon" 
+                              <Checkbox
+                                id="hackathon"
                                 checked={competitionTrack === 'hackathon'}
                                 onCheckedChange={(checked) => setCompetitionTrack(checked ? 'hackathon' : '')}
                               />
@@ -261,8 +267,8 @@ export default function Tickets() {
                               </Label>
                             </div>
                             <div className="flex items-center space-x-2">
-                              <Checkbox 
-                                id="pitch" 
+                              <Checkbox
+                                id="pitch"
                                 checked={competitionTrack === 'pitch'}
                                 onCheckedChange={(checked) => setCompetitionTrack(checked ? 'pitch' : '')}
                               />
@@ -276,10 +282,10 @@ export default function Tickets() {
                     )}
 
                     <ul className="text-xs sm:text-sm text-gray-300 space-y-1 sm:space-y-2">
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>All Keynotes & Sessions</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>One Workshop Track</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Networking & Game Access</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Meals & Refreshments</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />All Keynotes & Sessions</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />One Workshop Track</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Networking & Game Access</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Meals & Refreshments</li>
                     </ul>
                   </div>
                 </CardContent>
@@ -294,7 +300,7 @@ export default function Tickets() {
                   Best Value
                 </Badge>
               </div>
-              <Card 
+              <Card
                 onClick={() => setTicketChoice('combo')}
                 className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full transition-all ${ticketChoice === 'combo' ? 'ring-2 ring-violet-500' : 'hover:border-gray-600'}`}
               >
@@ -307,7 +313,7 @@ export default function Tickets() {
                 <CardContent>
                   <div className="card-gap flex flex-col">
                     <p className="text-sm sm:text-base text-gray-400">Everything included, plus entry into a competition track.</p>
-                    
+
                     {ticketChoice === 'combo' && (
                       <div className="border-t border-gray-600 pt-3 sm:pt-4">
                         <div className="text-spacing">
@@ -327,11 +333,11 @@ export default function Tickets() {
                     )}
 
                     <ul className="text-xs sm:text-sm text-gray-300 space-y-1 sm:space-y-2">
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Entry + Workshop Pass</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Competition Entry</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Team Discount Eligible</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Priority Access</li>
-                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400"/>Premium Kit</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Entry + Workshop Pass</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Competition Entry</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Team Discount Eligible</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Priority Access</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Premium Kit</li>
                     </ul>
                   </div>
                 </CardContent>
@@ -422,6 +428,5 @@ export default function Tickets() {
         </div>
       </section>
     </div>
-    </PublicLayout>
   );
 }

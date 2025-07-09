@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import PublicLayout from "@/components/layout/PublicLayout";
 import { Check, Users, ArrowRight, ChevronLeft, Upload, User as UserIcon, CreditCard, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
+import { PageLoading } from "@/components/shared/Loading";
 
 export default function DirectJoin() {
   const router = useRouter();
@@ -31,7 +31,7 @@ export default function DirectJoin() {
         const response = await fetch('/api/registrations/stats');
         const data = await response.json();
         setStats(data);
-        
+
         // Redirect if direct join is not available
         if (!data.direct_join_available) {
           router.push('/register');
@@ -525,141 +525,141 @@ export default function DirectJoin() {
 
   if (!stats) {
     return (
-      <PublicLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="text-gray-300 mt-4">Loading...</p>
-          </div>
-        </div>
-      </PublicLayout>
+      <PageLoading text="Loading direct join options..." />
     );
   }
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen max-w-4xl mx-auto">
-        <div className="container-narrow section-padding">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-6 sm:mb-8 lg:mb-12"
-          >
-            <div className="text-spacing-lg">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-                Direct <span className="text-orange-400">Competition Entry</span>
-              </h1>
-              <p className="text-base sm:text-lg lg:text-xl text-gray-300">
-                Join competitions directly with starter kit and certificates
-              </p>
-              <div className="flex flex-wrap gap-2 justify-center mt-4">
-                <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Workshop slots full
-                </Badge>
-                <Badge className="bg-green-500/10 text-green-400 border-green-500/20 px-3 py-1">
-                  Competition slots available
-                </Badge>
-              </div>
+    <div className="min-h-screen max-w-4xl mx-auto">
+      <div className="container-narrow section-padding">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-6 sm:mb-8 lg:mb-12"
+        >
+          <div className="text-spacing-lg">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
+              Direct <span className="text-orange-400">Competition Entry</span>
+            </h1>
+            <p className="text-base sm:text-lg lg:text-xl text-gray-300">
+              Join competitions directly with starter kit and certificates
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center mt-4">
+              <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
+                <Clock className="w-3 h-3 mr-1" />
+                Workshop slots full
+              </Badge>
+              <Badge className="bg-green-500/10 text-green-400 border-green-500/20 px-3 py-1">
+                Competition slots available
+              </Badge>
             </div>
-          </motion.div>
+          </div>
+        </motion.div>
 
-          {/* Progress Steps */}
-          <div className="mb-6 sm:mb-8 lg:mb-12">
-            <div className="hidden md:flex items-center justify-between mb-6 lg:mb-8">
-              {steps.map((step, index) => (
+        {/* Progress Steps */}
+        <div className="mb-6 sm:mb-8 lg:mb-12">
+          <div className="hidden md:flex items-center justify-between mb-6 lg:mb-8">
+            {steps.map((step, index) => (
+              <div
+                key={step.id}
+                className={`flex items-center ${index !== steps.length - 1 ? 'flex-1' : ''}`}
+              >
                 <div
-                  key={step.id}
-                  className={`flex items-center ${index !== steps.length - 1 ? 'flex-1' : ''}`}
+                  className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= step.id
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'border-gray-600 text-gray-400'
+                    }`}
                 >
-                  <div
-                    className={`w-8 h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= step.id
-                      ? 'bg-orange-500 border-orange-500 text-white'
-                      : 'border-gray-600 text-gray-400'
-                      }`}
-                  >
-                    <step.icon className="w-4 h-4 lg:w-5 lg:h-5" />
-                  </div>
-                  {index !== steps.length - 1 && (
-                    <div
-                      className={`flex-1 h-0.5 mx-2 lg:mx-4 ${currentStep > step.id ? 'bg-orange-500' : 'bg-gray-600'
-                        }`}
-                    />
-                  )}
+                  <step.icon className="w-4 h-4 lg:w-5 lg:h-5" />
                 </div>
-              ))}
-            </div>
-
-            <div className="text-center">
-              <div className="text-spacing">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
-                  {steps[currentStep - 1].title}
-                </h2>
-                <p className="text-sm sm:text-base text-gray-400">
-                  Step {currentStep} of {steps.length}
-                </p>
+                {index !== steps.length - 1 && (
+                  <div
+                    className={`flex-1 h-0.5 mx-2 lg:mx-4 ${currentStep > step.id ? 'bg-orange-500' : 'bg-gray-600'
+                      }`}
+                  />
+                )}
               </div>
-            </div>
+            ))}
           </div>
 
-          {/* Form Content */}
-          <motion.div
-            key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-gray-800/40 backdrop-blur-sm rounded-2xl component-padding border border-gray-700 mb-4 sm:mb-6 lg:mb-8"
+          <div className="text-center">
+            <div className="text-spacing">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white">
+                {steps[currentStep - 1].title}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-400">
+                Step {currentStep} of {steps.length}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Form Content */}
+        <motion.div
+          key={currentStep}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-gray-800/40 backdrop-blur-sm rounded-2xl component-padding border border-gray-700 mb-4 sm:mb-6 lg:mb-8"
+        >
+          {renderStepContent()}
+        </motion.div>
+
+        {/* Navigation */}
+        <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+          <Button
+            onClick={handlePrevious}
+            disabled={currentStep === 1}
+            variant="outline"
+            className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto order-2 sm:order-1"
           >
-            {renderStepContent()}
-          </motion.div>
+            <ChevronLeft className="w-4 h-4 mr-2" />
+            Previous
+          </Button>
 
-          {/* Navigation */}
-          <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4">
+          {currentStep === 4 ? (
             <Button
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              variant="outline"
-              className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white w-full sm:w-auto order-2 sm:order-1"
+              onClick={() => router.push('/login')}
+              className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
             >
-              <ChevronLeft className="w-4 h-4 mr-2" />
-              Previous
+              Continue to Dashboard
             </Button>
-
-            {currentStep === 4 ? (
-              <Button
-                onClick={() => router.push('/login')}
-                className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
-              >
-                Continue to Dashboard
-              </Button>
-            ) : currentStep === 3 ? (
-              <Button
-                onClick={handleSubmit}
-                disabled={loading}
-                className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
-              >
-                {loading ? 'Processing...' : 'Submit Registration'}
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            ) : (
-              <Button
-                onClick={handleNext}
-                className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
-              >
-                Next
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            )}
-          </div>
-
-          {errors.submit && (
-            <div className="mt-4 text-center text-red-400">
-              {errors.submit}
-            </div>
+          ) : currentStep === 3 ? (
+            <Button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Submit Registration
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleNext}
+              className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
+            >
+              Next
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
           )}
         </div>
+
+        {errors.submit && (
+          <div className="mt-4 text-center text-red-400">
+            {errors.submit}
+          </div>
+        )}
       </div>
-    </PublicLayout>
+    </div>
   );
 }

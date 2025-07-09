@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import PublicLayout from "@/components/layout/PublicLayout";
+
 import Link from "next/link";
 import {
   Calendar,
@@ -19,11 +19,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, UserData } from "@/entities/User";
+import { User } from "@/entities/User";
+import { User as UserType } from "@/lib/types";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -83,8 +84,7 @@ export default function Home() {
   ];
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
         {/* Hero Section */}
         <section className="section-padding relative overflow-hidden">
           <div className="container-responsive">
@@ -125,7 +125,7 @@ export default function Home() {
               </div>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row justify-center" style={{ gap: 'var(--gap-sm)' }}>
+              <div className="flex flex-col md:flex-row justify-center" style={{ gap: 'var(--gap-sm)' }}>
                 <Link href={user ? "/dashboard" : "/register"}>
                   <Button className="px-12 py-6 text-lg bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 rounded-xl neon-glow">
                     {user ? "Access Dashboard" : "Register Now"}
@@ -140,7 +140,7 @@ export default function Home() {
                 </Link>
                 <Button 
                   onClick={() => window.open('mailto:sponsors@samyukta.anits.edu.in?subject=Sponsorship Inquiry - Samyukta 2025', '_blank')}
-                  className="px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
+                  className="w-fit mx-auto md:mx-0 px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
                 >
                   Sponsor Us
                   <Star className="w-5 h-5 ml-2" />
@@ -295,6 +295,5 @@ export default function Home() {
           </div>
         </section>
       </div>
-    </PublicLayout>
   );
 }

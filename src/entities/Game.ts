@@ -1,26 +1,5 @@
 // Game entity for QR quest and imposter game functionality
-export interface GameData {
-  scanner_id: string;
-  target_id: string;
-  game_type: 'qr_quest' | 'imposter';
-  points?: number;
-  timestamp?: string;
-  data?: Record<string, unknown>;
-}
-
-export interface GameCreateRequest {
-  scanner_id: string;
-  target_id: string;
-  game_type: 'qr_quest' | 'imposter';
-  points?: number;
-  data?: Record<string, unknown>;
-}
-
-export interface GameResponse extends GameData {
-  id: string;
-  created_at: string;
-  updated_at: string;
-}
+import { GameStats, GameCreateRequest, GameResponse } from '@/lib/types'
 
 export class Game {
   static async create(gameData: GameCreateRequest): Promise<GameResponse> {
@@ -39,54 +18,17 @@ export class Game {
     return response.json();
   }
 
-  static async getByScanner(scannerId: string): Promise<GameResponse[]> {
-    const response = await fetch(`/api/games?scanner_id=${scannerId}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch games');
-    }
-
-    return response.json();
-  }
-
-  static async getByTarget(targetId: string): Promise<GameResponse[]> {
-    const response = await fetch(`/api/games?target_id=${targetId}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch games');
-    }
-
-    return response.json();
-  }
-
-  static async getByType(gameType: 'qr_quest' | 'imposter'): Promise<GameResponse[]> {
-    const response = await fetch(`/api/games?game_type=${gameType}`);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch games');
-    }
-
-    return response.json();
-  }
-
-  static async getLeaderboard(gameType?: 'qr_quest' | 'imposter'): Promise<Array<{ user_id: string; total_points: number; game_count: number }>> {
-    const url = gameType ? `/api/games/leaderboard?game_type=${gameType}` : '/api/games/leaderboard';
-    const response = await fetch(url);
-    
-    if (!response.ok) {
-      throw new Error('Failed to fetch leaderboard');
-    }
-
-    return response.json();
-  }
-
-  static async scanQR(scannerId: string, qrData: string): Promise<GameResponse> {
-    const response = await fetch('/api/games/scan-qr', {
+  static async scanQR(userId: string, qrData: string): Promise<GameResponse> {
+    const response = await fetch('/api/games', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ scanner_id: scannerId, qr_data: qrData }),
+      body: JSON.stringify({ 
+        userId,
+        action: 'qr_scan',
+        data: qrData
+      }),
     });
 
     if (!response.ok) {
@@ -96,36 +38,16 @@ export class Game {
     return response.json();
   }
 
-  static async reportImposter(scannerId: string, targetId: string, evidence?: Record<string, unknown>): Promise<GameResponse> {
-    const response = await fetch('/api/games/report-imposter', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
-        scanner_id: scannerId, 
-        target_id: targetId, 
-        data: evidence 
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to report imposter');
-    }
-
-    return response.json();
-  }
-
-  static async addSuspect(userId: string, suspectId: string): Promise<any> {
+  static async addSuspect(userId: string, suspectId: string): Promise<GameResponse> {
     const response = await fetch('/api/games', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ 
-        action: 'addSuspect',
         userId,
-        data: suspectId
+        action: 'suspect_added',
+        suspectId
       }),
     });
 
@@ -136,7 +58,7 @@ export class Game {
     return response.json();
   }
 
-  static async getStats(): Promise<any> {
+  static async getStats(): Promise<GameStats> {
     const response = await fetch('/api/games');
     
     if (!response.ok) {
@@ -144,6 +66,6 @@ export class Game {
     }
 
     const data = await response.json();
-    return data.stats || {};
+    return data.stats || { totalScans: 0, activePlayers: 0, totalSuspects: 0 };
   }
 }

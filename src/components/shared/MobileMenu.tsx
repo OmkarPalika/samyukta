@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ export default function MobileMenu({ isOpen, onToggle, children }: MobileMenuPro
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="bg-gray-800/95 border-gray-700 backdrop-blur-sm">
+        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
         <div className="space-y-1 mt-6">
           {children}
         </div>

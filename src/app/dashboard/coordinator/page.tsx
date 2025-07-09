@@ -1,10 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, UserData } from '@/entities/User';
-import { Registration, RegistrationResponse } from '@/entities/Registration';
-import { HelpTicket, HelpTicketResponse } from '@/entities/HelpTicket';
-import { Gallery } from '@/entities/Gallery';
+import { User } from '@/entities/User';
+import { User as UserType, RegistrationResponse, HelpTicketResponse } from '@/lib/types';
+import { Registration } from '@/entities/Registration';
+import { HelpTicket } from '@/entities/HelpTicket';
+import { Social } from '@/entities/Social';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import QRScanner from '@/components/dashboard/QRScanner';
 import { QRGenerator, QRPayload } from '@/lib/qr-generator';
@@ -19,9 +20,10 @@ import { QrCode, Camera, Users, CheckSquare, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Image from 'next/image';
+import { PageLoading } from '@/components/shared/Loading';
 
 export default function CoordinatorDashboard() {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState('');
   const [showScanner, setShowScanner] = useState(false);
@@ -119,24 +121,19 @@ export default function CoordinatorDashboard() {
   const handlePhotoUpload = async (file: File) => {
     if (!user) return;
     try {
-      const galleryData = {
+      const socialData = {
         uploaded_by: user.id,
         file_url: URL.createObjectURL(file),
-        caption: 'Event photo by coordinator',
-        status: 'approved' as const
+        caption: 'Event photo by coordinator'
       };
-      await Gallery.create(galleryData);
+      await Social.create(socialData);
     } catch (error) {
       console.error('Photo upload error:', error);
     }
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400"></div>
-      </div>
-    );
+    return <PageLoading text="Loading coordinator dashboard..." />;
   }
 
   if (!user || user.role !== 'coordinator') {
@@ -155,13 +152,13 @@ export default function CoordinatorDashboard() {
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
-        <div className="container-responsive section-padding">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">
               Coordinator Dashboard - <span className="text-green-400">{user.full_name}</span>
             </h1>
             <p className="text-gray-400">
@@ -169,40 +166,40 @@ export default function CoordinatorDashboard() {
             </p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-4 gap-6">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="lg:col-span-1">
               <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center text-white">
-                    <QrCode className="w-5 h-5 mr-2 text-green-400" />
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center text-white text-sm sm:text-base">
+                    <QrCode className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-400" />
                     Coordinator Badge
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <div className="space-y-4">
+                <CardContent className="text-center p-3 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
                     {qrCode ? (
                       <Image
                         src={qrCode}
                         alt="Coordinator QR Code"
                         width={128}
                         height={128}
-                        className="w-32 h-32 mx-auto rounded-lg"
+                        className="w-24 h-24 sm:w-32 sm:h-32 mx-auto rounded-lg"
                         unoptimized
                         priority
                       />
                     ) : (
-                      <div className="w-32 h-32 bg-white rounded-lg flex items-center justify-center mx-auto">
-                        <QrCode className="w-24 h-24 text-green-500/50" />
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 bg-white rounded-lg flex items-center justify-center mx-auto">
+                        <QrCode className="w-16 h-16 sm:w-24 sm:h-24 text-green-500/50" />
                       </div>
                     )}
                     <div className="text-center">
-                      <Avatar className="w-16 h-16 mx-auto mb-2">
-                        <AvatarFallback className="bg-gradient-to-r from-green-500 to-emerald-500 text-xl font-bold text-white">
+                      <Avatar className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2">
+                        <AvatarFallback className="bg-gradient-to-r from-green-500 to-emerald-500 text-lg sm:text-xl font-bold text-white">
                           {user.full_name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <h3 className="text-white font-bold">{user.full_name}</h3>
-                      <Badge className="bg-green-500/10 text-green-400 border-green-500/20">
+                      <h3 className="text-white font-bold text-sm sm:text-base truncate">{user.full_name}</h3>
+                      <Badge className="bg-green-500/10 text-green-400 border-green-500/20 text-xs sm:text-sm">
                         Coordinator
                       </Badge>
                     </div>
@@ -213,45 +210,62 @@ export default function CoordinatorDashboard() {
 
             <div className="lg:col-span-3">
               <Tabs defaultValue="gate" className="w-full">
-                <TabsList className="grid w-full grid-cols-4 bg-gray-800/40 mb-8 h-16">
+                {/* Desktop Tabs */}
+                <TabsList className="hidden md:grid w-full grid-cols-4 bg-gray-800/40 mb-6 sm:mb-8 h-12 sm:h-16">
                   <TabsTrigger value="gate" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white h-full">
                     <div className="text-center">
-                      <div className="font-semibold">Gate Entry</div>
-                      <div className="text-xs opacity-70">Attendance</div>
+                      <div className="font-semibold text-xs sm:text-sm">Gate Entry</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Attendance</div>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger value="participants" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white h-full">
                     <div className="text-center">
-                      <div className="font-semibold">Participants</div>
-                      <div className="text-xs opacity-70">Management</div>
+                      <div className="font-semibold text-xs sm:text-sm">Participants</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Management</div>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger value="tickets" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white h-full">
                     <div className="text-center">
-                      <div className="font-semibold">Help Tickets</div>
-                      <div className="text-xs opacity-70">Support</div>
+                      <div className="font-semibold text-xs sm:text-sm">Help Tickets</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Support</div>
                     </div>
                   </TabsTrigger>
-                  <TabsTrigger value="gallery" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white h-full">
+                  <TabsTrigger value="social" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white h-full">
                     <div className="text-center">
-                      <div className="font-semibold">Gallery</div>
-                      <div className="text-xs opacity-70">Photos</div>
+                      <div className="font-semibold text-xs sm:text-sm">Social</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Photos</div>
                     </div>
+                  </TabsTrigger>
+                </TabsList>
+                
+                {/* Mobile Tabs - Scrollable */}
+                <TabsList className="md:hidden flex w-full bg-gray-800/40 mb-6 h-12 overflow-x-auto scrollbar-hide">
+                  <TabsTrigger value="gate" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white flex-shrink-0 px-4 text-sm">
+                    Gate Entry
+                  </TabsTrigger>
+                  <TabsTrigger value="participants" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white flex-shrink-0 px-4 text-sm">
+                    Participants
+                  </TabsTrigger>
+                  <TabsTrigger value="tickets" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-500 data-[state=active]:text-white flex-shrink-0 px-4 text-sm">
+                    Help Tickets
+                  </TabsTrigger>
+                  <TabsTrigger value="social" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white flex-shrink-0 px-4 text-sm">
+                    Social
                   </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="gate" className="space-y-6">
-                  <div className="grid md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="text-white">QR Scanner</CardTitle>
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <CardTitle className="text-white text-sm sm:text-base">QR Scanner</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <p className="text-gray-400">Scan participant QR codes for gate entry</p>
+                      <CardContent className="p-3 sm:p-6">
+                        <div className="space-y-3 sm:space-y-4">
+                          <p className="text-gray-400 text-sm sm:text-base">Scan participant QR codes for gate entry</p>
                           <Button 
                             onClick={() => setShowScanner(true)}
-                            className="w-full bg-green-600 hover:bg-green-700"
+                            className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
                           >
                             <Camera className="w-4 h-4 mr-2" />
                             Start QR Scanner
@@ -261,17 +275,17 @@ export default function CoordinatorDashboard() {
                     </Card>
 
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
-                      <CardHeader>
-                        <CardTitle className="text-white">Manual Entry</CardTitle>
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <CardTitle className="text-white text-sm sm:text-base">Manual Entry</CardTitle>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <Label className="text-gray-300">Team ID</Label>
+                      <CardContent className="p-3 sm:p-6">
+                        <div className="space-y-3 sm:space-y-4">
+                          <Label className="text-gray-300 text-sm sm:text-base">Team ID</Label>
                           <Input 
                             placeholder="Enter team ID"
-                            className="bg-gray-700 border-gray-600 text-white"
+                            className="bg-gray-700 border-gray-600 text-white text-sm sm:text-base"
                           />
-                          <Button className="w-full">
+                          <Button className="w-full text-sm sm:text-base">
                             <Users className="w-4 h-4 mr-2" />
                             Find Team
                           </Button>
@@ -305,7 +319,7 @@ export default function CoordinatorDashboard() {
                           
                           <div className="space-y-3">
                             {attendanceList.map((member, index) => (
-                              <div key={index} className="flex items-center space-x-3 p-3 bg-gray-700/30 rounded-lg">
+                              <div key={index} className="flex items-center space-x-3 p-2 sm:p-3 bg-gray-700/30 rounded-lg">
                                 <Checkbox
                                   checked={member.present}
                                   onCheckedChange={(checked) => {
@@ -313,10 +327,11 @@ export default function CoordinatorDashboard() {
                                       i === index ? { ...m, present: !!checked } : m
                                     ));
                                   }}
+                                  className="flex-shrink-0"
                                 />
-                                <div className="flex-1">
-                                  <p className="text-white font-medium">{member.name}</p>
-                                  <p className="text-gray-400 text-sm">{member.email}</p>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white font-medium text-sm sm:text-base truncate">{member.name}</p>
+                                  <p className="text-gray-400 text-xs sm:text-sm truncate">{member.email}</p>
                                 </div>
                               </div>
                             ))}
@@ -340,16 +355,16 @@ export default function CoordinatorDashboard() {
                     <CardContent>
                       <div className="space-y-3">
                         {participants.map((participant, index) => (
-                          <div key={index} className="p-4 bg-gray-700/30 rounded-lg">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="text-white font-medium">{participant.team_id}</h3>
-                                <p className="text-gray-400">{participant.college}</p>
-                                <p className="text-gray-400 text-sm">
+                          <div key={index} className="p-3 sm:p-4 bg-gray-700/30 rounded-lg">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
+                              <div className="min-w-0 flex-1">
+                                <h3 className="text-white font-medium text-sm sm:text-base truncate">{participant.team_id}</h3>
+                                <p className="text-gray-400 text-sm sm:text-base truncate">{participant.college}</p>
+                                <p className="text-gray-400 text-xs sm:text-sm">
                                   {participant.team_size} members • {participant.ticket_type}
                                 </p>
                               </div>
-                              <Badge className={`${
+                              <Badge className={`flex-shrink-0 text-xs sm:text-sm ${
                                 participant.status === 'confirmed' 
                                   ? 'bg-green-500/10 text-green-400' 
                                   : 'bg-yellow-500/10 text-yellow-400'
@@ -372,10 +387,10 @@ export default function CoordinatorDashboard() {
                     <CardContent>
                       <div className="space-y-4">
                         {helpTickets.map((ticket, index) => (
-                          <div key={index} className="p-4 bg-gray-700/30 rounded-lg">
-                            <div className="flex justify-between items-start mb-2">
-                              <h3 className="text-white font-medium">{ticket.title}</h3>
-                              <Badge className={`${
+                          <div key={index} className="p-3 sm:p-4 bg-gray-700/30 rounded-lg">
+                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0 mb-2">
+                              <h3 className="text-white font-medium text-sm sm:text-base truncate">{ticket.title}</h3>
+                              <Badge className={`flex-shrink-0 text-xs sm:text-sm ${
                                 ticket.status === 'resolved' 
                                   ? 'bg-green-500/10 text-green-400'
                                   : ticket.status === 'in_progress'
@@ -385,19 +400,19 @@ export default function CoordinatorDashboard() {
                                 {ticket.status}
                               </Badge>
                             </div>
-                            <p className="text-gray-400 text-sm mb-3">{ticket.description}</p>
-                            <div className="flex gap-2">
+                            <p className="text-gray-400 text-xs sm:text-sm mb-3">{ticket.description}</p>
+                            <div className="flex flex-col sm:flex-row gap-2">
                               <Button
                                 size="sm"
                                 onClick={() => handleTicketUpdate(ticket.id, 'in_progress')}
-                                className="bg-blue-600 hover:bg-blue-700"
+                                className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
                               >
                                 In Progress
                               </Button>
                               <Button
                                 size="sm"
                                 onClick={() => handleTicketUpdate(ticket.id, 'resolved')}
-                                className="bg-green-600 hover:bg-green-700"
+                                className="bg-green-600 hover:bg-green-700 text-xs sm:text-sm"
                               >
                                 Resolve
                               </Button>
@@ -409,7 +424,7 @@ export default function CoordinatorDashboard() {
                   </Card>
                 </TabsContent>
 
-                <TabsContent value="gallery" className="space-y-6">
+                <TabsContent value="social" className="space-y-6">
                   <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                     <CardHeader>
                       <CardTitle className="text-white">Event Photo Upload</CardTitle>
@@ -427,13 +442,13 @@ export default function CoordinatorDashboard() {
                           id="photo-upload"
                         />
                         <label htmlFor="photo-upload">
-                          <Button className="bg-gradient-to-r from-purple-500 to-pink-500 cursor-pointer">
+                          <Button className="bg-gradient-to-r from-purple-500 to-pink-500 cursor-pointer text-sm sm:text-base">
                             <Upload className="w-4 h-4 mr-2" />
                             Upload Event Photo
                           </Button>
                         </label>
-                        <p className="text-gray-400 text-sm mt-2">
-                          Upload official event photos for the gallery
+                        <p className="text-gray-400 text-xs sm:text-sm mt-2">
+                          Upload official event photos for social
                         </p>
                       </div>
                     </CardContent>

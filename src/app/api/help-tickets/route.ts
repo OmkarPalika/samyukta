@@ -1,38 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock help tickets data storage
-const helpTickets: Array<{
-  id: string;
-  title: string;
-  description: string;
-  submitted_by: string;
-  status: string;
-  priority: string;
-  created_at: string;
-  updated_at?: string;
-}> = [
-  {
-    id: '1',
-    title: 'Login Issue',
-    description: 'Cannot access my dashboard after registration',
-    submitted_by: 'user123',
-    status: 'open',
-    priority: 'medium',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: 'Payment Verification',
-    description: 'Payment made but status not updated',
-    submitted_by: 'user456',
-    status: 'in_progress',
-    priority: 'high',
-    created_at: new Date().toISOString()
-  }
-];
+import { MOCK_HELP_TICKETS } from '@/lib/mock-data';
 
 export async function GET() {
-  return NextResponse.json(helpTickets);
+  return NextResponse.json(MOCK_HELP_TICKETS);
 }
 
 export async function POST(request: NextRequest) {
@@ -53,13 +23,13 @@ export async function POST(request: NextRequest) {
       title,
       description,
       submitted_by: submittedBy,
-      status: 'open',
-      priority,
-      attachment_url: attachment ? `uploads/${attachment.name}` : null,
+      status: 'open' as const,
+      priority: priority as 'low' | 'medium' | 'high' | 'urgent',
+      attachment_url: attachment ? `uploads/${attachment.name}` : undefined,
       created_at: new Date().toISOString()
     };
 
-    helpTickets.push(newTicket);
+    MOCK_HELP_TICKETS.push(newTicket);
 
     return NextResponse.json({ data: newTicket });
   } catch {
@@ -71,15 +41,15 @@ export async function PATCH(request: NextRequest) {
   try {
     const { id, status } = await request.json();
     
-    const ticketIndex = helpTickets.findIndex(ticket => ticket.id === id);
+    const ticketIndex = MOCK_HELP_TICKETS.findIndex(ticket => ticket.id === id);
     if (ticketIndex === -1) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
-    helpTickets[ticketIndex].status = status;
-    helpTickets[ticketIndex].updated_at = new Date().toISOString();
+    MOCK_HELP_TICKETS[ticketIndex].status = status;
+    MOCK_HELP_TICKETS[ticketIndex].updated_at = new Date().toISOString();
 
-    return NextResponse.json({ data: helpTickets[ticketIndex] });
+    return NextResponse.json({ data: MOCK_HELP_TICKETS[ticketIndex] });
   } catch {
     return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
   }
@@ -91,14 +61,14 @@ export async function PUT(request: NextRequest) {
     const ticketId = url.pathname.split('/').pop();
     const updateData = await request.json();
     
-    const ticketIndex = helpTickets.findIndex(ticket => ticket.id === ticketId);
+    const ticketIndex = MOCK_HELP_TICKETS.findIndex(ticket => ticket.id === ticketId);
     if (ticketIndex === -1) {
       return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
     }
 
-    helpTickets[ticketIndex] = { ...helpTickets[ticketIndex], ...updateData, updated_at: new Date().toISOString() };
+    MOCK_HELP_TICKETS[ticketIndex] = { ...MOCK_HELP_TICKETS[ticketIndex], ...updateData, updated_at: new Date().toISOString() };
 
-    return NextResponse.json(helpTickets[ticketIndex]);
+    return NextResponse.json(MOCK_HELP_TICKETS[ticketIndex]);
   } catch {
     return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
   }

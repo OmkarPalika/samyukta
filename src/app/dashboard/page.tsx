@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User } from "@/entities/User";
+import { PageLoading } from "@/components/shared/Loading";
 
 export default function Dashboard() {
-  const [, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,15 +25,10 @@ export default function Dashboard() {
         // If user is not authenticated, redirect to login
         router.push('/login');
       }
-      setLoading(false);
     };
 
     loadUserData();
   }, [router]);
 
-  return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-    </div>
-  );
+  return <PageLoading text="Redirecting to dashboard..." />;
 }

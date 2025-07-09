@@ -28,6 +28,7 @@ export default function PublicNavigation({ user, onLogout }: PublicNavigationPro
     { href: "Home", label: "Home", path: "/" },
     { href: "EventDetails", label: "Events", path: "/events" },
     { href: "Tickets", label: "Tickets", path: "/tickets" },
+    { href: "Social", label: "Social", path: "/social" },
     { href: "FAQs", label: "FAQs", path: "/faqs" },
     { href: "Contact", label: "Contact", path: "/contact" },
   ];
@@ -36,7 +37,6 @@ export default function PublicNavigation({ user, onLogout }: PublicNavigationPro
     { href: "About", label: "About Us", path: "/about" },
     { href: "Speakers", label: "Speakers", path: "/speakers" },
     { href: "Sponsors", label: "Sponsors", path: "/sponsors" },
-    { href: "Gallery", label: "Gallery", path: "/gallery" },
   ];
 
   const allNavItems = [...navItems, ...aboutItems];
@@ -107,6 +107,19 @@ export default function PublicNavigation({ user, onLogout }: PublicNavigationPro
                     }`}
                   >
                     Tickets
+                  </Link>
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              
+              <NavigationMenuItem>
+                <NavigationMenuLink asChild>
+                  <Link 
+                    href="/social" 
+                    className={`px-3 py-2 text-gray-300 hover:text-blue-400 transition-colors rounded-md ${
+                      pathname === "/social" ? 'text-blue-400 bg-gray-800/50' : ''
+                    }`}
+                  >
+                    Social
                   </Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>

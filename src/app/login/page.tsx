@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import PublicLayout from '@/components/layout/PublicLayout';
+
 import { Mail, Lock, AlertCircle } from 'lucide-react';
 import { User } from '@/entities/User';
 import { Button } from '@/components/ui/button';
@@ -40,8 +40,7 @@ export default function Login() {
   };
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen flex items-center justify-center section-padding">
+    <div className="min-h-screen flex items-center justify-center section-padding">
         <div className="w-full max-w-md mx-auto px-4">
           <div className="text-center mb-6 sm:mb-8">
             <div className="text-spacing-lg">
@@ -120,9 +119,16 @@ export default function Login() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:shadow-lg transition-all neon-glow disabled:opacity-50 disabled:cursor-not-allowed py-2 sm:py-3 text-sm sm:text-base"
+                    className="w-full bg-gradient-to-r from-blue-500 to-violet-500 text-white hover:shadow-lg transition-all neon-glow disabled:opacity-50 disabled:cursor-not-allowed py-2 sm:py-3 text-sm sm:text-base flex items-center justify-center"
                   >
-                    {loading ? 'Signing in...' : 'Sign In'}
+                    {loading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign In'
+                    )}
                   </Button>
                 </form>
               </Form>
@@ -149,6 +155,5 @@ export default function Login() {
           </Card>
         </div>
       </div>
-    </PublicLayout>
   );
 }

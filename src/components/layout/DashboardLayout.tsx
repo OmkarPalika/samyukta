@@ -6,6 +6,7 @@ import DashboardNavigation from '@/components/navigation/DashboardNavigation';
 import { User } from '@/entities/User';
 import { Card, CardContent } from '@/components/ui/card';
 
+
 interface UserType {
   full_name: string;
   role?: string;
@@ -19,6 +20,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const [user, setUser] = React.useState<UserType | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
+
 
   React.useEffect(() => {
     const checkAuth = async () => {
@@ -63,10 +67,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
-      <DashboardNavigation user={user} onLogout={handleLogout} />
+    <div className="min-h-screen w-full max-w-full bg-gray-900 text-gray-200 flex flex-col overflow-x-hidden">
+      <DashboardNavigation 
+        user={user} 
+        onLogout={handleLogout} 
+        mobileMenuOpen={mobileMenuOpen}
+        onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+      />
       
-      <main className="flex-grow nav-offset">
+
+      
+      <main className="flex-grow pt-12 sm:pt-16 px-2 sm:px-0">
         {children}
       </main>
     </div>

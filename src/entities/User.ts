@@ -1,31 +1,22 @@
-// User entity and authentication methods
-export interface UserData {
-  id: string;
-  full_name: string;
-  email: string;
-  role?: string;
-  linkedin?: string;
-  instagram?: string;
-  portfolio?: string;
-  college?: string;
-  track?: string;
-  year?: string;
-  dept?: string;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface UserResponse extends UserData {
-  token?: string;
-  session_id?: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
+import { User as UserData, UserResponse, LoginCredentials } from '@/lib/types'
 
 export class User {
+  static async create(userData: Omit<UserData, 'id' | 'created_at'>): Promise<UserData> {
+    const { insertOne } = await import('@/lib/db-utils')
+    return insertOne('users', userData) as Promise<UserData>
+  }
+
+  static async findById(id: string): Promise<UserData | null> {
+    const { findById } = await import('@/lib/db-utils')
+    return findById('users', id) as Promise<UserData | null>
+  }
+
+  static async findByEmail(email: string): Promise<UserData | null> {
+    const { getCollection } = await import('@/lib/db-utils')
+    const users = await getCollection('users')
+    const user = await users.findOne({ email })
+    return user ? { id: user._id.toString(), ...user } as unknown as UserData : null
+  }
   static async me(): Promise<UserData> {
     try {
       // Replace with your actual API endpoint
@@ -164,7 +155,7 @@ export class User {
     }
   }
 
-  static async updateProfile(userId: string, profileData: any): Promise<void> {
+  static async updateProfile(userId: string, profileData: Partial<UserData>): Promise<void> {
     try {
       const response = await fetch(`/api/users/${userId}/profile`, {
         method: 'PATCH',

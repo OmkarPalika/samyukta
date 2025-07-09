@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Target, Heart, Users, Globe, Lightbulb, Award } from "lucide-react";
-import PublicLayout from "@/components/layout/PublicLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -17,7 +16,7 @@ export default function About() {
     },
     {
       icon: Heart,
-      title: "Vision", 
+      title: "Vision",
       description: "Building India's most impactful tech community by uniting diverse talents and igniting breakthrough innovations.",
       color: "from-violet-500 to-purple-500"
     },
@@ -51,8 +50,7 @@ export default function About() {
   ];
 
   return (
-    <PublicLayout>
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
       <section className="section-padding">
         <div className="container-responsive">
@@ -69,9 +67,9 @@ export default function About() {
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed">
-                More than a tech summit — we&apos;re building the future of innovation through 
-                <span className="text-blue-400"> collaboration</span>, 
-                <span className="text-violet-400"> creativity</span>, and 
+                More than a tech summit — we&apos;re building the future of innovation through
+                <span className="text-blue-400"> collaboration</span>,
+                <span className="text-violet-400"> creativity</span>, and
                 <span className="text-pink-400"> community</span>.
               </p>
             </div>
@@ -205,7 +203,7 @@ export default function About() {
               <Card className="bg-gradient-to-r from-blue-600/20 to-violet-600/20 border-gray-700">
                 <CardContent className="card-padding">
                   <div className="card-gap flex flex-col">
-                    <Image 
+                    <Image
                       src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=600&fit=crop"
                       alt="ANITS Campus"
                       width={800}
@@ -237,11 +235,11 @@ export default function About() {
                 Building Tomorrow&apos;s <span className="text-pink-400">Tech Leaders</span>
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-4xl mx-auto">
-                Samyukta 2025 isn&apos;t just about the four days in August — it&apos;s about creating lasting connections, 
+                Samyukta 2025 isn&apos;t just about the four days in August — it&apos;s about creating lasting connections,
                 fostering innovation, and building a community that continues to grow and impact the tech ecosystem.
               </p>
             </div>
-            
+
             <div className="grid sm:grid-cols-2 md:grid-cols-4 grid-gap">
               {[
                 { number: "500+", label: "Participants" },
@@ -271,7 +269,6 @@ export default function About() {
           </motion.div>
         </div>
       </section>
-      </div>
-    </PublicLayout>
+    </div>
   );
 }

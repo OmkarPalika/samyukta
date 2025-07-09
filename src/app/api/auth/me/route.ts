@@ -1,30 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock users database - same as in login route
-const MOCK_USERS = [
-  {
-    id: 'admin1',
-    email: 'admin@samyukta.com',
-    full_name: 'System Administrator',
-    role: 'admin'
-  },
-  {
-    id: 'coord1',
-    email: 'coordinator@samyukta.com',
-    full_name: 'Event Coordinator',
-    role: 'coordinator'
-  },
-  {
-    id: 'part1',
-    email: 'participant@samyukta.com',
-    full_name: 'John Participant',
-    role: 'participant',
-    college: 'ANITS',
-    track: 'Cloud Computing',
-    year: '3rd Year',
-    dept: 'CSE'
-  }
-];
+import { MOCK_USERS } from '@/lib/mock-data';
 
 // Mock authentication check - Replace with your actual authentication logic
 export async function GET(request: NextRequest) {

@@ -1,22 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// Mock game data storage
-const gameData: Array<{
-  id: string;
-  userId: string;
-  action: string;
-  data?: string;
-  suspectId?: string;
-  timestamp: string;
-}> = [];
-const gameStats = {
-  totalScans: 0,
-  activePlayers: 0,
-  totalSuspects: 0
-};
+import { MOCK_GAME_DATA, MOCK_GAME_STATS } from '@/lib/mock-data';
 
 export async function GET() {
-  return NextResponse.json({ data: gameData, stats: gameStats });
+  return NextResponse.json({ data: MOCK_GAME_DATA, stats: MOCK_GAME_STATS });
 }
 
 export async function POST(request: NextRequest) {
@@ -26,8 +12,8 @@ export async function POST(request: NextRequest) {
 
     switch (action) {
       case 'scanQR':
-        gameStats.totalScans++;
-        gameData.push({
+        MOCK_GAME_STATS.totalScans++;
+        MOCK_GAME_DATA.push({
           id: Date.now().toString(),
           userId,
           action: 'qr_scan',
@@ -37,8 +23,8 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'addSuspect':
-        gameStats.totalSuspects++;
-        gameData.push({
+        MOCK_GAME_STATS.totalSuspects++;
+        MOCK_GAME_DATA.push({
           id: Date.now().toString(),
           userId,
           action: 'suspect_added',
@@ -51,7 +37,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
 
-    return NextResponse.json({ success: true, stats: gameStats });
+    return NextResponse.json({ success: true, stats: MOCK_GAME_STATS });
   } catch {
     return NextResponse.json({ error: 'Failed to process game action' }, { status: 500 });
   }
