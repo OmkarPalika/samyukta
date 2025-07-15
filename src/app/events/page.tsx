@@ -10,7 +10,7 @@ import { MOCK_EVENT_DAYS, MOCK_EVENT_BENEFITS } from "@/lib/mock-data";
 import { generateEventStructuredData } from "@/lib/seo";
 
 export default function Events() {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app';
   
   const eventData = generateEventStructuredData({
     name: "Samyukta 2025 - 4-Day Tech Summit Schedule",
@@ -155,7 +155,7 @@ export default function Events() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto">
-            {MOCK_EVENT_BENEFITS.map((benefit, index) => (
+            {MOCK_EVENT_BENEFITS.map((benefit: string, index: number) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}

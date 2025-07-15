@@ -8,5 +8,5 @@ export const metadata: Metadata = generateSEO({
     "samyukta events", "tech summit schedule", "hackathon timeline", "AI workshop", "ML workshop", 
     "cloud computing", "pitch competition", "tech conference agenda", "ANITS events", "student tech events"
   ],
-  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in'}/events`
+  url: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app'}/events`
 });

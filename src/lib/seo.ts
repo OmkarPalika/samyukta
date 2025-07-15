@@ -23,8 +23,8 @@ export const siteConfig = {
   publisher: "Anil Neerukonda Institute of Technology and Sciences",
   social: {
     twitter: '@samyukta2025',
-    instagram: EVENT_CONFIG.social_media_links?.instagram || '',
-    linkedin: EVENT_CONFIG.social_media_links?.linkedin || ''
+    instagram: 'https://www.instagram.com/samyukta.2025/',
+    linkedin: 'https://www.linkedin.com/groups/14723748/'
   }
 };
 
@@ -55,8 +55,8 @@ export function generateSEO({
   section,
   tags = []
 }: SEOProps = {}): Metadata {
-  const seoTitle = title 
-    ? `${title} | ${siteConfig.name}` 
+  const seoTitle = title
+    ? `${title} | ${siteConfig.name}`
     : siteConfig.title;
 
   const allKeywords = [...siteConfig.keywords, ...keywords, ...tags];

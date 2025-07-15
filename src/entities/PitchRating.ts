@@ -187,11 +187,26 @@ export class PitchRating {
     return response.json();
   }
 
-  static async uploadPitchDeck(file: File): Promise<{ file_url: string }> {
+  static async uploadPitchDeck(file: File): Promise<{ file_url: string; file_name: string; file_size: number }> {
     const { uploadFile, validateFile } = await import('@/lib/file-upload');
     const { UPLOAD_TYPES } = await import('@/lib/gdrive');
     
-    validateFile(file, 50 * 1024 * 1024, UPLOAD_TYPES.PITCH_DECKS);
-    return uploadFile(file, '/api/upload', UPLOAD_TYPES.PITCH_DECKS);
+    try {
+      validateFile(file, 50 * 1024 * 1024, UPLOAD_TYPES.PITCH_DECKS);
+      const result = await uploadFile(file, '/api/upload', UPLOAD_TYPES.PITCH_DECKS);
+      
+      if (!result.file_url) {
+        throw new Error('Upload failed - no file URL returned');
+      }
+      
+      return {
+        file_url: result.file_url,
+        file_name: result.file_name || file.name,
+        file_size: result.file_size || file.size
+      };
+    } catch (error) {
+      console.error('Pitch deck upload error:', error);
+      throw new Error(error instanceof Error ? error.message : 'Failed to upload pitch deck');
+    }
   }
 }

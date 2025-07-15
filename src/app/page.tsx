@@ -24,14 +24,14 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "@/entities/User";
 import { User as UserType } from "@/lib/types";
 import { EVENT_CONFIG, URL_CONFIG } from "@/lib/config";
-import { EVENT_DATA, PARTNERS_DATA } from "@/data";
+import { PARTNERS_DATA } from "@/data";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
   const [user, setUser] = useState<UserType | null>(null);
   
   const baseUrl = useMemo(() => 
-    process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.anits.edu.in', 
+    process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app', 
     []
   );
   
@@ -96,10 +96,10 @@ export default function Home() {
   const iconMap = useMemo(() => ({ Cloud, Brain, Trophy, Target }), []);
   
   const highlights = useMemo(() => 
-    EVENT_DATA.tracks.map(track => ({
+    EVENT_CONFIG.tracks?.map((track: { title: string; description: string; color: string; icon: string }) => ({
       ...track,
       icon: iconMap[track.icon as keyof typeof iconMap]
-    })), 
+    })) || [], 
     [iconMap]
   );
 
@@ -176,7 +176,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Button 
-                  onClick={() => window.open(`mailto:${EVENT_CONFIG.contacts.email}?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
+                  onClick={() => window.open(`mailto:samyukta.summit@gmail.com?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
                   className="w-fit mx-auto md:mx-0 px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
                 >
                   Sponsor Us
@@ -237,7 +237,7 @@ export default function Home() {
             </motion.div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-4 grid-gap-lg">
-              {highlights.map((highlight, index) => (
+              {highlights.map((highlight: { title: string; description: string; color: string; icon: React.ComponentType<{ className?: string }> }, index: number) => (
                 <motion.div
                   key={highlight.title}
                   initial={{ opacity: 0, y: 30 }}

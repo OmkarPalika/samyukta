@@ -176,9 +176,9 @@ export async function POST(request: NextRequest) {
       
       // Insert team member
       await collections.teamMembers.insertOne(teamMember);
-      
-      // Send confirmation email
+      // Send individual confirmation email to each member
       try {
+        console.log(`Sending confirmation email to ${member.email} (${member.full_name})`);
         await sendRegistrationConfirmation(
           member.email,
           {
@@ -196,19 +196,38 @@ export async function POST(request: NextRequest) {
           },
           member.passkey
         );
+        console.log(`✅ Email sent successfully to ${member.email}`);
+        return { email: member.email, success: true };
       } catch (emailError) {
-        console.error(`Failed to send email to ${member.email}:`, emailError);
+        console.error(`❌ Failed to send email to ${member.email}:`, emailError);
+        return { email: member.email, success: false, error: emailError };
       }
     });
     
-    await Promise.all(memberPromises);
+    const emailResults = await Promise.all(memberPromises);
+    
+    // Log email sending results
+    const successfulEmails = emailResults.filter(result => result.success).length;
+    const failedEmails = emailResults.filter(result => !result.success);
+    
+    console.log(`Email sending summary for team ${teamId}:`);
+    console.log(`✅ Successful: ${successfulEmails}/${registrationData.members.length}`);
+    if (failedEmails.length > 0) {
+      console.log(`❌ Failed emails:`, failedEmails.map(f => f.email));
+    }
     
     return NextResponse.json({
       success: true,
       team_id: teamId,
+      email_status: {
+        total: registrationData.members.length,
+        successful: successfulEmails,
+        failed: failedEmails.length,
+        failed_emails: failedEmails.map(f => f.email)
+      },
       message: 'Registration completed successfully'
     });
-    
+
   } catch (error) {
     console.error('Registration failed:', error);
     return NextResponse.json(
@@ -217,3 +236,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
