@@ -1,7 +1,9 @@
 #!/usr/bin/env tsx
 
 import { config } from 'dotenv';
-import { seedDatabase } from '../src/lib/seed-data';
+// Simplified seeding - just create admin user
+import { getTypedCollections } from '../src/lib/db-utils';
+import bcrypt from 'bcryptjs';
 
 // Load environment variables
 config({ path: '.env.local' });
@@ -9,10 +11,24 @@ config({ path: '.env.local' });
 async function main() {
   try {
     console.log('🌱 Seeding database...');
-    await seedDatabase();
+    const collections = await getTypedCollections();
+    
+    // Create admin user
+    await collections.users.insertOne({
+      email: 'omkar@samyukta.com',
+      full_name: 'System Administrator',
+      password: await bcrypt.hash('@Omkar143', 10),
+      role: 'admin',
+      college: 'ANITS',
+      track: 'Admin',
+      year: 'Convenor',
+      dept: 'Administration',
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+    
     console.log('✅ Database seeded successfully!');
-    console.log('\n👤 Admin user created: omkar@samyukta.com / @Omkar143');
-    console.log('🏆 Sample competitions added');
+    console.log('👤 Admin user: omkar@samyukta.com / @Omkar143');
     process.exit(0);
   } catch (error) {
     console.error('❌ Error seeding database:', error);

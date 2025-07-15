@@ -8,42 +8,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Check in admins collection
+    // Check in users collection (single source of truth)
     try {
       const { getCollection } = await import('@/lib/db-utils');
-      const admins = await getCollection('admins');
-      const admin = await admins.findOne({ email });
-      if (admin) {
-        return NextResponse.json({ exists: true, role: 'admin' });
+      const users = await getCollection('users');
+      const user = await users.findOne({ email });
+      if (user) {
+        return NextResponse.json({ exists: true, role: user.role || 'participant' });
       }
     } catch (error) {
-      console.log('Admin collection not found or error:', error);
-    }
-
-    // Check in coordinators collection
-    try {
-      const { getCollection } = await import('@/lib/db-utils');
-      const coordinators = await getCollection('coordinators');
-      const coordinator = await coordinators.findOne({ email });
-      if (coordinator) {
-        return NextResponse.json({ exists: true, role: 'coordinator' });
-      }
-    } catch (error) {
-      console.log('Coordinator collection not found or error:', error);
-    }
-
-    // Check in participants collection (registrations)
-    try {
-      const { getCollection } = await import('@/lib/db-utils');
-      const registrations = await getCollection('registrations');
-      const participant = await registrations.findOne({ 
-        'members.email': email 
-      });
-      if (participant) {
-        return NextResponse.json({ exists: true, role: 'participant' });
-      }
-    } catch (error) {
-      console.log('Registration collection not found or error:', error);
+      console.log('Users collection error:', error);
     }
 
     return NextResponse.json({ exists: false });

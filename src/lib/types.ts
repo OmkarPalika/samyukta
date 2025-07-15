@@ -343,6 +343,44 @@ export interface PitchRatingResponse extends PitchRating {
 
 
 
+// Workshop Types
+export interface Workshop {
+  id: string;
+  name: string;
+  track: 'Cloud' | 'AI';
+  instructor: string;
+  description: string;
+  schedule: Date;
+  duration_hours: number;
+  capacity: number;
+  enrolled: number;
+  materials_url?: string;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WorkshopAttendance {
+  id: string;
+  workshop_id: string;
+  participant_id: string;
+  check_in_time?: Date;
+  completion_status: 'registered' | 'attended' | 'completed';
+  certificate_url?: string;
+  created_at: string;
+}
+
+export interface WorkshopCreateRequest {
+  name: string;
+  track: 'Cloud' | 'AI';
+  instructor: string;
+  description: string;
+  schedule: Date;
+  duration_hours: number;
+  capacity: number;
+  materials_url?: string;
+}
+
 // Interactive Map Types
 export interface MapLocation {
   id: string;

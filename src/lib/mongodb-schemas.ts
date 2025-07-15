@@ -57,6 +57,33 @@ export interface TeamMemberSchema {
   created_at: Date;
 }
 
+export interface WorkshopSchema {
+  _id?: ObjectId;
+  name: string;
+  track: 'Cloud' | 'AI';
+  instructor: string;
+  description: string;
+  schedule: Date;
+  duration_hours: number;
+  capacity: number;
+  enrolled: number;
+  materials_url?: string;
+  status: 'upcoming' | 'ongoing' | 'completed';
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface WorkshopAttendanceSchema {
+  _id?: ObjectId;
+  workshop_id: string;
+  participant_id: string;
+  check_in_time?: Date;
+  completion_status: 'registered' | 'attended' | 'completed';
+  certificate_url?: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface CompetitionSchema {
   _id?: ObjectId;
   name: string;
@@ -179,6 +206,21 @@ export async function initializeDatabase(db: Db) {
       { key: { created_at: -1 } }
     ]),
 
+    // Workshops collection
+    db.collection('workshops').createIndexes([
+      { key: { track: 1 } },
+      { key: { status: 1 } },
+      { key: { schedule: 1 } },
+      { key: { instructor: 1 } }
+    ]),
+
+    // Workshop attendance collection
+    db.collection('workshop_attendance').createIndexes([
+      { key: { workshop_id: 1, participant_id: 1 }, unique: true },
+      { key: { completion_status: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
     // Competitions collection
     db.collection('competitions').createIndexes([
       { key: { category: 1 } },
@@ -251,6 +293,8 @@ export function getCollections(db: Db) {
     users: db.collection<UserSchema>('users'),
     registrations: db.collection<RegistrationSchema>('registrations'),
     teamMembers: db.collection<TeamMemberSchema>('team_members'),
+    workshops: db.collection<WorkshopSchema>('workshops'),
+    workshopAttendance: db.collection<WorkshopAttendanceSchema>('workshop_attendance'),
     competitions: db.collection<CompetitionSchema>('competitions'),
     competitionRegistrations: db.collection<CompetitionRegistrationSchema>('competition_registrations'),
     helpTickets: db.collection<HelpTicketSchema>('help_tickets'),

@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
 import { RegistrationFormData, CompletedRegistrationData } from "@/lib/types";
 import { uploadFile, validateFile } from "@/lib/file-upload";
 import { useRouter } from "next/navigation";
