@@ -72,4 +72,11 @@ export class Social {
 
     return response.json();
   }
+
+  static async uploadMedia(file: File): Promise<{ file_url: string }> {
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    validateFile(file, undefined, UPLOAD_TYPES.SOCIAL_MEDIA);
+    return uploadFile(file, '/api/upload', UPLOAD_TYPES.SOCIAL_MEDIA);
+  }
 }

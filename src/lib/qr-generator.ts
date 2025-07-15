@@ -106,3 +106,6 @@ export class QRGenerator {
     return uuidv4();
   }
 }
+
+// Export function for backward compatibility
+export const generateQRCode = QRGenerator.generateParticipantQR;

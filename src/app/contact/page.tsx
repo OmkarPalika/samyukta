@@ -125,11 +125,11 @@ export default function Contact() {
                       </div>
                       <div className="flex items-center space-x-3">
                         <Mail className="w-4 h-4 text-blue-400" />
-                        <span className="text-gray-300">{CONTACT_PAGE_DATA.supportChannels[0].contact}</span>
+                        <span className="text-gray-300">{CONTACT_PAGE_DATA.venue.email}</span>
                       </div>
                       <div className="flex items-center space-x-3">
                         <Clock className="w-4 h-4 text-violet-400" />
-                        <span className="text-gray-300">Event: {CONTACT_PAGE_DATA.venue.eventDates}</span>
+                        <span className="text-gray-300">Event: {CONTACT_PAGE_DATA.venue.event_dates}</span>
                       </div>
                     </div>
                   </div>
@@ -351,15 +351,15 @@ export default function Contact() {
             className="text-center mb-8 sm:mb-12"
           >
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-4">
-              {CONTACT_PAGE_DATA.reachUsSection.title.split('Reach')[0]}<span className="text-blue-400">Reach Us</span>
+              {CONTACT_PAGE_DATA.reach_us_section.title.split('Reach')[0]}<span className="text-blue-400">Reach Us</span>
             </h2>
             <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-              {CONTACT_PAGE_DATA.reachUsSection.description}
+              {CONTACT_PAGE_DATA.reach_us_section.description}
             </p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {CONTACT_PAGE_DATA.transportInfo.map((transport, index) => (
+            {CONTACT_PAGE_DATA.transport_info.map((transport, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}

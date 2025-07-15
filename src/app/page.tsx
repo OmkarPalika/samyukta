@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { User } from "@/entities/User";
 import { User as UserType } from "@/lib/types";
 import { EVENT_CONFIG, URL_CONFIG } from "@/lib/config";
+import { EVENT_DATA, PARTNERS_DATA } from "@/data";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
@@ -54,7 +55,7 @@ export default function Home() {
       url: "https://anits.edu.in"
     },
     offers: {
-      price: EVENT_CONFIG.pricing.combo_discount.toString(),
+      price: EVENT_CONFIG.pricing.entry_workshop.toString(),
       priceCurrency: "INR",
       url: `${baseUrl}${URL_CONFIG.register}`
     },
@@ -95,14 +96,14 @@ export default function Home() {
   const iconMap = useMemo(() => ({ Cloud, Brain, Trophy, Target }), []);
   
   const highlights = useMemo(() => 
-    EVENT_CONFIG.tracks.map(track => ({
+    EVENT_DATA.tracks.map(track => ({
       ...track,
       icon: iconMap[track.icon as keyof typeof iconMap]
     })), 
     [iconMap]
   );
 
-  const partners = useMemo(() => EVENT_CONFIG.partners, []);
+  const partners = useMemo(() => PARTNERS_DATA, []);
 
   return (
     <>
@@ -175,7 +176,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Button 
-                  onClick={() => window.open(`mailto:${EVENT_CONFIG.contacts.sponsor_email}?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
+                  onClick={() => window.open(`mailto:${EVENT_CONFIG.contacts.email}?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
                   className="w-fit mx-auto md:mx-0 px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
                 >
                   Sponsor Us

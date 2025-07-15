@@ -14,6 +14,13 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 31536000, // 1 year
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+    unoptimized: false,
   },
   
   // Headers for SEO and Security
@@ -50,7 +57,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: '/(.*\\.(ico|png|jpg|jpeg|gif|webp|svg|css|js))',
+        source: '/:path*\\.(ico|png|jpg|jpeg|gif|webp|svg|css|js)',
         headers: [
           {
             key: 'Cache-Control',
@@ -85,6 +92,27 @@ const nextConfig: NextConfig = {
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
+    // MongoDB and server-side fallbacks for client-side
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        child_process: false,
+        fs: false,
+        'fs/promises': false,
+        net: false,
+        tls: false,
+        dns: false,
+        'timers/promises': false,
+        kerberos: false,
+        '@mongodb-js/zstd': false,
+        '@aws-sdk/credential-providers': false,
+        snappy: false,
+        socks: false,
+        aws4: false,
+        'mongodb-client-encryption': false,
+      };
+    }
+    
     if (!dev && !isServer) {
       config.optimization.splitChunks.cacheGroups.commons = {
         name: 'commons',

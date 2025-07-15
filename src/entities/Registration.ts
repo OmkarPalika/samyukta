@@ -92,8 +92,9 @@ export class Registration {
 
   static async uploadPaymentScreenshot(file: File): Promise<{ file_url: string }> {
     const { uploadFile, validateFile } = await import('@/lib/file-upload');
-    validateFile(file);
-    return uploadFile(file, '/api/registrations/upload-payment');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    validateFile(file, undefined, UPLOAD_TYPES.PAYMENT_SCREENSHOTS);
+    return uploadFile(file, '/api/upload', UPLOAD_TYPES.PAYMENT_SCREENSHOTS);
   }
 
   static async approveRegistration(registrationId: string): Promise<RegistrationResponse> {

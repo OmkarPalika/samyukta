@@ -6,3 +6,6 @@ export * from './types';
 export * from './seo';
 export * from './utils';
 export * from './sponsors-data';
+
+// Re-export centralized data
+export * from '@/data';

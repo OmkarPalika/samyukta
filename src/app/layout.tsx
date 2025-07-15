@@ -43,9 +43,9 @@ export const metadata: Metadata = {
     description: "Join 400+ innovators at India's biggest student-led tech summit. 4-day event with hackathons, workshops, and competitions at ANITS Visakhapatnam.",
     images: [
       {
-        url: `${baseUrl}/og-image.jpg`,
-        width: 1200,
-        height: 630,
+        url: `${baseUrl}/logo.png`,
+        width: 512,
+        height: 512,
         alt: "Samyukta 2025 - India's Premier Student Innovation Summit",
       },
     ],
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
     creator: "@anits_official",
     title: "Samyukta 2025 - India's Premier Student Innovation Summit",
     description: "Join 400+ innovators at India's biggest student-led tech summit. Register now for August 6-9, 2025 at ANITS Visakhapatnam.",
-    images: [`${baseUrl}/twitter-image.jpg`],
+    images: [`${baseUrl}/logo.png`],
   },
   robots: {
     index: true,
@@ -134,7 +134,7 @@ export default function RootLayout({
       "availability": "https://schema.org/InStock",
       "validFrom": "2025-07-10T00:00:00+05:30"
     },
-    "image": [`${baseUrl}/og-image.jpg`],
+    "image": [`${baseUrl}/logo.png`],
     "url": baseUrl,
     "isAccessibleForFree": false,
     "maximumAttendeeCapacity": 400
@@ -143,9 +143,6 @@ export default function RootLayout({
   return (
     <html lang="en-IN">
       <head>
-        <link rel="preload" href="/logo.png" as="image" type="image/png" />
-        <link rel="preload" href="/og-image.jpg" as="image" type="image/jpeg" />
-        <link rel="preload" href="/twitter-image.jpg" as="image" type="image/jpeg" />
         <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

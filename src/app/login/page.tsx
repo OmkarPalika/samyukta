@@ -29,11 +29,16 @@ export default function Login() {
     setError('');
 
     try {
-      await User.login(data);
+      const result = await User.login(data);
+      console.log('Login successful:', result);
       router.push('/dashboard');
     } catch (err) {
-      setError('Invalid email or password');
       console.error('Login error:', err);
+      if (err instanceof Error) {
+        setError(err.message || 'Invalid email or password');
+      } else {
+        setError('Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }

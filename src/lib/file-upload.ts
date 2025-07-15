@@ -1,6 +1,9 @@
-export async function uploadFile(file: File, endpoint: string = '/api/upload') {
+export async function uploadFile(file: File, endpoint: string = '/api/upload', uploadType?: string) {
   const formData = new FormData()
   formData.append('file', file)
+  if (uploadType) {
+    formData.append('uploadType', uploadType)
+  }
   
   const response = await fetch(endpoint, {
     method: 'POST',
@@ -14,8 +17,13 @@ export async function uploadFile(file: File, endpoint: string = '/api/upload') {
   return response.json()
 }
 
-export function validateFile(file: File, maxSize: number = 10 * 1024 * 1024) {
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+export function validateFile(file: File, maxSize: number = 10 * 1024 * 1024, uploadType?: string) {
+  let allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  
+  if (uploadType === 'pitch-decks') {
+    allowedTypes = ['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation']
+    maxSize = 50 * 1024 * 1024 // 50MB for presentations
+  }
   
   if (!allowedTypes.includes(file.type)) {
     throw new Error('Invalid file type')

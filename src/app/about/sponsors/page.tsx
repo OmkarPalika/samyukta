@@ -81,7 +81,7 @@ export default function Sponsors() {
                       </div>
                     </div>
                     <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tier.tier}</h2>
-                    <Badge className={`${tier.bgColor} ${tier.textColor} ${tier.borderColor} px-4 py-2`}>
+                    <Badge className={`${tier.bg_color} ${tier.text_color} ${tier.border_color} px-4 py-2`}>
                       {tier.amount}
                     </Badge>
                   </div>
@@ -218,7 +218,7 @@ export default function Sponsors() {
 
                 <div className="flex justify-center mt-8">
                   <Button
-                    onClick={() => window.open(`mailto:${SPONSORS_PAGE_DATA.ctaSection.contactEmail}?subject=Sponsorship Inquiry - Samyukta 2025`, '_blank')}
+                    onClick={() => window.open(`mailto:${SPONSORS_PAGE_DATA.cta_section.contact_email}?subject=Sponsorship Inquiry - Samyukta 2025`, '_blank')}
                     className="px-8 py-4 bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white font-semibold rounded-xl transition-all duration-300 neon-glow"
                   >
                     <Mail className="w-5 h-5 mr-2" />

@@ -30,19 +30,25 @@ export class Competition {
     transaction_id: string;
     payment_screenshot: File;
   }): Promise<CompetitionRegistration> {
-    const formData = new FormData();
-    formData.append('competition_id', data.competition_id);
-    formData.append('user_id', data.user_id);
-    formData.append('registration_type', data.registration_type);
-    formData.append('transaction_id', data.transaction_id);
-    formData.append('payment_screenshot', data.payment_screenshot);
-    if (data.team_id) {
-      formData.append('team_id', data.team_id);
-    }
-
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    
+    validateFile(data.payment_screenshot, undefined, UPLOAD_TYPES.COMPETITION_PAYMENTS);
+    const uploadResult = await uploadFile(data.payment_screenshot, '/api/upload', UPLOAD_TYPES.COMPETITION_PAYMENTS);
+    
     const response = await fetch('/api/competitions/join', {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        competition_id: data.competition_id,
+        user_id: data.user_id,
+        team_id: data.team_id,
+        registration_type: data.registration_type,
+        transaction_id: data.transaction_id,
+        payment_screenshot_url: uploadResult.file_url
+      }),
     });
 
     if (!response.ok) {
@@ -69,5 +75,12 @@ export class Competition {
       throw new Error('Failed to check registration');
     }
     return response.json();
+  }
+
+  static async uploadPaymentScreenshot(file: File): Promise<{ file_url: string }> {
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    validateFile(file, undefined, UPLOAD_TYPES.COMPETITION_PAYMENTS);
+    return uploadFile(file, '/api/upload', UPLOAD_TYPES.COMPETITION_PAYMENTS);
   }
 }

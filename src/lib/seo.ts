@@ -21,7 +21,11 @@ export const siteConfig = {
   authors: [{ name: "ANITS Samyukta Team", url: "https://anits.edu.in" }],
   creator: "ANITS Samyukta Team",
   publisher: "Anil Neerukonda Institute of Technology and Sciences",
-  social: EVENT_CONFIG.social
+  social: {
+    twitter: '@samyukta2025',
+    instagram: EVENT_CONFIG.social_media_links?.instagram || '',
+    linkedin: EVENT_CONFIG.social_media_links?.linkedin || ''
+  }
 };
 
 interface SEOProps {
@@ -89,8 +93,8 @@ export function generateSEO({
     },
     twitter: {
       card: 'summary_large_image',
-      site: siteConfig.social.twitter,
-      creator: siteConfig.social.twitter,
+      site: siteConfig.social?.twitter || '',
+      creator: siteConfig.social?.twitter || '',
       title: seoTitle,
       description,
       images: [image],

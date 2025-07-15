@@ -1,37 +1,45 @@
-import { google } from 'googleapis'
+export const UPLOAD_TYPES = {
+  PAYMENT_SCREENSHOTS: 'payment-screenshots',
+  COMPETITION_PAYMENTS: 'competition-payments',
+  PITCH_DECKS: 'pitch-decks',
+  SOCIAL_MEDIA: 'social-media',
+  HELP_TICKETS: 'help-tickets',
+  DEFAULT: 'default'
+} as const;
 
-const auth = new google.auth.GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-  },
-  scopes: ['https://www.googleapis.com/auth/drive.file'],
-})
+export async function uploadToGoogleDrive(file: File, fileName: string, uploadType: string = UPLOAD_TYPES.DEFAULT) {
+  const gasUrl = process.env.GAS_UPLOAD_URL;
+  
+  if (!gasUrl) {
+    throw new Error('GAS_UPLOAD_URL not configured');
+  }
 
-const drive = google.drive({ version: 'v3', auth })
+  // Convert file to base64
+  const bytes = await file.arrayBuffer();
+  const base64 = Buffer.from(bytes).toString('base64');
 
-export async function uploadToGDrive(file: Buffer, fileName: string, mimeType: string) {
-  const response = await drive.files.create({
-    requestBody: {
-      name: fileName,
-      parents: [process.env.GDRIVE_FOLDER_ID!],
+  const response = await fetch(gasUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
     },
-    media: {
-      mimeType,
-      body: file,
-    },
-  })
+    body: JSON.stringify({
+      fileData: base64,
+      fileName: fileName,
+      mimeType: file.type,
+      uploadType: uploadType
+    })
+  });
 
-  // Make file publicly viewable
-  await drive.permissions.create({
-    fileId: response.data.id!,
-    requestBody: {
-      role: 'reader',
-      type: 'anyone',
-    },
-  })
+  if (!response.ok) {
+    throw new Error(`GAS upload failed: ${response.status}`);
+  }
 
-  return `https://drive.google.com/file/d/${response.data.id}/view`
+  const result = await response.json();
+  
+  if (!result.success) {
+    throw new Error(`Upload failed: ${result.error}`);
+  }
+
+  return result.fileUrl;
 }
-
-export { drive }

@@ -21,7 +21,12 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    checkAuth();
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      checkAuth();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   const checkAuth = async () => {

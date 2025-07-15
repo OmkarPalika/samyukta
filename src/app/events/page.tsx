@@ -120,7 +120,7 @@ export default function Events() {
                       <p className="text-lg sm:text-xl text-gray-300">{day.date}</p>
                       <div className="flex justify-center items-center">
                         <Badge className={`bg-gradient-to-r ${day.color} text-white px-3 sm:px-4 py-2 text-sm sm:text-base`}>
-                          {day.dressCode} Dress Code
+                          {day.dress_code} Dress Code
                         </Badge>
                       </div>
                     </div>

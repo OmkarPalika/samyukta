@@ -7,33 +7,33 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useMemo } from 'react';
 
 interface TimelineEvent {
-  time: string;
-  duration: number;
-  trackA?: {
-    title: string;
-    description?: string;
-    type: string;
+  readonly time: string;
+  readonly duration: number;
+  readonly track_a?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
   };
-  trackB?: {
-    title: string;
-    description?: string;
-    type: string;
+  readonly track_b?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
   };
-  unified?: {
-    title: string;
-    description?: string;
-    type: string;
+  readonly unified?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
   };
 }
 
 interface EventTimelineProps {
   day: {
-    id: string;
-    title: string;
-    date: string;
-    dressCode: string;
-    color: string;
-    events: TimelineEvent[];
+    readonly id: string;
+    readonly title: string;
+    readonly date: string;
+    readonly dress_code: string;
+    readonly color: string;
+    readonly events: readonly TimelineEvent[];
   };
 }
 
@@ -118,7 +118,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                 // Dual track events
                 <div className="grid md:grid-cols-2 gap-4">
                   {/* Track A */}
-                  {event.trackA && (
+                  {event.track_a && (
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all">
                       <CardContent className="p-6">
                         <div className="mb-3">
@@ -127,16 +127,16 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                           </Badge>
                         </div>
                         <div className="flex items-start space-x-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${typeColors[event.trackA.type]} flex items-center justify-center flex-shrink-0`}>
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${typeColors[event.track_a.type]} flex items-center justify-center flex-shrink-0`}>
                             {(() => {
-                              const IconComponent = typeIcons[event.trackA.type] || Users;
+                              const IconComponent = typeIcons[event.track_a.type] || Users;
                               return <IconComponent className="w-5 h-5 text-white" />;
                             })()}
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-white mb-1">{event.trackA.title}</h4>
-                            {event.trackA.description && (
-                              <p className="text-gray-400 text-sm">{event.trackA.description}</p>
+                            <h4 className="text-lg font-semibold text-white mb-1">{event.track_a.title}</h4>
+                            {event.track_a.description && (
+                              <p className="text-gray-400 text-sm">{event.track_a.description}</p>
                             )}
                           </div>
                         </div>
@@ -145,7 +145,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                   )}
 
                   {/* Track B */}
-                  {event.trackB && (
+                  {event.track_b && (
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all">
                       <CardContent className="p-6">
                         <div className="mb-3">
@@ -154,16 +154,16 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                           </Badge>
                         </div>
                         <div className="flex items-start space-x-3">
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${typeColors[event.trackB.type]} flex items-center justify-center flex-shrink-0`}>
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${typeColors[event.track_b.type]} flex items-center justify-center flex-shrink-0`}>
                             {(() => {
-                              const IconComponent = typeIcons[event.trackB.type] || Users;
+                              const IconComponent = typeIcons[event.track_b.type] || Users;
                               return <IconComponent className="w-5 h-5 text-white" />;
                             })()}
                           </div>
                           <div className="flex-1">
-                            <h4 className="text-lg font-semibold text-white mb-1">{event.trackB.title}</h4>
-                            {event.trackB.description && (
-                              <p className="text-gray-400 text-sm">{event.trackB.description}</p>
+                            <h4 className="text-lg font-semibold text-white mb-1">{event.track_b.title}</h4>
+                            {event.track_b.description && (
+                              <p className="text-gray-400 text-sm">{event.track_b.description}</p>
                             )}
                           </div>
                         </div>

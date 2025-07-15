@@ -8,8 +8,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Search, HelpCircle } from "lucide-react";
-import { MOCK_FAQS, MOCK_FAQ_CATEGORIES, generateFAQStructuredData, FAQS_PAGE_DATA, CONTACT_PAGE_DATA } from "@/lib";
+import { Search, HelpCircle, Mail, Phone } from "lucide-react";
+import { FAQ_PAGE_DATA, FAQ_DATA, FAQ_CATEGORIES } from "@/data/faqs";
+import { CONTACTS_DATA } from "@/data/contacts";
+import { generateFAQStructuredData } from "@/lib";
 
 export default function FAQs() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,13 +19,13 @@ export default function FAQs() {
   
   // Generate FAQ structured data
   const faqStructuredData = generateFAQStructuredData(
-    MOCK_FAQS.map(faq => ({
+    FAQ_DATA.map(faq => ({
       question: faq.question,
       answer: faq.answer
     }))
   );
 
-  const filteredFAQs = MOCK_FAQS.filter(faq => {
+  const filteredFAQs = FAQ_DATA.filter(faq => {
     const matchesCategory = activeCategory === 'all' || faq.category === activeCategory;
     const matchesSearch = searchTerm === '' ||
       faq.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,11 +56,11 @@ export default function FAQs() {
             <div className="text-spacing-lg">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
                 <span className="bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
-                  {FAQS_PAGE_DATA.title}
+                  {FAQ_PAGE_DATA?.title}
                 </span>
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-gray-300 max-w-4xl mx-auto mt-4">
-                {FAQS_PAGE_DATA.description}
+                {FAQ_PAGE_DATA?.description}
               </p>
             </div>
           </motion.div>
@@ -88,7 +90,7 @@ export default function FAQs() {
             transition={{ delay: 0.3 }}
             className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12 px-4 sm:px-0"
           >
-            {MOCK_FAQ_CATEGORIES.map((category) => (
+            {FAQ_CATEGORIES.map((category) => (
               <Button
                 key={category.id}
                 variant={activeCategory === category.id ? "default" : "outline"}
@@ -130,7 +132,7 @@ export default function FAQs() {
                               variant="outline"
                               className="text-xs bg-gray-700/50 text-gray-300 border-gray-600"
                             >
-                              {MOCK_FAQ_CATEGORIES.find(c => c.id === faq.category)?.name}
+                              {FAQ_CATEGORIES.find(c => c.id === faq.category)?.name}
                             </Badge>
                           </div>
                           <h3 className="text-base sm:text-lg font-semibold text-white pr-2 sm:pr-4">
@@ -175,16 +177,16 @@ export default function FAQs() {
           >
             <div className="text-spacing-lg">
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                {FAQS_PAGE_DATA.supportSection.title.split('Questions')[0]}<span className="text-blue-400">Questions?</span>
+                Still Have <span className="text-blue-400">Questions?</span>
               </h2>
               <p className="text-lg sm:text-xl text-gray-400 max-w-3xl mx-auto">
-                {FAQS_PAGE_DATA.supportSection.description}
+                Can&apos;t find what you&apos;re looking for? Our team is here to help! Reach out to us through any of these channels.
               </p>
             </div>
           </motion.div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12 max-w-4xl mx-auto">
-            {CONTACT_PAGE_DATA.supportChannels.map((contact, index) => (
+            {(CONTACTS_DATA?.support_channels || []).map((contact, index) => contact ? (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
@@ -197,13 +199,13 @@ export default function FAQs() {
                   <CardContent>
                     <div className="card-gap flex flex-col items-center">
                       <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl flex items-center justify-center mb-4">
-                        <contact.icon className="w-8 h-8 text-white" />
+                        {contact?.icon === 'Mail' ? <Mail className="w-8 h-8 text-white" /> : <Phone className="w-8 h-8 text-white" />}
                       </div>
-                      <h3 className="text-lg font-bold text-white">{contact.title}</h3>
-                      <p className="text-gray-400 text-sm mb-3">{contact.description}</p>
-                      <p className="text-blue-400 font-semibold mb-4">{contact.contact}</p>
+                      <h3 className="text-lg font-bold text-white">{contact?.title}</h3>
+                      <p className="text-gray-400 text-sm mb-3">{contact?.description}</p>
+                      <p className="text-blue-400 font-semibold mb-4">{contact?.contact}</p>
                       <Button
-                        onClick={() => window.open(contact.action, '_blank')}
+                        onClick={() => window.open(contact?.action, '_blank')}
                         variant="outline"
                         className="bg-transparent border-gray-600 text-gray-300 hover:bg-white hover:text-blue-500"
                       >
@@ -213,7 +215,7 @@ export default function FAQs() {
                   </CardContent>
                 </Card>
               </motion.div>
-            ))}
+            ) : null) ?? []}
           </div>
         </div>
       </section>

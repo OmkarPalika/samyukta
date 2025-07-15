@@ -18,7 +18,7 @@ function GoogleAnalyticsContent() {
   useEffect(() => {
     if (typeof window.gtag !== 'undefined') {
       window.gtag('config', process.env.NEXT_PUBLIC_GA_ID!, {
-        page_path: pathname + searchParams.toString(),
+        page_path: pathname + (searchParams ? searchParams.toString() : ''),
       });
     }
   }, [pathname, searchParams]);

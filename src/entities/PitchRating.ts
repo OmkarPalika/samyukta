@@ -186,4 +186,12 @@ export class PitchRating {
 
     return response.json();
   }
+
+  static async uploadPitchDeck(file: File): Promise<{ file_url: string }> {
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    
+    validateFile(file, 50 * 1024 * 1024, UPLOAD_TYPES.PITCH_DECKS);
+    return uploadFile(file, '/api/upload', UPLOAD_TYPES.PITCH_DECKS);
+  }
 }

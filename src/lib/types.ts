@@ -400,6 +400,8 @@ export interface RegistrationFormMember {
   department: string;
   accommodation: boolean;
   foodPreference: 'veg' | 'non-veg';
+  isClubLead?: boolean;
+  clubName?: string;
 }
 
 export interface RegistrationFormData {
@@ -423,6 +425,7 @@ export interface RegistrationFormData {
 }
 
 export interface CompletedRegistrationData {
+  team_id: string;
   college: string;
   members: Array<{
     participant_id: string;

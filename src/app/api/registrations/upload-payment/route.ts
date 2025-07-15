@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { uploadToGoogleDrive, UPLOAD_TYPES } from '@/lib/gdrive';
 
 export async function POST(request: NextRequest) {
   try {
@@ -6,41 +7,35 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File;
     
     if (!file) {
-      return NextResponse.json(
-        { error: 'No file provided' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    // Validate file type
+    // Validate file type and size
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: 'Invalid file type. Only JPEG, PNG, GIF, and WebP are allowed.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid file type. Only images are allowed.' }, { status: 400 });
     }
 
-    // Validate file size (10MB max)
-    const maxSize = 10 * 1024 * 1024;
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'File too large. Maximum size is 10MB.' }, { status: 400 });
     }
 
-    // In a real implementation, you would:
-    // 1. Upload the file to a storage service (S3, Firebase Storage, etc.)
-    // 2. Get the URL of the uploaded file
-    // 3. Return the URL to the client
-
-    // For now, we'll mock this behavior
-    const mockFileUrl = `https://storage.samyukta.com/payments/${Date.now()}-${file.name}`;
-
-    return NextResponse.json({ file_url: mockFileUrl }, { status: 200 });
+    // Generate unique filename
+    const timestamp = Date.now();
+    const fileName = `payment_${timestamp}_${file.name}`;
+    
+    // Upload to Google Drive with payment screenshots type
+    const fileUrl = await uploadToGoogleDrive(file, fileName, UPLOAD_TYPES.PAYMENT_SCREENSHOTS);
+    
+    return NextResponse.json({ 
+      success: true,
+      file_url: fileUrl,
+      message: 'Payment screenshot uploaded successfully'
+    });
+    
   } catch (error) {
-    console.error('Error uploading payment screenshot:', error);
+    console.error('Payment upload error:', error);
     return NextResponse.json(
       { error: 'Failed to upload payment screenshot' },
       { status: 500 }

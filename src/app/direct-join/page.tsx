@@ -59,6 +59,7 @@ export default function DirectJoin() {
       }
     ],
     competition: "hackathon", // hackathon or pitch
+    pitchMode: "offline", // online or offline
     payment: {
       transactionId: "",
       screenshot: null as File | null
@@ -126,6 +127,10 @@ export default function DirectJoin() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
+      if (currentStep === 1 && formData.competition === "pitch" && formData.pitchMode === "online") {
+        window.open("https://platform.example.com/startup-pitch", "_blank");
+        return;
+      }
       setCurrentStep(prev => Math.min(prev + 1, 4));
     }
   };
@@ -273,6 +278,26 @@ export default function DirectJoin() {
                 </div>
               </RadioGroup>
             </div>
+
+            {formData.competition === "pitch" && (
+              <div>
+                <Label className="text-white text-lg mb-4 block">Pitch Mode</Label>
+                <RadioGroup
+                  value={formData.pitchMode}
+                  onValueChange={(value) => setFormData({ ...formData, pitchMode: value })}
+                  className="space-y-3"
+                >
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="offline" id="offline" />
+                    <Label htmlFor="offline" className="text-gray-300">Offline (On-campus)</Label>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <RadioGroupItem value="online" id="online" />
+                    <Label htmlFor="online" className="text-gray-300">Online</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
             <div>
               <Label className="text-white text-lg mb-4 block">College/University</Label>
@@ -506,7 +531,7 @@ export default function DirectJoin() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Payment Screenshot <span className="text-red-400">*</span></Label>
+                <Label className="text-gray-300">Payment Screenshot</Label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg">
                   <div className="space-y-1 text-center">
                     {formData.payment.screenshot ? (
@@ -743,7 +768,7 @@ export default function DirectJoin() {
               onClick={handleNext}
               className="bg-gradient-to-r from-orange-500 to-red-500 w-full sm:w-auto order-1 sm:order-2"
             >
-              Next
+              {currentStep === 1 && formData.competition === "pitch" && formData.pitchMode === "online" ? "Redirect" : "Next"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           )}

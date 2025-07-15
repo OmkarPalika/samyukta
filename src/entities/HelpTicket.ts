@@ -121,18 +121,9 @@ export class HelpTicket {
   }
 
   static async uploadFile(file: File): Promise<{ file_url: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch('/api/help-tickets/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to upload file');
-    }
-
-    return response.json();
+    const { uploadFile, validateFile } = await import('@/lib/file-upload');
+    const { UPLOAD_TYPES } = await import('@/lib/gdrive');
+    validateFile(file, undefined, UPLOAD_TYPES.HELP_TICKETS);
+    return uploadFile(file, '/api/upload', UPLOAD_TYPES.HELP_TICKETS);
   }
 }

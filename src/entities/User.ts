@@ -72,7 +72,7 @@ export class User {
 
   static async login(credentials: LoginCredentials): Promise<UserResponse> {
     try {
-      // Replace with your actual API endpoint
+      console.log('Attempting login with:', { email: credentials.email });
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -82,12 +82,14 @@ export class User {
         credentials: 'include',
       });
       
+      const responseData = await response.json();
+      console.log('Login response:', { status: response.status, data: responseData });
+      
       if (!response.ok) {
-        throw new Error('Login failed');
+        throw new Error(responseData.error || `Login failed with status ${response.status}`);
       }
       
-      const userData = await response.json();
-      return userData;
+      return responseData;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

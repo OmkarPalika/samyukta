@@ -14,28 +14,28 @@ type SocialLinks = {
 };
 
 type TeamMember = {
-  name: string;
-  role: string;
-  image: string;
-  social: SocialLinks;
+  readonly name: string;
+  readonly role: string;
+  readonly image: string;
+  readonly social: SocialLinks;
 };
 
 type TeamCategory = {
-  title: string;
-  description: string;
-  members: TeamMember[];
+  readonly title: string;
+  readonly description: string;
+  readonly members: readonly TeamMember[];
 };
 
 type ComingSoonSection = {
-  title: string;
-  description: string;
+  readonly title: string;
+  readonly description: string;
 };
 
 type TeamData = {
-  title: string;
-  description: string;
-  categories: TeamCategory[];
-  comingSoon: ComingSoonSection;
+  readonly title: string;
+  readonly description: string;
+  readonly categories: readonly TeamCategory[];
+  readonly coming_soon: ComingSoonSection;
 };
 
 // Define the props type for the component
@@ -128,10 +128,10 @@ export default function TeamContent({ teamData }: TeamContentProps) {
               
               <div className="space-y-3">
                 <h3 className="text-2xl sm:text-3xl font-bold text-white">
-                  {teamData.comingSoon.title}
+                  {teamData.coming_soon.title}
                 </h3>
                 <p className="text-gray-300 max-w-xl mx-auto">
-                  {teamData.comingSoon.description as string}
+                  {teamData.coming_soon.description as string}
                 </p>
                 
                 <div className="pt-4">

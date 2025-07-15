@@ -10,7 +10,7 @@ import { generateOrganizationStructuredData, EVENT_CONFIG, ABOUT_PAGE_DATA } fro
 export default function About() {
   const organizationData = generateOrganizationStructuredData();
   
-  const { values, differentiators, anitsAdvantage, communityImpact } = ABOUT_PAGE_DATA;
+  const { values, differentiators, anits_advantage: anitsAdvantage, community_impact: communityImpact } = ABOUT_PAGE_DATA;
 
   return (
     <>

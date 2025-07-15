@@ -1,75 +1,50 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MOCK_HELP_TICKETS } from '@/lib/mock-data';
-
-export async function GET() {
-  return NextResponse.json(MOCK_HELP_TICKETS);
-}
+import { getTypedCollections } from '@/lib/db-utils';
 
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData();
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const submittedBy = formData.get('submitted_by') as string;
-    const priority = formData.get('priority') as string || 'medium';
-    const attachment = formData.get('attachment') as File;
-
-    if (!title || !description || !submittedBy) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    const { participantId, title, description, priority = 'medium' } = await request.json();
+    const collections = await getTypedCollections();
+    
+    // Verify participant exists
+    const participant = await collections.teamMembers.findOne({ participant_id: participantId });
+    if (!participant) {
+      return NextResponse.json({ error: 'Participant not found' }, { status: 404 });
     }
-
-    const newTicket = {
-      id: Date.now().toString(),
+    
+    // Create help ticket
+    const ticket = await collections.helpTickets.insertOne({
+      submitted_by: participantId,
       title,
       description,
-      submitted_by: submittedBy,
-      status: 'open' as const,
-      priority: priority as 'low' | 'medium' | 'high' | 'urgent',
-      attachment_url: attachment ? `uploads/${attachment.name}` : undefined,
-      created_at: new Date().toISOString()
-    };
-
-    MOCK_HELP_TICKETS.push(newTicket);
-
-    return NextResponse.json({ data: newTicket });
+      status: 'open',
+      priority,
+      created_at: new Date(),
+      updated_at: new Date()
+    });
+    
+    return NextResponse.json({ 
+      success: true, 
+      ticketId: ticket.insertedId.toString() 
+    });
   } catch {
-    return NextResponse.json({ error: 'Failed to create help ticket' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create ticket' }, { status: 500 });
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { id, status } = await request.json();
+    const { searchParams } = new URL(request.url);
+    const participantId = searchParams.get('participantId');
+    const collections = await getTypedCollections();
     
-    const ticketIndex = MOCK_HELP_TICKETS.findIndex(ticket => ticket.id === id);
-    if (ticketIndex === -1) {
-      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
-    }
-
-    MOCK_HELP_TICKETS[ticketIndex].status = status;
-    MOCK_HELP_TICKETS[ticketIndex].updated_at = new Date().toISOString();
-
-    return NextResponse.json({ data: MOCK_HELP_TICKETS[ticketIndex] });
-  } catch {
-    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
-    const url = new URL(request.url);
-    const ticketId = url.pathname.split('/').pop();
-    const updateData = await request.json();
+    const filter = participantId ? { submitted_by: participantId } : {};
+    const tickets = await collections.helpTickets.find(filter)
+      .sort({ created_at: -1 })
+      .toArray();
     
-    const ticketIndex = MOCK_HELP_TICKETS.findIndex(ticket => ticket.id === ticketId);
-    if (ticketIndex === -1) {
-      return NextResponse.json({ error: 'Ticket not found' }, { status: 404 });
-    }
-
-    MOCK_HELP_TICKETS[ticketIndex] = { ...MOCK_HELP_TICKETS[ticketIndex], ...updateData, updated_at: new Date().toISOString() };
-
-    return NextResponse.json(MOCK_HELP_TICKETS[ticketIndex]);
+    return NextResponse.json({ tickets });
   } catch {
-    return NextResponse.json({ error: 'Failed to update ticket' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch tickets' }, { status: 500 });
   }
 }

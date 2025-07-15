@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Users, Star, ArrowRight, ChevronLeft, Upload, User as UserIcon, CreditCard, FileText, Clock, AlertTriangle } from "lucide-react";
+import { Check, Users, Star, ArrowRight, ChevronLeft, Upload, User as UserIcon, CreditCard, FileText, Clock, AlertTriangle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Registration } from "@/entities/Registration";
+
 import { RegistrationFormData, CompletedRegistrationData } from "@/lib/types";
 import { uploadFile, validateFile } from "@/lib/file-upload";
 import { useRouter } from "next/navigation";
@@ -19,42 +19,74 @@ import Image from "next/image";
 
 export default function Register() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('samyukta_registration_step');
+      return saved ? parseInt(saved, 10) : 1;
+    }
+    return 1;
+  });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [stats, setStats] = useState<{
     remaining_cloud: number;
     remaining_ai: number;
     remaining_total: number;
+    remaining_hackathon?: number;
+    remaining_pitch?: number;
+    cloud_closed?: boolean;
+    ai_closed?: boolean;
+    hackathon_closed?: boolean;
+    pitch_closed?: boolean;
+    event_closed?: boolean;
   } | null>(null);
 
   const [completedRegistration, setCompletedRegistration] = useState<CompletedRegistrationData | null>(null);
 
-  const [formData, setFormData] = useState<RegistrationFormData>({
-    college: "",
-    customCollege: "",
-    teamSize: 1,
-    members: [
-      {
-        fullName: "",
-        email: "",
-        whatsapp: "",
-        year: "",
-        department: "",
-        accommodation: false,
-        foodPreference: "veg"
+  const [formData, setFormData] = useState<RegistrationFormData>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('samyukta_registration_form');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          // Don't restore screenshot file object
+          if (parsed.payment?.screenshot) {
+            parsed.payment.screenshot = null;
+          }
+          return parsed;
+        } catch {
+          console.error('Failed to parse saved form data');
+        }
       }
-    ],
-    tickets: {
-      combo: false,
-      workshop: "",
-      competition: ""
-    },
-    memberTracks: [],
-    payment: {
-      transactionId: "",
-      screenshot: null
     }
+    return {
+      college: "",
+      customCollege: "",
+      teamSize: 1,
+      members: [
+        {
+          fullName: "",
+          email: "",
+          whatsapp: "",
+          year: "",
+          department: "",
+          accommodation: false,
+          foodPreference: "veg",
+          isClubLead: false,
+          clubName: ""
+        }
+      ],
+      tickets: {
+        combo: false,
+        workshop: "",
+        competition: ""
+      },
+      memberTracks: [],
+      payment: {
+        transactionId: "",
+        screenshot: null
+      }
+    };
   });
 
   useEffect(() => {
@@ -182,12 +214,16 @@ export default function Register() {
 
   const handleNext = () => {
     if (validateStep(currentStep)) {
-      setCurrentStep(prev => Math.min(prev + 1, 6));
+      const nextStep = Math.min(currentStep + 1, 6);
+      setCurrentStep(nextStep);
+      localStorage.setItem('samyukta_registration_step', nextStep.toString());
     }
   };
 
   const handlePrevious = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    const prevStep = Math.max(currentStep - 1, 1);
+    setCurrentStep(prevStep);
+    localStorage.setItem('samyukta_registration_step', prevStep.toString());
   };
 
   const handleTeamSizeChange = (size: number) => {
@@ -204,7 +240,9 @@ export default function Register() {
           year: "",
           department: "",
           accommodation: false,
-          foodPreference: "veg" as "veg" | "non-veg"
+          foodPreference: "veg" as "veg" | "non-veg",
+          isClubLead: false,
+          clubName: ""
         });
         newMemberTracks.push({
           workshopTrack: "",
@@ -217,18 +255,22 @@ export default function Register() {
       newMemberTracks.splice(size);
     }
 
-    setFormData({
+    const newFormData = {
       ...formData,
       teamSize: size,
       members: newMembers,
       memberTracks: newMemberTracks
-    });
+    };
+    setFormData(newFormData);
+    localStorage.setItem('samyukta_registration_form', JSON.stringify(newFormData));
   };
 
   const handleMemberChange = (index: number, field: string, value: string | boolean) => {
     const newMembers = [...formData.members];
     newMembers[index] = { ...newMembers[index], [field]: value };
-    setFormData({ ...formData, members: newMembers });
+    const newFormData = { ...formData, members: newMembers };
+    setFormData(newFormData);
+    localStorage.setItem('samyukta_registration_form', JSON.stringify(newFormData));
   };
 
   const handleSubmit = async () => {
@@ -247,9 +289,8 @@ export default function Register() {
           paymentScreenshotUrl = uploadResult.file_url;
         } catch (uploadError) {
           console.error("Payment screenshot upload failed:", uploadError);
-          setErrors({ submit: "Payment screenshot upload failed. Please try again." });
-          setLoading(false);
-          return;
+          // Continue registration without screenshot for now
+          paymentScreenshotUrl = "upload_failed";
         }
       }
 
@@ -264,7 +305,9 @@ export default function Register() {
         accommodation: member.accommodation || false,
         food_preference: member.foodPreference,
         workshop_track: formData.memberTracks[index]?.workshopTrack || "",
-        competition_track: formData.memberTracks[index]?.competitionTrack || ""
+        competition_track: formData.memberTracks[index]?.competitionTrack || "",
+        is_club_lead: member.isClubLead || false,
+        club_name: member.clubName || ""
       }));
 
       // Determine primary workshop track (most common among members)
@@ -288,9 +331,29 @@ export default function Register() {
         payment_screenshot_url: paymentScreenshotUrl
       };
 
-      await Registration.create(registrationData);
-      setCompletedRegistration(registrationData);
+      const response = await fetch('/api/registrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registrationData)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        if (response.status === 400) {
+          // Handle slot availability errors
+          setErrors({ submit: errorData.error });
+          setLoading(false);
+          return;
+        }
+        throw new Error(errorData.details || 'Registration failed');
+      }
+      
+      const result = await response.json();
+      setCompletedRegistration({ ...registrationData, team_id: result.team_id } as CompletedRegistrationData);
       setCurrentStep(6);
+      // Clear saved data on successful registration
+      localStorage.removeItem('samyukta_registration_form');
+      localStorage.removeItem('samyukta_registration_step');
     } catch (error) {
       console.error("Registration failed:", error);
       setErrors({ submit: "Registration failed. Please try again." });
@@ -307,7 +370,11 @@ export default function Register() {
               <Label className="text-white text-lg mb-4 block">College/University</Label>
               <RadioGroup
                 value={formData.college}
-                onValueChange={(value) => setFormData({ ...formData, college: value })}
+                onValueChange={(value) => {
+                  const newFormData = { ...formData, college: value };
+                  setFormData(newFormData);
+                  localStorage.setItem('samyukta_registration_form', JSON.stringify(newFormData));
+                }}
               >
                 {colleges.map((college) => (
                   <div key={college} className="flex items-center space-x-3">
@@ -323,7 +390,11 @@ export default function Register() {
                   <Input
                     placeholder="Enter your college/university name"
                     value={formData.customCollege}
-                    onChange={(e) => setFormData({ ...formData, customCollege: e.target.value })}
+                    onChange={(e) => {
+                      const newFormData = { ...formData, customCollege: e.target.value };
+                      setFormData(newFormData);
+                      localStorage.setItem('samyukta_registration_form', JSON.stringify(newFormData));
+                    }}
                     className="bg-gray-700/50 border-gray-600 text-white"
                   />
                   {errors.customCollege && <p className="text-red-400 text-sm mt-2">{errors.customCollege}</p>}
@@ -469,16 +540,46 @@ export default function Register() {
                     </RadioGroup>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`accommodation-${index}`}
-                      checked={member.accommodation}
-                      onCheckedChange={(checked) => handleMemberChange(index, 'accommodation', checked)}
-                      className="bg-gray-700/50 border-gray-600 text-white"
-                    />
-                    <Label htmlFor={`accommodation-${index}`} className="text-gray-300">
-                      Accommodation required
-                    </Label>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`accommodation-${index}`}
+                        checked={member.accommodation}
+                        onCheckedChange={(checked) => handleMemberChange(index, 'accommodation', checked)}
+                        className="bg-gray-700/50 border-gray-600 text-white"
+                      />
+                      <Label htmlFor={`accommodation-${index}`} className="text-gray-300">
+                        Accommodation required
+                      </Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`club-lead-${index}`}
+                        checked={member.isClubLead || false}
+                        onCheckedChange={(checked) => handleMemberChange(index, 'isClubLead', checked)}
+                        className="bg-gray-700/50 border-gray-600 text-white"
+                      />
+                      <Label htmlFor={`club-lead-${index}`} className="text-gray-300">
+                        Are you a club lead?
+                      </Label>
+                    </div>
+
+                    {member.isClubLead && (
+                      <div className="ml-6 space-y-2">
+                        <Label className="text-gray-300">Club Name</Label>
+                        <Input
+                          value={member.clubName || ""}
+                          onChange={(e) => handleMemberChange(index, 'clubName', e.target.value)}
+                          className="bg-gray-700/50 border-gray-600 text-white"
+                          placeholder="Enter club name"
+                        />
+                        <div className="flex items-start space-x-2 text-sm text-blue-400">
+                          <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <p>Our team will contact you for verification and discuss plans for club leads.</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -582,22 +683,22 @@ export default function Register() {
                           <SelectValue placeholder="Select workshop track" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Cloud Computing (AWS)" disabled={!stats || stats.remaining_cloud <= 0}>
+                          <SelectItem value="Cloud Computing (AWS)" disabled={!stats || stats.cloud_closed}>
                             <div className="flex items-center justify-between w-full">
                               <span>Cloud Computing (AWS)</span>
                               {stats && (
-                                <Badge className={`ml-2 text-xs ${stats.remaining_cloud <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                  {stats.remaining_cloud} left
+                                <Badge className={`ml-2 text-xs ${stats.cloud_closed ? 'bg-red-500/10 text-red-400' : stats.remaining_cloud <= 10 ? 'bg-orange-500/10 text-orange-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                  {stats.cloud_closed ? 'CLOSED' : `${stats.remaining_cloud} left`}
                                 </Badge>
                               )}
                             </div>
                           </SelectItem>
-                          <SelectItem value="AI/ML (Google)" disabled={!stats || stats.remaining_ai <= 0}>
+                          <SelectItem value="AI/ML (Google)" disabled={!stats || stats.ai_closed}>
                             <div className="flex items-center justify-between w-full">
                               <span>AI/ML (Google)</span>
                               {stats && (
-                                <Badge className={`ml-2 text-xs ${stats.remaining_ai <= 10 ? 'bg-red-500/10 text-red-400' : 'bg-violet-500/10 text-violet-400'}`}>
-                                  {stats.remaining_ai} left
+                                <Badge className={`ml-2 text-xs ${stats.ai_closed ? 'bg-red-500/10 text-red-400' : stats.remaining_ai <= 10 ? 'bg-orange-500/10 text-orange-400' : 'bg-violet-500/10 text-violet-400'}`}>
+                                  {stats.ai_closed ? 'CLOSED' : `${stats.remaining_ai} left`}
                                 </Badge>
                               )}
                             </div>
@@ -624,8 +725,26 @@ export default function Register() {
                           <SelectValue placeholder={formData.tickets.combo ? "Select competition track" : "Available with Combo Pass only"} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Hackathon">Hackathon</SelectItem>
-                          <SelectItem value="Startup Pitch">Startup Pitch</SelectItem>
+                          <SelectItem value="Hackathon" disabled={!stats || stats.hackathon_closed}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>Hackathon</span>
+                              {stats && (
+                                <Badge className={`ml-2 text-xs ${stats.hackathon_closed ? 'bg-red-500/10 text-red-400' : (stats.remaining_hackathon || 0) <= 10 ? 'bg-orange-500/10 text-orange-400' : 'bg-green-500/10 text-green-400'}`}>
+                                  {stats.hackathon_closed ? 'CLOSED' : `${stats.remaining_hackathon || 0} left`}
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="Startup Pitch" disabled={!stats || stats.pitch_closed}>
+                            <div className="flex items-center justify-between w-full">
+                              <span>Startup Pitch</span>
+                              {stats && (
+                                <Badge className={`ml-2 text-xs ${stats.pitch_closed ? 'bg-red-500/10 text-red-400' : (stats.remaining_pitch || 0) <= 10 ? 'bg-orange-500/10 text-orange-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                  {stats.pitch_closed ? 'CLOSED' : `${stats.remaining_pitch || 0} left`}
+                                </Badge>
+                              )}
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       {errors[`member${index}Competition`] && (
@@ -706,7 +825,11 @@ export default function Register() {
                 <Label className="text-gray-300">Transaction ID</Label>
                 <Input
                   value={formData.payment.transactionId}
-                  onChange={(e) => setFormData({ ...formData, payment: { ...formData.payment, transactionId: e.target.value } })}
+                  onChange={(e) => {
+                  const newFormData = { ...formData, payment: { ...formData.payment, transactionId: e.target.value } };
+                  setFormData(newFormData);
+                  localStorage.setItem('samyukta_registration_form', JSON.stringify(newFormData));
+                }}
                   className="bg-gray-700/50 border-gray-600 text-white"
                   placeholder="Enter transaction ID"
                 />
@@ -714,7 +837,7 @@ export default function Register() {
               </div>
 
               <div>
-                <Label className="text-gray-300">Payment Screenshot <span className="text-red-400">*</span></Label>
+                <Label className="text-gray-300">Payment Screenshot</Label>
                 <div className="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-600 border-dashed rounded-lg">
                   <div className="space-y-1 text-center">
                     {formData.payment.screenshot ? (
@@ -722,9 +845,10 @@ export default function Register() {
                         <Image
                           src={URL.createObjectURL(formData.payment.screenshot)}
                           alt="Payment Screenshot"
-                          width={100}
-                          height={100}
-                          className="h-32 object-contain mb-2"
+                          width={128}
+                          height={128}
+                          className="h-32 w-auto object-contain mb-2"
+                          style={{ width: 'auto', height: '128px' }}
                         />
                         <Button
                           variant="outline"
@@ -749,13 +873,17 @@ export default function Register() {
                               accept="image/*"
                               onChange={(e) => {
                                 if (e.target.files && e.target.files[0]) {
-                                  setFormData({
+                                  const newFormData = {
                                     ...formData,
                                     payment: {
                                       ...formData.payment,
                                       screenshot: e.target.files[0]
                                     }
-                                  });
+                                  };
+                                  setFormData(newFormData);
+                                  // Don't save file object to localStorage
+                                  const dataToSave = { ...newFormData, payment: { ...newFormData.payment, screenshot: null } };
+                                  localStorage.setItem('samyukta_registration_form', JSON.stringify(dataToSave));
                                 }
                               }}
                             />
@@ -852,15 +980,36 @@ export default function Register() {
             </p>
             {stats && (
               <div className="flex flex-wrap gap-2 justify-center mt-4">
-                <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Only {stats.remaining_total} slots remaining
-                </Badge>
-                {stats.remaining_total <= 50 && (
-                  <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    Filling fast!
+                {stats.event_closed ? (
+                  <Badge className="bg-red-500/20 text-red-300 border-red-500/30 px-4 py-2">
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    EVENT CLOSED - Registration Full
                   </Badge>
+                ) : (
+                  <>
+                    <Badge className={`px-3 py-1 ${
+                      stats.remaining_total <= 10 
+                        ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                        : stats.remaining_total <= 50
+                        ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                        : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                    }`}>
+                      <Clock className="w-3 h-3 mr-1" />
+                      {stats.remaining_total} slots remaining
+                    </Badge>
+                    {(stats.cloud_closed || stats.ai_closed) && (
+                      <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Some tracks closed
+                      </Badge>
+                    )}
+                    {(stats.hackathon_closed || stats.pitch_closed) && (
+                      <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">
+                        <AlertTriangle className="w-3 h-3 mr-1" />
+                        Competitions filling up
+                      </Badge>
+                    )}
+                  </>
                 )}
               </div>
             )}
