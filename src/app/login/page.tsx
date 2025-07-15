@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { User } from '@/entities/User';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,8 @@ import { useForm } from "react-hook-form";
 export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<'email' | 'auth'>('email');
+  const [userRole, setUserRole] = useState<'admin' | 'coordinator' | 'participant' | null>(null);
   const router = useRouter();
 
   const form = useForm({
@@ -25,7 +27,32 @@ export default function Login() {
     }
   });
 
+  const checkEmail = async (email: string) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await User.checkEmail(email);
+      if (result.exists && result.role) {
+        setUserRole(result.role);
+        setStep('auth');
+      } else {
+        setError('Email not found. Please check your email or register first.');
+      }
+    } catch (err) {
+      console.error('Email check error:', err);
+      setError('Failed to verify email. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const onSubmit = async (data: {email: string, password: string, passkey: string}) => {
+    if (step === 'email') {
+      await checkEmail(data.email);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -49,6 +76,14 @@ export default function Login() {
     }
   };
 
+  const goBackToEmail = () => {
+    setStep('email');
+    setUserRole(null);
+    setError('');
+    form.setValue('password', '');
+    form.setValue('passkey', '');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center section-padding">
         <div className="w-full max-w-md mx-auto px-4">
@@ -64,7 +99,10 @@ export default function Login() {
               <div className="text-spacing">
                 <CardTitle className="text-lg sm:text-xl text-white">Sign In</CardTitle>
                 <CardDescription className="text-sm sm:text-base text-gray-400">
-                  Enter your credentials to access your account
+                  {step === 'email' 
+                    ? 'Enter your email to continue' 
+                    : `Enter your ${userRole === 'participant' ? 'passkey' : 'password'} to sign in`
+                  }
                 </CardDescription>
               </div>
             </CardHeader>
@@ -92,10 +130,20 @@ export default function Login() {
                             <Input
                               type="email"
                               {...field}
-                              className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
+                              disabled={step === 'auth'}
+                              className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full disabled:opacity-50"
                               placeholder="Enter your email"
                               required
                             />
+                            {step === 'auth' && (
+                              <button
+                                type="button"
+                                onClick={goBackToEmail}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-400 hover:text-blue-300 text-sm"
+                              >
+                                Change
+                              </button>
+                            )}
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -103,49 +151,57 @@ export default function Login() {
                     )}
                   />
 
-                  <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm sm:text-base text-gray-300">Password (for admin/coordinators)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-                            <Input
-                              type="password"
-                              {...field}
-                              className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
-                              placeholder="Enter your password"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="passkey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm sm:text-base text-gray-300">Passkey (for participants)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
-                            <Input
-                              type="text"
-                              {...field}
-                              className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
-                              placeholder="Enter your passkey"
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {step === 'auth' && userRole && (
+                    <>
+                      {userRole === 'participant' ? (
+                        <FormField
+                          control={form.control}
+                          name="passkey"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm sm:text-base text-gray-300">Passkey</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                  <Input
+                                    type="text"
+                                    {...field}
+                                    className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
+                                    placeholder="Enter your passkey"
+                                    required
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ) : (
+                        <FormField
+                          control={form.control}
+                          name="password"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-sm sm:text-base text-gray-300">Password</FormLabel>
+                              <FormControl>
+                                <div className="relative">
+                                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                                  <Input
+                                    type="password"
+                                    {...field}
+                                    className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
+                                    placeholder="Enter your password"
+                                    required
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+                    </>
+                  )}
 
                   <Button
                     type="submit"
@@ -155,10 +211,18 @@ export default function Login() {
                     {loading ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-                        Signing in...
+                        {step === 'email' ? 'Checking...' : 'Signing in...'}
                       </>
                     ) : (
-                      'Sign In'
+                      <>
+                        {step === 'email' ? (
+                          <>
+                            Continue <ArrowRight className="ml-2 w-4 h-4" />
+                          </>
+                        ) : (
+                          'Sign In'
+                        )}
+                      </>
                     )}
                   </Button>
                 </form>

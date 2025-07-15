@@ -91,10 +91,12 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Samyukta 2025 - Registration Confirmed</title>
 </head>
-<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0F0F23 0%, #1A1B3A 100%); color: #ffffff;">
+<body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: linear-gradient(135deg, #0F0F23 0%, #1A1B3A 100%); color: #ffffff; background-image: url('${process.env.NEXT_PUBLIC_APP_URL}/logo.png'); background-repeat: no-repeat; background-position: center; background-size: 300px; background-attachment: fixed; position: relative;">
+  <!-- Logo Background Overlay -->
+  <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${process.env.NEXT_PUBLIC_APP_URL}/logo.png'); background-repeat: no-repeat; background-position: center; background-size: 300px; opacity: 0.03; z-index: 0; pointer-events: none;"></div>
   
   <!-- Main Container -->
-  <div style="max-width: 650px; margin: 0 auto; background: #0F0F23; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);">
+  <div style="max-width: 650px; margin: 0 auto; background: #0F0F23; border-radius: 24px; overflow: hidden; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05); position: relative; z-index: 1;">
     
     <!-- Dynamic Header -->
     <div style="background: ${theme.gradient}; padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
@@ -182,8 +184,8 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
         <div style="display: grid; gap: 12px;">
         ${data.teamMembers.map((member, index) => `
           <div style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 10px; color: #ffffff; font-size: 14px; font-weight: 500; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="background: ${theme.gradient}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff;">${index + 1}</span>
-            ${member}
+            <span style="background: ${theme.gradient}; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff; flex-shrink: 0; text-align: center; line-height: 1;">${index + 1}</span>
+            <span style="flex: 1;">${member}</span>
           </div>
         `).join('')}
         </div>
@@ -248,16 +250,18 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
             ` : ''}
           </div>
 
-          <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
-            <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="display: inline-flex; align-items: center; background: ${theme.gradient}; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1);">
-              <span style="margin-right: 8px;">🚀</span>
-              Launch Dashboard
-            </a>
-            
-            <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+919876543210'}?text=Hi! I just registered for Samyukta 2025 🎉" style="display: inline-flex; align-items: center; background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1);">
-              <span style="margin-right: 8px;">💬</span>
-              Join WhatsApp
-            </a>
+          <div style="text-align: center; margin-top: 20px;" class="mobile-stack">
+            <div style="display: inline-block; margin: 0 auto;">
+              <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="display: inline-flex; align-items: center; background: ${theme.gradient}; color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); margin: 0 8px 12px 8px;">
+                <span style="margin-right: 8px;">🚀</span>
+                Launch Dashboard
+              </a>
+              
+              <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918897892720'}?text=Hi! I just registered for Samyukta 2025 🎉" style="display: inline-flex; align-items: center; background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); margin: 0 8px 12px 8px;">
+                <span style="margin-right: 8px;">💬</span>
+                Join WhatsApp
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -278,16 +282,18 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
 
     <!-- Footer -->
     <div style="background: linear-gradient(135deg, #0F0F23, #1A1B3A); padding: 30px 25px; text-align: center; border-top: 1px solid rgba(255,255,255,0.1);">
-      <div style="margin-bottom: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-        <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color: ${theme.accent}; text-decoration: none; display: flex; align-items: center; font-weight: 600; font-size: 14px;">
-          <span style="margin-right: 6px;">🌐</span> Website
-        </a>
-        <a href="mailto:support@samyukta.anits.edu.in" style="color: ${theme.accent}; text-decoration: none; display: flex; align-items: center; font-weight: 600; font-size: 14px;">
-          <span style="margin-right: 6px;">📧</span> Support
-        </a>
-        <a href="https://instagram.com/samyukta_anits" style="color: ${theme.accent}; text-decoration: none; display: flex; align-items: center; font-weight: 600; font-size: 14px;">
-          <span style="margin-right: 6px;">📸</span> Instagram
-        </a>
+      <div style="margin-bottom: 20px; text-align: center;" class="mobile-links">
+        <div style="display: inline-block;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}" style="color: ${theme.accent}; text-decoration: none; display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; margin: 0 15px 8px 15px;">
+            <span style="margin-right: 6px;">🌐</span> Website
+          </a>
+          <a href="mailto:support@samyukta.anits.edu.in" style="color: ${theme.accent}; text-decoration: none; display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; margin: 0 15px 8px 15px;">
+            <span style="margin-right: 6px;">📧</span> Support
+          </a>
+          <a href="https://instagram.com/samyukta_anits" style="color: ${theme.accent}; text-decoration: none; display: inline-flex; align-items: center; font-weight: 600; font-size: 14px; margin: 0 15px 8px 15px;">
+            <span style="margin-right: 6px;">📸</span> Instagram
+          </a>
+        </div>
       </div>
       <div style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 15px; margin-bottom: 15px;">
         <p style="margin: 0; color: rgba(255,255,255,0.8); font-size: 13px; line-height: 1.5;">
@@ -312,6 +318,16 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
     @media (max-width: 600px) {
       .responsive-flex { flex-direction: column !important; }
       .responsive-text { font-size: 14px !important; }
+      .mobile-stack a {
+        display: block !important;
+        margin: 8px auto !important;
+        width: fit-content;
+      }
+      .mobile-links a {
+        display: block !important;
+        margin: 8px auto !important;
+        text-align: center;
+      }
     }
   </style>
   

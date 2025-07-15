@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Loading from "@/components/shared/Loading";
+import { User } from "@/entities/User";
 
 export default function Tickets() {
   const [teamSize, setTeamSize] = useState([1]);
@@ -35,10 +36,20 @@ export default function Tickets() {
     direct_join_pitch_price: number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchData = async () => {
       try {
+        // Check authentication status
+        try {
+          await User.me();
+          setIsAuthenticated(true);
+        } catch {
+          setIsAuthenticated(false);
+        }
+        
+        // Fetch stats
         const response = await fetch('/api/registrations/stats');
         const data = await response.json();
         setStats(data);
@@ -48,7 +59,7 @@ export default function Tickets() {
         setLoading(false);
       }
     };
-    fetchStats();
+    fetchData();
   }, []);
 
   const calculatePrice = () => {
@@ -414,9 +425,9 @@ export default function Tickets() {
                   </div>
 
                   {/* Register Button */}
-                  <Link href="/register">
+                  <Link href={isAuthenticated ? "/dashboard" : "/register"}>
                     <Button className="w-full bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-base sm:text-lg py-2 sm:py-3">
-                      Proceed to Registration
+                      {isAuthenticated ? "Go to Dashboard" : "Proceed to Registration"}
                       <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
                     </Button>
                   </Link>

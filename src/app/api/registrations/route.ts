@@ -99,6 +99,18 @@ export async function POST(request: NextRequest) {
     const registrationData = await request.json();
     const collections = await getTypedCollections();
     
+    // Check for duplicate emails
+    const emails = registrationData.members.map((member: { email: string }) => member.email);
+    const existingMembers = await collections.teamMembers.find({ email: { $in: emails } }).toArray();
+    
+    if (existingMembers.length > 0) {
+      const duplicateEmails = existingMembers.map(member => member.email);
+      return NextResponse.json({ 
+        error: 'Email already registered', 
+        duplicate_emails: duplicateEmails 
+      }, { status: 400 });
+    }
+    
     // Generate unique team ID
     const teamId = `TEAM${Date.now()}`;
     

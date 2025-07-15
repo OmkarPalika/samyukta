@@ -340,7 +340,20 @@ export default function Register() {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 400) {
-          // Handle slot availability errors
+          // Handle duplicate email errors
+          if (errorData.duplicate_emails) {
+            const newErrors: Record<string, string> = {};
+            formData.members.forEach((member, index) => {
+              if (errorData.duplicate_emails.includes(member.email)) {
+                newErrors[`member${index}Email`] = "This email is already registered";
+              }
+            });
+            setErrors(newErrors);
+            setCurrentStep(2); // Go back to member details step
+            setLoading(false);
+            return;
+          }
+          // Handle other errors like slot availability
           setErrors({ submit: errorData.error });
           setLoading(false);
           return;

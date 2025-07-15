@@ -70,6 +70,27 @@ export class User {
     }
   }
 
+  static async checkEmail(email: string): Promise<{ exists: boolean; role?: 'admin' | 'coordinator' | 'participant' }> {
+    try {
+      const response = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to check email');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Email check failed:', error);
+      throw error;
+    }
+  }
+
   static async login(credentials: LoginCredentials): Promise<UserResponse> {
     try {
       console.log('Attempting login with:', { email: credentials.email });
