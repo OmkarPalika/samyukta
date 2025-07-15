@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import LayoutProvider from "@/components/layout/LayoutProvider";
 import { GoogleAnalytics, HotjarTracking } from "@/components/shared/Analytics";
+import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -159,6 +161,8 @@ export default function RootLayout({
         {/* Analytics Components */}
         <GoogleAnalytics />
         <HotjarTracking />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

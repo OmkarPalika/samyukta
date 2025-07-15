@@ -26,7 +26,8 @@ export interface UserResponse extends User {
 
 export interface LoginCredentials {
   email: string;
-  password: string;
+  password?: string;
+  passkey?: string;
 }
 
 // Competition Types

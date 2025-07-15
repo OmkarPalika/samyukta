@@ -20,24 +20,29 @@ export default function Login() {
   const form = useForm({
     defaultValues: {
       email: '',
-      password: ''
+      password: '',
+      passkey: ''
     }
   });
 
-  const onSubmit = async (data: {email: string, password: string}) => {
+  const onSubmit = async (data: {email: string, password: string, passkey: string}) => {
     setLoading(true);
     setError('');
 
     try {
-      const result = await User.login(data);
+      const result = await User.login({
+        email: data.email,
+        password: data.password || undefined,
+        passkey: data.passkey || undefined
+      });
       console.log('Login successful:', result);
       router.push('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       if (err instanceof Error) {
-        setError(err.message || 'Invalid email or password');
+        setError(err.message || 'Invalid credentials');
       } else {
-        setError('Invalid email or password');
+        setError('Invalid credentials');
       }
     } finally {
       setLoading(false);
@@ -103,7 +108,7 @@ export default function Login() {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm sm:text-base text-gray-300">Password</FormLabel>
+                        <FormLabel className="text-sm sm:text-base text-gray-300">Password (for admin/coordinators)</FormLabel>
                         <FormControl>
                           <div className="relative">
                             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
@@ -112,7 +117,28 @@ export default function Login() {
                               {...field}
                               className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
                               placeholder="Enter your password"
-                              required
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="passkey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-sm sm:text-base text-gray-300">Passkey (for participants)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
+                            <Input
+                              type="text"
+                              {...field}
+                              className="pl-10 sm:pl-12 bg-gray-700 border-gray-600 text-white focus:border-blue-400 focus:ring-blue-400 text-sm sm:text-base w-full"
+                              placeholder="Enter your passkey"
                             />
                           </div>
                         </FormControl>

@@ -28,7 +28,7 @@ export default function TestEmailPage() {
       name: "Test User",
       email: email,
       college: "ANITS",
-      phone: "+91 9876543210",
+      phone: "+91 8897892720",
       registrationId: `SAM2025${type.toUpperCase().replace(/-/g, '')}`,
       passkey: Math.random().toString(36).substring(2, 8).toUpperCase(),
       eventDates: "August 6-9, 2025",

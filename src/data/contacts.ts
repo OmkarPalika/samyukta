@@ -51,7 +51,7 @@ export const CONTACTS_DATA = {
   
   sponsor: {
     email: "samyukta.summit@gmail.com",
-    phone: "+91-9876543210"
+    phone: "+91-8897892720"
   },
   
   speakers: {

@@ -27,7 +27,7 @@ await sendRegistrationEmail({
   name: "John Doe",
   email: "john@example.com",
   college: "ANITS",
-  phone: "+91 9876543210",
+  phone: "+91 8897892720",
   ticketType: "Combo",
   registrationId: "SAM2025001",
   amount: 1500,

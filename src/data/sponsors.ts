@@ -10,7 +10,7 @@ export const SPONSORS_PAGE_DATA = {
     title: "Ready to Partner with Us?",
     description: "Join leading brands in supporting India's most innovative tech summit and connect with tomorrow's technology leaders.",
     contact_email: "sponsors@samyukta.anits.edu.in",
-    contact_phone: "+91-9876543210"
+    contact_phone: "+91-8897892720"
   }
 } as const;
 
