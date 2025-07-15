@@ -41,7 +41,7 @@ export const PAGES_DATA = {
         icon: Award,
         title: "Recognition Platform",
         description: "Showcase your talents to industry leaders and government officials, opening doors to new opportunities.",
-        stats: "₹20k+ Prizes"
+        stats: "Exciting Prizes"
       }
     ],
     anits_advantage: {

@@ -54,16 +54,16 @@ export const EVENT_DATA = {
   
   // Prizes
   prizes: {
-    total: "₹20,000 + Incentives",
+    total: "Cash Prizes + Incentives + Surprises",
     hackathon: {
-      first: "₹5,000 + GFG Merchandise + Interview Buddy Merchandise",
-      second: "₹3,000 + GFG Merchandise + Interview Buddy Merchandise", 
-      third: "₹2,000 + Interview Buddy Merchandise"
+      first: "Cash Prizes + GFG Merchandise + Interview Buddy Merchandise",
+      second: "Cash Prizes + GFG Merchandise + Interview Buddy Merchandise", 
+      third: "Cash Prizes + Interview Buddy Merchandise"
     },
     pitch: {
-      first: "₹5,000 + Mentorship",
-      second: "₹3,000 + Mentorship",
-      third: "₹2,000 + Mentorship"
+      first: "Cash Prizes + Mentorship",
+      second: "Cash Prizes + Mentorship",
+      third: "Cash Prizes + Mentorship"
     }
   },
   
@@ -83,7 +83,7 @@ export const EVENT_DATA = {
     },
     {
       title: "Hackathon & Pitch",
-      description: "Compete for ₹20k+ in prizes and recognition", 
+      description: "Compete for exciting prizes and recognition", 
       color: "from-pink-500 to-rose-500",
       icon: "Trophy"
     },
