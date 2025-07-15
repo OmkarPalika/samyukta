@@ -38,6 +38,7 @@
     "@types/uuid": "^10.0.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
+    "critters": "^0.0.23",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",

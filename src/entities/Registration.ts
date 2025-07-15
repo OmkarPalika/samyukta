@@ -262,4 +262,32 @@ export class Registration {
 
     return response.json();
   }
+
+  static async resendConfirmationEmails(teamId: string, memberEmails?: string[]): Promise<{
+    success: boolean;
+    message: string;
+    results: {
+      total: number;
+      successful: number;
+      failed: number;
+      failed_emails: string[];
+    };
+  }> {
+    const response = await fetch('/api/email/resend-registration', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        team_id: teamId,
+        member_emails: memberEmails 
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to resend confirmation emails');
+    }
+
+    return response.json();
+  }
 }
