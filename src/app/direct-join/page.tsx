@@ -500,10 +500,11 @@ export default function DirectJoin() {
                 <div className="text-gray-300">
                   <p className="mb-2">Pay via UPI/Bank Transfer to:</p>
                   <div className="bg-gray-700/50 p-3 md:p-4 rounded-lg text-sm md:text-base">
-                    <p className="break-all"><strong>UPI ID:</strong> samyukta2025@paytm</p>
+                    <p className="break-all"><strong>UPI ID:</strong> 8897892720@ybl</p>
+                    <p><strong>Name:</strong> Palika Umamaheswari</p>
                     <p><strong>Bank Name:</strong> State Bank of India</p>
-                    <p><strong>Account No:</strong> 1234567890</p>
-                    <p><strong>IFSC:</strong> SBIN0001234</p>
+                    <p><strong>Account No:</strong> 34473466684</p>
+                    <p><strong>IFSC:</strong> SBIN0000942</p>
                   </div>
                 </div>
               </div>

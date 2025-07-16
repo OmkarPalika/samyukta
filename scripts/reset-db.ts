@@ -1,67 +1,38 @@
 #!/usr/bin/env tsx
 
 import { config } from 'dotenv';
-import { MongoClient } from 'mongodb';
+import { getTypedCollections } from '../src/lib/db-utils';
 
 // Load environment variables
 config({ path: '.env.local' });
 
-async function resetDB() {
-  if (!process.env.MONGODB_URI) {
-    console.error('❌ MONGODB_URI environment variable is required');
-    process.exit(1);
-  }
-
-  const client = new MongoClient(process.env.MONGODB_URI);
-  
+async function main() {
   try {
-    console.log('🔄 Connecting to MongoDB...');
-    await client.connect();
-    console.log('✅ Connected to MongoDB');
+    console.log('🗑️ Resetting database...');
     
-    const db = client.db('samyukta');
+    const collections = await getTypedCollections();
     
-    // Collections that should be reset (user-generated data)
-    const collectionsToReset = [
-      'registrations',
-      'team_members', 
-      'competition_registrations',
-      'help_tickets',
-      'social_items',
-      'games',
-      'pitch_ratings',
-      'sessions'
-    ];
+    // Clear all collections
+    await Promise.all([
+      collections.users.deleteMany({}),
+      collections.registrations.deleteMany({}),
+      collections.teamMembers.deleteMany({}),
+      collections.competitions.deleteMany({}),
+      collections.competitionRegistrations.deleteMany({}),
+      collections.helpTickets.deleteMany({}),
+      collections.socialItems.deleteMany({}),
+      collections.games.deleteMany({}),
+      collections.pitchRatings.deleteMany({}),
+      collections.sessions.deleteMany({})
+    ]);
     
-    // Collections to keep (system/reference data)
-    const collectionsToKeep = [
-      'users', // Keep admin user
-      'competitions' // Keep competition definitions
-    ];
-    
-    console.log('🗑️  Resetting user-generated data...');
-    
-    for (const collection of collectionsToReset) {
-      const result = await db.collection(collection).deleteMany({});
-      console.log(`  ✓ ${collection}: ${result.deletedCount} documents removed`);
-    }
-    
-    console.log('\n📋 Keeping system data:');
-    for (const collection of collectionsToKeep) {
-      const count = await db.collection(collection).countDocuments();
-      console.log(`  ✓ ${collection}: ${count} documents preserved`);
-    }
-    
-    console.log('\n🎉 Database reset completed successfully!');
-    console.log('🚀 Ready to run: npm run seed-db (if needed)');
-    
+    console.log('✅ Database reset successfully!');
+    console.log('🗑️ All collections cleared');
+    process.exit(0);
   } catch (error) {
     console.error('❌ Error resetting database:', error);
     process.exit(1);
-  } finally {
-    await client.close();
-    console.log('\n🔌 Database connection closed');
   }
 }
 
-resetDB();
+main();

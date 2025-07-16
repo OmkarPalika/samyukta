@@ -235,6 +235,14 @@ export async function initializeDatabase(db: Db) {
   ]);
 
   console.log('Database collections and indexes created successfully');
+  
+  // Seed initial data
+  try {
+    const { seedDatabase } = await import('./seed-database');
+    await seedDatabase();
+  } catch (seedError) {
+    console.log('Database seeding skipped or failed:', seedError);
+  }
   } catch (error: unknown) {
     // If the error is about index already existing, we can safely ignore it
     if (error && typeof error === 'object' && 'code' in error && 'codeName' in error && error.code === 85 && error.codeName === 'IndexOptionsConflict') {

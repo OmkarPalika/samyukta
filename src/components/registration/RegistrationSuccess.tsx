@@ -16,18 +16,20 @@ export default function RegistrationSuccess({ registration, onDashboard }: Regis
   const handleShare = async () => {
     if (navigator.share) {
       try {
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
         await navigator.share({
           title: 'Samyukta 2025 Registration Complete!',
           text: `I just registered for Samyukta 2025! Team ID: ${registration.team_id}`,
-          url: window.location.origin
+          url: currentOrigin
         });
       } catch (error) {
         console.log('Share failed:', error);
       }
     } else {
       // Fallback to clipboard
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
       navigator.clipboard.writeText(
-        `I just registered for Samyukta 2025! Team ID: ${registration.team_id}\n${window.location.origin}`
+        `I just registered for Samyukta 2025! Team ID: ${registration.team_id}\n${currentOrigin}`
       );
     }
   };

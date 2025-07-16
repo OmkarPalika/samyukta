@@ -37,10 +37,11 @@ export default function InteractiveMap() {
 
   const shareLocation = async (location: MapLocation) => {
     if (navigator.share) {
+      const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
       await navigator.share({
         title: location.name,
         text: location.description,
-        url: window.location.href
+        url: currentUrl
       });
     }
   };

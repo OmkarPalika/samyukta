@@ -94,8 +94,8 @@ http://localhost:3000
 The project includes a mock authentication system:
 
 **Demo Login Credentials:**
-- Email: `admin@samyukta.com`
-- Password: `admin123`
+- **Admin:** `omkar@samyukta.com` / `@Omkar143`
+- **Coordinator:** `coordinator@samyukta.com` / `coord123`
 
 **API Endpoints:**
 - `POST /api/auth/login` - User login

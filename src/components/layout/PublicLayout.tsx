@@ -21,12 +21,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
-    // Only run on client side
-    if (typeof window !== 'undefined') {
-      checkAuth();
-    } else {
-      setLoading(false);
-    }
+    checkAuth();
   }, []);
 
   const checkAuth = async () => {
@@ -45,11 +40,11 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
       await User.logout();
       setUser(null);
       // Force redirect to home page
-      window.location.href = '/';
+      window.location.replace('/');
     } catch (error) {
       console.error("Logout error:", error);
       // Still redirect to home even if logout fails
-      window.location.href = '/';
+      window.location.replace('/');
     }
   };
 

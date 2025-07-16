@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getTypedCollections } from '@/lib/db-utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,42 +9,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
-    // Check in admins collection
-    try {
-      const { getCollection } = await import('@/lib/db-utils');
-      const admins = await getCollection('admins');
-      const admin = await admins.findOne({ email });
-      if (admin) {
-        return NextResponse.json({ exists: true, role: 'admin' });
-      }
-    } catch (error) {
-      console.log('Admin collection not found or error:', error);
+    const collections = await getTypedCollections();
+
+    // Check in users collection (admin/coordinator accounts)
+    const user = await collections.users.findOne({ email });
+    if (user) {
+      return NextResponse.json({ exists: true, role: user.role });
     }
 
-    // Check in coordinators collection
-    try {
-      const { getCollection } = await import('@/lib/db-utils');
-      const coordinators = await getCollection('coordinators');
-      const coordinator = await coordinators.findOne({ email });
-      if (coordinator) {
-        return NextResponse.json({ exists: true, role: 'coordinator' });
-      }
-    } catch (error) {
-      console.log('Coordinator collection not found or error:', error);
-    }
-
-    // Check in participants collection (registrations)
-    try {
-      const { getCollection } = await import('@/lib/db-utils');
-      const registrations = await getCollection('registrations');
-      const participant = await registrations.findOne({ 
-        'members.email': email 
-      });
-      if (participant) {
-        return NextResponse.json({ exists: true, role: 'participant' });
-      }
-    } catch (error) {
-      console.log('Registration collection not found or error:', error);
+    // Check in team_members collection (participants)
+    const participant = await collections.teamMembers.findOne({ email });
+    if (participant) {
+      return NextResponse.json({ exists: true, role: 'participant' });
     }
 
     return NextResponse.json({ exists: false });

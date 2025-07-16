@@ -74,12 +74,12 @@ function SocialContent() {
     try {
       const response = await fetch(post.file_url);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `samyukta-${post.id}.jpg`;
       a.click();
-      window.URL.revokeObjectURL(url);
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Download failed:', error);
     }
@@ -91,13 +91,14 @@ function SocialContent() {
         ? { ...post, shares: (post.shares || 0) + 1 }
         : post
     ));
+    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
     if (navigator.share) {
       navigator.share({
         title: 'Samyukta 2025 Social',
-        url: window.location.href
+        url: currentUrl
       });
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(currentUrl);
     }
   };
 

@@ -1,9 +1,9 @@
 import { 
   LoginUser, 
   Competition, 
-  CompetitionRegistration, 
-  HelpTicket, 
-  SocialItem, 
+  // CompetitionRegistration, 
+  // HelpTicket, 
+  // SocialItem, 
   GameAction, 
   GameStats,
   RegistrationStats,
@@ -37,17 +37,6 @@ export const MOCK_USERS: LoginUser[] = [
     track: 'Event Management',
     year: 'Staff',
     dept: 'Coordination'
-  },
-  {
-    id: 'part1',
-    email: DEMO_CREDENTIALS.participant.email,
-    password: DEMO_CREDENTIALS.participant.password,
-    full_name: 'John Participant',
-    role: 'participant',
-    college: 'ANITS',
-    track: 'Cloud Computing',
-    year: '3rd Year',
-    dept: 'CSE'
   }
 ];
 
@@ -88,150 +77,150 @@ export const MOCK_COMPETITIONS: Competition[] = [
 ];
 
 // Mock Competition Registrations (mutable for API operations)
-export const MOCK_COMPETITION_REGISTRATIONS: CompetitionRegistration[] = [
-  {
-    id: 'reg-1',
-    competition_id: 'comp-1',
-    user_id: 'user-1',
-    team_id: 'team-1',
-    registration_type: 'individual',
-    transaction_id: 'TXN123456',
-    payment_screenshot_url: 'uploads/payments/screenshot.jpg',
-    status: 'approved',
-    created_at: '2025-01-15T10:00:00Z',
-    updated_at: '2025-01-16T10:00:00Z'
-  }
-];
+// export const MOCK_COMPETITION_REGISTRATIONS: CompetitionRegistration[] = [
+//   {
+//     id: 'reg-1',
+//     competition_id: 'comp-1',
+//     user_id: 'user-1',
+//     team_id: 'team-1',
+//     registration_type: 'individual',
+//     transaction_id: 'TXN123456',
+//     payment_screenshot_url: 'uploads/payments/screenshot.jpg',
+//     status: 'approved',
+//     created_at: '2025-01-15T10:00:00Z',
+//     updated_at: '2025-01-16T10:00:00Z'
+//   }
+// ];
 
 // Mock Help Tickets (mutable for API operations)
-export const MOCK_HELP_TICKETS: HelpTicket[] = [
-  {
-    id: '1',
-    title: 'Login Issue',
-    description: 'Cannot access my dashboard after registration',
-    submitted_by: 'user123',
-    status: 'open',
-    priority: 'medium',
-    created_at: new Date().toISOString()
-  },
-  {
-    id: '2',
-    title: 'Payment Verification',
-    description: 'Payment made but status not updated',
-    submitted_by: 'user456',
-    status: 'in_progress',
-    priority: 'high',
-    created_at: new Date().toISOString()
-  }
-];
+// export const MOCK_HELP_TICKETS: HelpTicket[] = [
+//   {
+//     id: '1',
+//     title: 'Login Issue',
+//     description: 'Cannot access my dashboard after registration',
+//     submitted_by: 'user123',
+//     status: 'open',
+//     priority: 'medium',
+//     created_at: new Date().toISOString()
+//   },
+//   {
+//     id: '2',
+//     title: 'Payment Verification',
+//     description: 'Payment made but status not updated',
+//     submitted_by: 'user456',
+//     status: 'in_progress',
+//     priority: 'high',
+//     created_at: new Date().toISOString()
+//   }
+// ];
 
 // Mock Social Items (mutable for API operations)
-export const MOCK_SOCIAL_ITEMS: SocialItem[] = [
-  {
-    id: '1',
-    file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
-    caption: 'Opening ceremony with 400+ enthusiastic participants',
-    uploaded_by: 'event_team',
-    status: 'approved',
-    category: 'ceremony',
-    likes: 45,
-    comments: 12,
-    shares: 8,
-    tags: ['opening', 'ceremony', 'samyukta2025'],
-    created_at: '2024-08-06T09:00:00Z'
-  },
-  {
-    id: '2',
-    file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
-    caption: 'AWS workshop in progress - Cloud computing mastery',
-    uploaded_by: 'coordinator_1',
-    status: 'approved',
-    category: 'workshop',
-    likes: 32,
-    comments: 8,
-    shares: 5,
-    tags: ['aws', 'workshop', 'cloud'],
-    created_at: '2024-08-06T11:30:00Z'
-  },
-  {
-    id: '3',
-    file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
-    caption: 'Team collaboration during hackathon',
-    uploaded_by: 'participant_23',
-    status: 'approved',
-    category: 'hackathon',
-    likes: 67,
-    comments: 15,
-    shares: 12,
-    tags: ['hackathon', 'teamwork', 'coding'],
-    created_at: '2024-08-08T14:00:00Z'
-  },
-  {
-    id: '4',
-    file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
-    caption: 'Cultural night performances and celebrations',
-    uploaded_by: 'cultural_team',
-    status: 'approved',
-    category: 'cultural',
-    likes: 89,
-    comments: 23,
-    shares: 18,
-    tags: ['cultural', 'dance', 'music'],
-    created_at: '2024-08-06T19:00:00Z'
-  },
-  {
-    id: '5',
-    file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
-    caption: 'Networking session with industry experts',
-    uploaded_by: 'networking_team',
-    status: 'approved',
-    category: 'networking',
-    likes: 28,
-    comments: 5,
-    shares: 3,
-    tags: ['networking', 'industry', 'experts'],
-    created_at: '2024-08-07T16:00:00Z'
-  },
-  {
-    id: '6',
-    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-    caption: 'AI/ML workshop with Google Cloud experts',
-    uploaded_by: 'tech_team',
-    status: 'approved',
-    category: 'workshop',
-    likes: 43,
-    comments: 9,
-    shares: 6,
-    tags: ['ai', 'ml', 'google'],
-    created_at: '2024-08-07T10:00:00Z'
-  },
-  {
-    id: '7',
-    file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
-    caption: 'Prize distribution ceremony',
-    uploaded_by: 'admin_team',
-    status: 'approved',
-    category: 'ceremony',
-    likes: 76,
-    comments: 18,
-    shares: 14,
-    tags: ['awards', 'winners', 'celebration'],
-    created_at: '2024-08-08T18:00:00Z'
-  },
-  {
-    id: '8',
-    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-    caption: 'Group photo with all participants',
-    uploaded_by: 'photo_team',
-    status: 'approved',
-    category: 'group',
-    likes: 120,
-    comments: 34,
-    shares: 28,
-    tags: ['group', 'memories', 'finale'],
-    created_at: '2024-08-08T17:00:00Z'
-  }
-];
+// export const MOCK_SOCIAL_ITEMS: SocialItem[] = [
+//   {
+//     id: '1',
+//     file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+//     caption: 'Opening ceremony with 400+ enthusiastic participants',
+//     uploaded_by: 'event_team',
+//     status: 'approved',
+//     category: 'ceremony',
+//     likes: 45,
+//     comments: 12,
+//     shares: 8,
+//     tags: ['opening', 'ceremony', 'samyukta2025'],
+//     created_at: '2024-08-06T09:00:00Z'
+//   },
+//   {
+//     id: '2',
+//     file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
+//     caption: 'AWS workshop in progress - Cloud computing mastery',
+//     uploaded_by: 'coordinator_1',
+//     status: 'approved',
+//     category: 'workshop',
+//     likes: 32,
+//     comments: 8,
+//     shares: 5,
+//     tags: ['aws', 'workshop', 'cloud'],
+//     created_at: '2024-08-06T11:30:00Z'
+//   },
+//   {
+//     id: '3',
+//     file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+//     caption: 'Team collaboration during hackathon',
+//     uploaded_by: 'participant_23',
+//     status: 'approved',
+//     category: 'hackathon',
+//     likes: 67,
+//     comments: 15,
+//     shares: 12,
+//     tags: ['hackathon', 'teamwork', 'coding'],
+//     created_at: '2024-08-08T14:00:00Z'
+//   },
+//   {
+//     id: '4',
+//     file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
+//     caption: 'Cultural night performances and celebrations',
+//     uploaded_by: 'cultural_team',
+//     status: 'approved',
+//     category: 'cultural',
+//     likes: 89,
+//     comments: 23,
+//     shares: 18,
+//     tags: ['cultural', 'dance', 'music'],
+//     created_at: '2024-08-06T19:00:00Z'
+//   },
+//   {
+//     id: '5',
+//     file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
+//     caption: 'Networking session with industry experts',
+//     uploaded_by: 'networking_team',
+//     status: 'approved',
+//     category: 'networking',
+//     likes: 28,
+//     comments: 5,
+//     shares: 3,
+//     tags: ['networking', 'industry', 'experts'],
+//     created_at: '2024-08-07T16:00:00Z'
+//   },
+//   {
+//     id: '6',
+//     file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+//     caption: 'AI/ML workshop with Google Cloud experts',
+//     uploaded_by: 'tech_team',
+//     status: 'approved',
+//     category: 'workshop',
+//     likes: 43,
+//     comments: 9,
+//     shares: 6,
+//     tags: ['ai', 'ml', 'google'],
+//     created_at: '2024-08-07T10:00:00Z'
+//   },
+//   {
+//     id: '7',
+//     file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
+//     caption: 'Prize distribution ceremony',
+//     uploaded_by: 'admin_team',
+//     status: 'approved',
+//     category: 'ceremony',
+//     likes: 76,
+//     comments: 18,
+//     shares: 14,
+//     tags: ['awards', 'winners', 'celebration'],
+//     created_at: '2024-08-08T18:00:00Z'
+//   },
+//   {
+//     id: '8',
+//     file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+//     caption: 'Group photo with all participants',
+//     uploaded_by: 'photo_team',
+//     status: 'approved',
+//     category: 'group',
+//     likes: 120,
+//     comments: 34,
+//     shares: 28,
+//     tags: ['group', 'memories', 'finale'],
+//     created_at: '2024-08-08T17:00:00Z'
+//   }
+// ];
 
 // Mock Game Data (mutable for API operations)
 export const MOCK_GAME_DATA: GameAction[] = [];
@@ -413,68 +402,65 @@ export const MOCK_EVENT_BENEFITS = EVENT_CONFIG.benefits;
 // Speaker tracks and benefits are commented out as they're not currently used
 
 // Mock Sponsorship Benefits
-export const MOCK_SPONSORSHIP_BENEFITS = [
-  {
-    tier: "Title Sponsor",
-    benefits: [
-      "Exclusive naming rights to the event",
-      "Logo on all marketing materials and banners",
-      "30-minute keynote speaking slot",
-      "Premium booth space at venue",
-      "Logo on participant certificates",
-      "Dedicated social media campaigns",
-      "Access to participant database",
-      "VIP seating for leadership team",
-      "Recognition in all press releases",
-      "Lifetime partnership status"
-    ]
-  },
-  {
-    tier: "Platinum",
-    benefits: [
-      "Logo on main stage backdrop",
-      "15-minute speaking opportunity",
-      "Premium exhibition booth",
-      "Logo on event t-shirts",
-      "Social media mentions",
-      "Inclusion in event app",
-      "Networking dinner invitation",
-      "Certificate co-branding"
-    ]
-  },
-  {
-    tier: "Gold",
-    benefits: [
-      "Logo on event materials",
-      "Exhibition booth space",
-      "Logo on participant badges",
-      "Social media recognition",
-      "Inclusion in event program",
-      "Networking session access",
-      "Recruitment opportunities"
-    ]
-  },
-  {
-    tier: "Silver",
-    benefits: [
-      "Logo on event website",
-      "Small exhibition space",
-      "Social media mentions",
-      "Inclusion in event brochure",
-      "Networking opportunities",
-      "Talent recruitment access"
-    ]
-  }
-];
+// export const MOCK_SPONSORSHIP_BENEFITS = [
+//   {
+//     tier: "Title Sponsor",
+//     benefits: [
+//       "Exclusive naming rights to the event",
+//       "Logo on all marketing materials and banners",
+//       "30-minute keynote speaking slot",
+//       "Premium booth space at venue",
+//       "Logo on participant certificates",
+//       "Dedicated social media campaigns",
+//       "Access to participant database",
+//       "VIP seating for leadership team",
+//       "Recognition in all press releases",
+//       "Lifetime partnership status"
+//     ]
+//   },
+//   {
+//     tier: "Platinum",
+//     benefits: [
+//       "Logo on main stage backdrop",
+//       "15-minute speaking opportunity",
+//       "Premium exhibition booth",
+//       "Logo on event t-shirts",
+//       "Social media mentions",
+//       "Inclusion in event app",
+//       "Networking dinner invitation",
+//       "Certificate co-branding"
+//     ]
+//   },
+//   {
+//     tier: "Gold",
+//     benefits: [
+//       "Logo on event materials",
+//       "Exhibition booth space",
+//       "Logo on participant badges",
+//       "Social media recognition",
+//       "Inclusion in event program",
+//       "Networking session access",
+//       "Recruitment opportunities"
+//     ]
+//   },
+//   {
+//     tier: "Silver",
+//     benefits: [
+//       "Logo on event website",
+//       "Small exhibition space",
+//       "Social media mentions",
+//       "Inclusion in event brochure",
+//       "Networking opportunities",
+//       "Talent recruitment access"
+//     ]
+//   }
+// ];
 
 // Re-export centralized event stats
 export { EVENT_STATS as MOCK_EVENT_STATS } from '@/data';
 
 // Re-export centralized contact data
 export const MOCK_CONTACTS = CONTACTS_DATA.team;
-
-// Mock Emergency Contacts
-// export const MOCK_EMERGENCY_CONTACTS = EVENT_CONFIG.emergency;
 
 // Re-export centralized FAQ data
 export { FAQ_DATA as MOCK_FAQS, FAQ_CATEGORIES as MOCK_FAQ_CATEGORIES } from '@/data';
