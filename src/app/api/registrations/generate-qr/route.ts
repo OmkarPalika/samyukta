@@ -5,18 +5,15 @@ import { QRGenerator } from '@/lib/qr-generator';
 export async function POST(request: NextRequest) {
   try {
     const { team_id } = await request.json();
-
     if (!team_id) {
       return NextResponse.json({ error: 'Team ID required' }, { status: 400 });
     }
 
     const collections = await getTypedCollections();
-
     // Get team members
     const members = await collections.teamMembers
       .find({ registration_id: team_id })
       .toArray();
-
     if (members.length === 0) {
       return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
