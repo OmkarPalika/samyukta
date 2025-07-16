@@ -26,6 +26,7 @@ import {
 import InteractiveMap from "@/components/shared/InteractiveMap";
 import { MOCK_CONTACTS, CONTACT_PAGE_DATA } from "@/lib";
 // import { MOCK_EMERGENCY_CONTACTS } from "@/lib/mock-data";
+import { useNavigation } from '@/hooks/useClientSide';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -37,6 +38,8 @@ export default function Contact() {
     phone: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { openExternal } = useNavigation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -136,7 +139,7 @@ export default function Contact() {
 
                   <div className="flex space-x-3">
                     <Button
-                      onClick={() => window.open('https://maps.google.com/?q=ANITS+Visakhapatnam', '_blank')}
+                      onClick={() => openExternal('https://maps.google.com/?q=ANITS+Visakhapatnam')}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <Navigation className="w-4 h-4 mr-2" />
@@ -144,7 +147,7 @@ export default function Contact() {
                     </Button>
                     <Button
                       variant="outline"
-                      onClick={() => window.open('https://anits.edu.in', '_blank')}
+                      onClick={() => openExternal('https://anits.edu.in')}
                       className="bg-transparent border-gray-600 text-gray-300 hover:text-blue-400 hover:bg-white"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />

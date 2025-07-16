@@ -8,6 +8,7 @@ import { Heart, MessageCircle, Share2, Search, Download, Bookmark, X, Send, Spar
 import Image from "next/image";
 import Loading from "@/components/shared/Loading";
 // import { MOCK_SOCIAL_ITEMS } from '@/lib/mock-data';
+import { useNavigation } from '@/hooks/useClientSide';
 
 function SocialContent() {
   const [posts, setPosts] = useState<SocialItem[]>([]);
@@ -21,6 +22,8 @@ function SocialContent() {
   const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState<{ [key: string]: Array<{ id: string, user: string, text: string, time: string }> }>({});
   const [selectedHashtag, setSelectedHashtag] = useState<string>('');
+
+  const { getCurrentURL } = useNavigation();
 
   // Comment out the mock data to show empty state
   // Using centralized mock data from lib/mock-data.ts
@@ -91,7 +94,7 @@ function SocialContent() {
         ? { ...post, shares: (post.shares || 0) + 1 }
         : post
     ));
-    const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const currentUrl = getCurrentURL();
     if (navigator.share) {
       navigator.share({
         title: 'Samyukta 2025 Social',

@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRouter } from "next/navigation";
 import { PageLoading } from "@/components/shared/Loading";
 import Image from "next/image";
+import { useNavigation } from '@/hooks/useClientSide';
 
 export default function DirectJoin() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function DirectJoin() {
     workshopCapacity: number;
     competitionSeats: number;
   } | null>(null);
+  const { openExternal } = useNavigation();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -128,7 +130,7 @@ export default function DirectJoin() {
   const handleNext = () => {
     if (validateStep(currentStep)) {
       if (currentStep === 1 && formData.competition === "pitch" && formData.pitchMode === "online") {
-        window.open("https://platform.example.com/startup-pitch", "_blank");
+        openExternal("https://platform.example.com/startup-pitch");
         return;
       }
       setCurrentStep(prev => Math.min(prev + 1, 4));

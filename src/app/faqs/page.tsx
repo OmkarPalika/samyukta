@@ -12,10 +12,12 @@ import { Search, HelpCircle, Mail, Phone } from "lucide-react";
 import { FAQ_PAGE_DATA, FAQ_DATA, FAQ_CATEGORIES } from "@/data/faqs";
 import { CONTACTS_DATA } from "@/data/contacts";
 import { generateFAQStructuredData } from "@/lib";
+import { useNavigation } from "@/hooks/useClientSide";
 
 export default function FAQs() {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('all');
+  const { openExternal } = useNavigation();
   
   // Generate FAQ structured data
   const faqStructuredData = generateFAQStructuredData(
@@ -205,7 +207,7 @@ export default function FAQs() {
                       <p className="text-gray-400 text-sm mb-3">{contact?.description}</p>
                       <p className="text-blue-400 font-semibold mb-4">{contact?.contact}</p>
                       <Button
-                        onClick={() => window.open(contact?.action, '_blank')}
+                        onClick={() => openExternal(contact?.action)}
                         variant="outline"
                         className="bg-transparent border-gray-600 text-gray-300 hover:bg-white hover:text-blue-500"
                       >

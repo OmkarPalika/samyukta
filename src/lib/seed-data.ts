@@ -1,6 +1,6 @@
 import { getTypedCollections } from './db-utils';
 import bcrypt from 'bcryptjs';
-import { MOCK_USERS, MOCK_COMPETITIONS } from './mock-data';
+import { MOCK_USERS, MOCK_COMPETITIONS, MOCK_WORKSHOPS } from './mock-data';
 
 export async function seedDatabase() {
   const collections = await getTypedCollections();
@@ -60,74 +60,23 @@ export async function seedDatabase() {
     );
   }
 
-  // Seed sample help tickets
-  console.log('🎟️ Seeding sample help tickets...');
-  const sampleTickets = [
-    {
-      submitted_by: 'PART001',
-      title: 'Login Issue',
-      description: 'Cannot access dashboard with my credentials',
-      status: 'open' as const,
-      priority: 'medium' as const
-    },
-    {
-      submitted_by: 'PART002',
-      title: 'Payment Verification',
-      description: 'Payment completed but status not updated',
-      status: 'in_progress' as const,
-      priority: 'high' as const
-    }
-  ];
-
-  for (const ticket of sampleTickets) {
-    await collections.helpTickets.updateOne(
-      { title: ticket.title, submitted_by: ticket.submitted_by },
+  // Seed Workshops from mock data
+  console.log('🎟️ Seeding Workshops...');
+  for (const workshop of MOCK_WORKSHOPS) {
+    await collections.workshops.updateOne(
+      { id: workshop.id },
       {
         $set: {
-          ...ticket,
-          updated_at: new Date()
-        },
-        $setOnInsert: {
-          created_at: new Date()
-        }
-      },
-      { upsert: true }
-    );
-  }
-
-  // Seed sample social items
-  console.log('📷 Seeding sample social items...');
-  const sampleSocialItems = [
-    {
-      uploaded_by: 'admin',
-      caption: 'Welcome to Samyukta 2025! 🎉',
-      file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
-      status: 'approved' as const,
-      category: 'announcement',
-      likes: 45,
-      comments: 12,
-      shares: 8,
-      tags: ['welcome', 'samyukta2025', 'announcement']
-    },
-    {
-      uploaded_by: 'coord1',
-      caption: 'AWS Workshop preparations underway ☁️',
-      file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
-      status: 'approved' as const,
-      category: 'workshop',
-      likes: 32,
-      comments: 8,
-      shares: 5,
-      tags: ['aws', 'workshop', 'cloud']
-    }
-  ];
-
-  for (const item of sampleSocialItems) {
-    await collections.socialItems.updateOne(
-      { caption: item.caption, uploaded_by: item.uploaded_by },
-      {
-        $set: {
-          ...item,
+          name: workshop.name,
+          track: workshop.track,
+          instructor: workshop.instructor,
+          description: workshop.description,
+          schedule: new Date(workshop.schedule),
+          duration_hours: workshop.duration_hours,
+          capacity: workshop.capacity,
+          enrolled: workshop.enrolled,
+          materials_url: workshop.materials_url,
+          status: workshop.status,
           updated_at: new Date()
         },
         $setOnInsert: {
@@ -141,6 +90,5 @@ export async function seedDatabase() {
   console.log('✅ Database seeded successfully!');
   console.log(`👤 Users: ${MOCK_USERS.length}`);
   console.log(`🏆 Competitions: ${MOCK_COMPETITIONS.length}`);
-  console.log(`🎟️ Help Tickets: ${sampleTickets.length}`);
-  console.log(`📷 Social Items: ${sampleSocialItems.length}`);
+  console.log(`🎟️ Workshops: ${MOCK_WORKSHOPS.length}`);
 }

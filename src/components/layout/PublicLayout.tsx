@@ -6,6 +6,7 @@ import Footer from '@/components/shared/Footer';
 import { User } from '@/entities/User';
 
 import { Card, CardContent } from '@/components/ui/card';
+import router from 'next/router';
 
 interface UserType {
   full_name: string;
@@ -40,11 +41,11 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
       await User.logout();
       setUser(null);
       // Force redirect to home page
-      window.location.replace('/');
+      router.replace('/');
     } catch (error) {
       console.error("Logout error:", error);
       // Still redirect to home even if logout fails
-      window.location.replace('/');
+      router.replace('/');
     }
   };
 

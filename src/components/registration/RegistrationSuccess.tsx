@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CompletedRegistrationData } from '@/lib/types';
+import { useNavigation } from '@/hooks/useClientSide';
 
 interface RegistrationSuccessProps {
   registration: CompletedRegistrationData;
@@ -13,10 +14,11 @@ interface RegistrationSuccessProps {
 }
 
 export default function RegistrationSuccess({ registration, onDashboard }: RegistrationSuccessProps) {
+  const { getCurrentURL, copyToClipboard, createObjectURL, revokeObjectURL } = useNavigation();
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+        const currentOrigin = getCurrentURL();
         await navigator.share({
           title: 'Samyukta 2025 Registration Complete!',
           text: `I just registered for Samyukta 2025! Team ID: ${registration.team_id}`,
@@ -27,8 +29,8 @@ export default function RegistrationSuccess({ registration, onDashboard }: Regis
       }
     } else {
       // Fallback to clipboard
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-      navigator.clipboard.writeText(
+      const currentOrigin = getCurrentURL();
+      copyToClipboard(
         `I just registered for Samyukta 2025! Team ID: ${registration.team_id}\n${currentOrigin}`
       );
     }
@@ -47,12 +49,12 @@ export default function RegistrationSuccess({ registration, onDashboard }: Regis
 
     const dataStr = JSON.stringify(receiptData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
+    const url = createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `samyukta-2025-receipt-${registration.team_id}.json`;
     link.click();
-    URL.revokeObjectURL(url);
+    revokeObjectURL(url);
   };
 
   return (
