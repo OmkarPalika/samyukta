@@ -14,10 +14,12 @@ interface RealtimeStats {
   remaining_ai: number;
   remaining_hackathon: number;
   remaining_pitch: number;
+  remaining_total: number;
   cloud_closed: boolean;
   ai_closed: boolean;
   hackathon_closed: boolean;
   pitch_closed: boolean;
+  event_closed: boolean;
   timestamp: string;
 }
 

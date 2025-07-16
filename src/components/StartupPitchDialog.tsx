@@ -85,19 +85,24 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
         try {
           const formData = new FormData();
           formData.append('file', data.pitchDeck);
-          formData.append('folder', 'pitch-decks');
           
-          const response = await fetch(process.env.NEXT_PUBLIC_GAS_UPLOAD_URL || '', {
+          const response = await fetch('/api/upload/pitch-deck', {
             method: 'POST',
             body: formData
           });
           
           if (response.ok) {
             const result = await response.json();
-            uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.url };
+            uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.file_url };
+          } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Upload failed');
           }
         } catch (error) {
           console.error('Upload failed:', error);
+          alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setUploading(false);
+          return;
         }
       }
       
@@ -280,7 +285,7 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
         </div>
 
         <div className="flex justify-end space-x-3 pt-4">
-          <Button variant="outline" onClick={handleCancel} className="border-gray-600 text-gray-300">
+          <Button variant="outline" onClick={handleCancel} className="border-gray-600 text-gray-600">
             Cancel
           </Button>
           <Button onClick={handleSave} disabled={uploading} className="bg-purple-600 hover:bg-purple-700">

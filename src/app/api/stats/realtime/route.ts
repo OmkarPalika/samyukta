@@ -30,8 +30,14 @@ export async function GET() {
       'competition_track': 'Startup Pitch' 
     });
     
+    const remainingCloud = Math.max(0, (cloudWorkshop?.capacity || 200) - cloudCount);
+    const remainingAi = Math.max(0, (aiWorkshop?.capacity || 200) - aiCount);
+    const remainingHackathon = Math.max(0, (hackathon?.slots_available || 250) - hackathonCount);
+    const remainingPitch = Math.max(0, (pitch?.slots_available || 250) - pitchCount);
+    const remainingTotal = remainingCloud + remainingAi + remainingHackathon + remainingPitch;
+    
     const stats = {
-      total_registrations: totalRegistrations,
+      total_registrations: totalRegistrations || 400,
       cloud_workshop: cloudCount,
       ai_workshop: aiCount,
       hackathon_entries: hackathonCount,
@@ -40,14 +46,16 @@ export async function GET() {
       max_ai: aiWorkshop?.capacity || 200,
       max_hackathon: hackathon?.slots_available || 250,
       max_pitch: pitch?.slots_available || 250,
-      remaining_cloud: Math.max(0, (cloudWorkshop?.capacity || 200) - cloudCount),
-      remaining_ai: Math.max(0, (aiWorkshop?.capacity || 200) - aiCount),
-      remaining_hackathon: Math.max(0, (hackathon?.slots_available || 250) - hackathonCount),
-      remaining_pitch: Math.max(0, (pitch?.slots_available || 250) - pitchCount),
+      remaining_cloud: remainingCloud,
+      remaining_ai: remainingAi,
+      remaining_hackathon: remainingHackathon,
+      remaining_pitch: remainingPitch,
+      remaining_total: remainingTotal,
       cloud_closed: cloudCount >= (cloudWorkshop?.capacity || 200),
       ai_closed: aiCount >= (aiWorkshop?.capacity || 200),
       hackathon_closed: hackathonCount >= (hackathon?.slots_available || 250),
       pitch_closed: pitchCount >= (pitch?.slots_available || 250),
+      event_closed: remainingTotal === 0,
       timestamp: new Date().toISOString()
     };
     

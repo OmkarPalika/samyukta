@@ -14,7 +14,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Loading from "@/components/shared/Loading";
 import { ClientAuth } from "@/lib/client-auth";
-import { Competition } from "@/lib/types";
 
 export default function Tickets() {
   const [teamSize, setTeamSize] = useState([1]);
@@ -22,48 +21,61 @@ export default function Tickets() {
   const [workshopTrack, setWorkshopTrack] = useState('cloud');
   const [competitionTrack, setCompetitionTrack] = useState('');
   const [comboCompetition, setComboCompetition] = useState('hackathon');
-  const [stats, setStats] = useState<{
-    remaining_total: number;
-    remaining_cloud: number;
-    remaining_ai: number;
-    total_registrations: number;
-    max_total: number;
-    cloud_workshop: number;
-    max_cloud: number;
-    ai_workshop: number;
-    max_ai: number;
-    direct_join_available: boolean;
-    direct_join_hackathon_price: number;
-    direct_join_pitch_price: number;
+  const [slots, setSlots] = useState<{
+    total: {
+      remaining: number;
+      registered: number;
+      max: number;
+    };
+    workshops: {
+      cloud: {
+        remaining: number;
+        registered: number;
+        max: number;
+        closed: boolean;
+      };
+      ai: {
+        remaining: number;
+        registered: number;
+        max: number;
+        closed: boolean;
+      };
+    };
+    competitions: {
+      hackathon: {
+        remaining: number;
+        registered: number;
+        max: number;
+      };
+      pitch: {
+        remaining: number;
+        registered: number;
+        max: number;
+      };
+    };
+    direct_join: {
+      available: boolean;
+      hackathon_price: number;
+      pitch_price: number;
+    };
   } | null>(null);
-  const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Check authentication status
-        try {
-          await ClientAuth.me();
-          setIsAuthenticated(true);
-        } catch {
-          setIsAuthenticated(false);
-        }
-        
-        // Fetch stats
-        const response = await fetch('/api/registrations/stats');
+        const user = await ClientAuth.me();
+        setIsAuthenticated(!!user);
+
+        // Fetch consolidated slot data
+        const response = await fetch('/api/slots');
         const data = await response.json();
-        setStats(data);
-        
-        // Fetch competitions
-        const compResponse = await fetch('/api/competitions');
-        if (compResponse.ok) {
-          const compData = await compResponse.json();
-          setCompetitions(compData);
-        }
+        setSlots(data);
       } catch (error) {
-        console.error('Failed to fetch stats:', error);
+        console.error('Failed to fetch data:', error);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -124,10 +136,10 @@ export default function Tickets() {
                   <Star className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Early Bird Pricing Active
                 </Badge>
-                {stats && (
+                {slots && (
                   <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 sm:px-4 py-2 text-sm sm:text-base">
                     <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                    Only {stats.remaining_total} slots left!
+                    Only {slots.total.remaining} slots left!
                   </Badge>
                 )}
               </div>
@@ -142,7 +154,7 @@ export default function Tickets() {
           )}
 
           {/* Slots Overview */}
-          {stats && !loading && (
+          {slots && !loading && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -152,19 +164,19 @@ export default function Tickets() {
                 <CardContent className="p-4 sm:p-6">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-white mb-1">{stats.remaining_total}</div>
+                      <div className="text-2xl font-bold text-white mb-1">{slots.total.remaining}</div>
                       <div className="text-sm text-gray-400 mb-2">Total Slots Left</div>
-                      <Progress value={(stats.total_registrations / stats.max_total) * 100} className="h-2 bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-violet-500" />
+                      <Progress value={(slots.total.registered / slots.total.max) * 100} className="h-2 bg-gray-700 [&>div]:bg-gradient-to-r [&>div]:from-blue-500 [&>div]:to-violet-500" />
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-blue-400 mb-1">{stats.remaining_cloud}</div>
+                      <div className="text-2xl font-bold text-blue-400 mb-1">{slots.workshops.cloud.remaining}</div>
                       <div className="text-sm text-gray-400 mb-2">Cloud Workshop</div>
-                      <Progress value={(stats.cloud_workshop / stats.max_cloud) * 100} className="h-2 bg-blue-900/20 [&>div]:bg-blue-500" />
+                      <Progress value={(slots.workshops.cloud.registered / slots.workshops.cloud.max) * 100} className="h-2 bg-blue-900/20 [&>div]:bg-blue-500" />
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-violet-400 mb-1">{stats.remaining_ai}</div>
+                      <div className="text-2xl font-bold text-violet-400 mb-1">{slots.workshops.ai.remaining}</div>
                       <div className="text-sm text-gray-400 mb-2">AI Workshop</div>
-                      <Progress value={(stats.ai_workshop / stats.max_ai) * 100} className="h-2 bg-violet-900/20 [&>div]:bg-violet-500" />
+                      <Progress value={(slots.workshops.ai.registered / slots.workshops.ai.max) * 100} className="h-2 bg-violet-900/20 [&>div]:bg-violet-500" />
                     </div>
                   </div>
                 </CardContent>
@@ -173,7 +185,7 @@ export default function Tickets() {
           )}
 
           {/* Direct Join Option */}
-          {stats && stats.direct_join_available && (
+          {slots && slots.direct_join.available && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -191,7 +203,7 @@ export default function Tickets() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700">
                       <h4 className="text-white font-semibold mb-2">Hackathon Direct Entry</h4>
-                      <div className="text-2xl font-bold text-green-400 mb-2">₹{stats.direct_join_hackathon_price}</div>
+                      <div className="text-2xl font-bold text-green-400 mb-2">₹{slots.direct_join.hackathon_price}</div>
                       <ul className="text-sm text-gray-300 space-y-1">
                         <li>• Hackathon participation</li>
                         <li>• Lunch and Refreshments</li>
@@ -200,7 +212,7 @@ export default function Tickets() {
                     </div>
                     <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700">
                       <h4 className="text-white font-semibold mb-2">Startup Pitch Direct Entry</h4>
-                      <div className="text-2xl font-bold text-green-400 mb-2">₹{stats.direct_join_pitch_price}</div>
+                      <div className="text-2xl font-bold text-green-400 mb-2">₹{slots.direct_join.pitch_price}</div>
                       <ul className="text-sm text-gray-300 space-y-1">
                         <li>• Startup pitch competition</li>
                         <li>• Lunch and Refreshments</li>
@@ -246,27 +258,27 @@ export default function Tickets() {
                           <RadioGroup value={workshopTrack} onValueChange={setWorkshopTrack} className="space-y-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="cloud" id="cloud" disabled={(stats?.remaining_cloud ?? 0) <= 0} />
-                                <Label htmlFor="cloud" className={`text-xs sm:text-sm ${(stats?.remaining_cloud ?? 0) <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
+                                <RadioGroupItem value="cloud" id="cloud" disabled={slots?.workshops.cloud.closed} />
+                                <Label htmlFor="cloud" className={`text-xs sm:text-sm ${slots?.workshops.cloud.closed ? 'text-gray-500' : 'text-gray-300'}`}>
                                   Cloud Computing (AWS)
                                 </Label>
                               </div>
-                              {stats && (
-                                <Badge className={`text-xs ${(stats.remaining_cloud ?? 0) <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
-                                  {stats.remaining_cloud ?? 0} left
+                              {slots && (
+                                <Badge className={`text-xs ${slots.workshops.cloud.remaining <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                  {slots.workshops.cloud.remaining} left
                                 </Badge>
                               )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="ai" id="ai" disabled={(stats?.remaining_ai ?? 0) <= 0} />
-                                <Label htmlFor="ai" className={`text-xs sm:text-sm ${(stats?.remaining_ai ?? 0) <= 0 ? 'text-gray-500' : 'text-gray-300'}`}>
+                                <RadioGroupItem value="ai" id="ai" disabled={slots?.workshops.ai.closed} />
+                                <Label htmlFor="ai" className={`text-xs sm:text-sm ${slots?.workshops.ai.closed ? 'text-gray-500' : 'text-gray-300'}`}>
                                   AI & Machine Learning (Google)
                                 </Label>
                               </div>
-                              {stats && (
-                                <Badge className={`text-xs ${(stats.remaining_ai ?? 0) <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
-                                  {stats.remaining_ai ?? 0} left
+                              {slots && (
+                                <Badge className={`text-xs ${slots.workshops.ai.remaining <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
+                                  {slots.workshops.ai.remaining} left
                                 </Badge>
                               )}
                             </div>
@@ -287,15 +299,11 @@ export default function Tickets() {
                                   Hackathon Entry (+₹150)
                                 </Label>
                               </div>
-                              {(() => {
-                                const comp = competitions.find(c => c.category === 'Hackathon');
-                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
-                                return comp && (
-                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
-                                    {slotsLeft} left
-                                  </Badge>
-                                );
-                              })()}
+                              {slots && (
+                                <Badge className={`text-xs ${slots.competitions.hackathon.remaining > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slots.competitions.hackathon.remaining > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                  {slots.competitions.hackathon.remaining} left
+                                </Badge>
+                              )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
@@ -308,15 +316,11 @@ export default function Tickets() {
                                   Startup Pitch Entry (+₹100)
                                 </Label>
                               </div>
-                              {(() => {
-                                const comp = competitions.find(c => c.category === 'Pitch');
-                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
-                                return comp && (
-                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
-                                    {slotsLeft} left
-                                  </Badge>
-                                );
-                              })()}
+                              {slots && (
+                                <Badge className={`text-xs ${slots.competitions.pitch.remaining > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slots.competitions.pitch.remaining > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                  {slots.competitions.pitch.remaining} left
+                                </Badge>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -366,30 +370,22 @@ export default function Tickets() {
                                 <RadioGroupItem value="hackathon" id="combo-hackathon" />
                                 <Label htmlFor="combo-hackathon" className="text-xs sm:text-sm text-gray-300">Hackathon Track (₹950)</Label>
                               </div>
-                              {(() => {
-                                const comp = competitions.find(c => c.category === 'Hackathon');
-                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
-                                return comp && (
-                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
-                                    {slotsLeft} left
-                                  </Badge>
-                                );
-                              })()}
+                              {slots && (
+                                <Badge className={`text-xs ${slots.competitions.hackathon.remaining > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slots.competitions.hackathon.remaining > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                  {slots.competitions.hackathon.remaining} left
+                                </Badge>
+                              )}
                             </div>
                             <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
                                 <RadioGroupItem value="pitch" id="combo-pitch" />
                                 <Label htmlFor="combo-pitch" className="text-xs sm:text-sm text-gray-300">Startup Pitch Track (₹900)</Label>
                               </div>
-                              {(() => {
-                                const comp = competitions.find(c => c.category === 'Pitch');
-                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
-                                return comp && (
-                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
-                                    {slotsLeft} left
-                                  </Badge>
-                                );
-                              })()}
+                              {slots && (
+                                <Badge className={`text-xs ${slots.competitions.pitch.remaining > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slots.competitions.pitch.remaining > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                  {slots.competitions.pitch.remaining} left
+                                </Badge>
+                              )}
                             </div>
                           </RadioGroup>
                         </div>
