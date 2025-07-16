@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard, FileText, Copy, Upload, InfoIcon } from "lucide-react";
+import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard, FileText, Copy, Upload, InfoIcon, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { uploadFile, validateFile } from "@/lib/file-upload";
 import StartupPitchDialog from '@/components/StartupPitchDialog';
 import PitchModeDialog from "@/components/PitchModeDialog";
+
 
 type Role = 'Student' | 'Working Professional' | 'Academician' | 'Entrepreneur' | 'Researcher' | 'Other';
 type Organization = 'College/University' | 'Company' | 'Startup' | 'Freelancer' | 'Other';
@@ -85,17 +86,32 @@ export default function Register() {
   const [showPitchModeDialog, setShowPitchModeDialog] = useState(false);
   const [currentPitchMember, setCurrentPitchMember] = useState(0);
   const [emailErrors, setEmailErrors] = useState<Record<string, string>>({});
-  const [slots, setSlots] = useState({ pitch: { available: 250 }, hackathon: { available: 250 } });
+  const [slots, setSlots] = useState<{
+    total: { remaining: number; closed: boolean };
+    workshops: {
+      cloud: { remaining: number; closed: boolean };
+      ai: { remaining: number; closed: boolean };
+    };
+    competitions: {
+      hackathon: { remaining: number; closed: boolean };
+      pitch: { remaining: number; closed: boolean };
+    };
+  } | null>(null);
 
-  const fetchSlots = async () => {
-    try {
-      const response = await fetch('/api/registrations/slots');
-      const data = await response.json();
-      setSlots(data);
-    } catch (error) {
-      console.error('Failed to fetch slots:', error);
-    }
-  };
+  useEffect(() => {
+    const fetchSlots = async () => {
+      try {
+        const response = await fetch('/api/slots');
+        const data = await response.json();
+        setSlots(data);
+      } catch (error) {
+        console.error('Failed to fetch slots:', error);
+      }
+    };
+    fetchSlots();
+    const interval = setInterval(fetchSlots, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const [formData, setFormData] = useState<FormData>({
     teamSize: 1,
@@ -144,7 +160,7 @@ export default function Register() {
     const newMembers = [...formData.members];
     newMembers[index] = { ...newMembers[index], [field]: value };
     setFormData({ ...formData, members: newMembers });
-    
+
     if (field === 'email' && typeof value === 'string') {
       checkEmailExists(value, index);
     }
@@ -152,20 +168,20 @@ export default function Register() {
 
   const checkEmailExists = async (email: string, memberIndex: number) => {
     if (!email || !email.includes('@')) return;
-    
+
     try {
       const response = await fetch(`/api/registrations/check-email?email=${encodeURIComponent(email)}`);
       const data = await response.json();
-      
+
       const newEmailErrors = { ...emailErrors };
       const errorKey = memberIndex === 0 ? 'teamLeadEmail' : `member${memberIndex}Email`;
-      
+
       if (data.exists) {
         newEmailErrors[errorKey] = 'Email already registered';
       } else {
         delete newEmailErrors[errorKey];
       }
-      
+
       setEmailErrors(newEmailErrors);
     } catch (error) {
       console.error('Email check failed:', error);
@@ -1155,14 +1171,20 @@ export default function Register() {
                           <SelectValue placeholder="Select workshop track" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="Cloud Computing (AWS)">
+                          <SelectItem value="Cloud Computing (AWS)" disabled={slots?.workshops.cloud.closed}>
                             <div className="flex items-center justify-between w-full">
                               <span>Cloud Computing (AWS)</span>
+                              <Badge className={`ml-2 text-xs ${slots?.workshops.cloud.closed ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
+                                {slots?.workshops.cloud.closed ? 'FULL' : `${slots?.workshops.cloud.remaining || 0} left`}
+                              </Badge>
                             </div>
                           </SelectItem>
-                          <SelectItem value="AI/ML (Google)">
+                          <SelectItem value="AI/ML (Google)" disabled={slots?.workshops.ai.closed}>
                             <div className="flex items-center justify-between w-full">
                               <span>AI/ML (Google)</span>
+                              <Badge className={`ml-2 text-xs ${slots?.workshops.ai.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
+                                {slots?.workshops.ai.closed ? 'FULL' : `${slots?.workshops.ai.remaining || 0} left`}
+                              </Badge>
                             </div>
                           </SelectItem>
                         </SelectContent>
@@ -1192,14 +1214,20 @@ export default function Register() {
                             <SelectValue placeholder="Select competition track" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="Hackathon">
+                            <SelectItem value="Hackathon" disabled={slots?.competitions.hackathon.closed}>
                               <div className="flex items-center justify-between w-full">
                                 <span>Hackathon</span>
+                                <Badge className={`ml-2 text-xs ${slots?.competitions.hackathon.closed ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                  {slots?.competitions.hackathon.closed ? 'FULL' : `${slots?.competitions.hackathon.remaining || 0} left`}
+                                </Badge>
                               </div>
                             </SelectItem>
-                            <SelectItem value="Startup Pitch">
+                            <SelectItem value="Startup Pitch" disabled={slots?.competitions.pitch.closed}>
                               <div className="flex items-center justify-between w-full">
                                 <span>Startup Pitch</span>
+                                <Badge className={`ml-2 text-xs ${slots?.competitions.pitch.closed ? 'bg-red-500/10 text-red-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                  {slots?.competitions.pitch.closed ? 'FULL' : `${slots?.competitions.pitch.remaining || 0} left`}
+                                </Badge>
                               </div>
                             </SelectItem>
                           </SelectContent>
@@ -1266,6 +1294,9 @@ export default function Register() {
                             />
                             <Label htmlFor={`hackathon-${index}`} className="text-gray-300">
                               Hackathon (+₹150)
+                              <Badge className={`ml-2 text-xs ${slots?.competitions.hackathon.closed ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                {slots?.competitions.hackathon.closed ? 'FULL' : `${slots?.competitions.hackathon.remaining || 0} left`}
+                              </Badge>
                             </Label>
                           </div>
                           <div className="space-y-2">
@@ -1290,7 +1321,9 @@ export default function Register() {
                               />
                               <Label htmlFor={`pitch-${index}`} className="text-gray-300">
                                 Startup Pitch (+₹100)
-                                <Badge className="ml-2 text-xs bg-purple-500/10 text-purple-400">{slots.pitch.available} left</Badge>
+                                <Badge className={`ml-2 text-xs ${slots?.competitions.pitch.closed ? 'bg-red-500/10 text-red-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                  {slots?.competitions.pitch.closed ? 'FULL' : `${slots?.competitions.pitch.remaining || 0} left`}
+                                </Badge>
                               </Label>
                             </div>
                             {memberTrack.competitionTrack === "Startup Pitch" && (
@@ -1566,9 +1599,7 @@ export default function Register() {
     }
   };
 
-  useEffect(() => {
-    fetchSlots();
-  }, []);
+
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto">
@@ -1584,6 +1615,40 @@ export default function Register() {
           <p className="text-lg text-gray-300">
             Join the ultimate tech summit and elevate your skills
           </p>
+          {slots && (
+            <div className="flex flex-wrap gap-2 justify-center mt-4">
+              {slots.total.closed ? (
+                <Badge className="bg-red-500/20 text-red-300 border-red-500/30 px-4 py-2">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  EVENT CLOSED - Registration Full
+                </Badge>
+              ) : (
+                <>
+                  <Badge className={`px-3 py-1 ${slots.total.remaining <= 10
+                    ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                    : slots.total.remaining <= 50
+                      ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                      : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                    }`}>
+                    <Clock className="w-3 h-3 mr-1" />
+                    {slots.total.remaining} slots remaining
+                  </Badge>
+                  {(slots.workshops.cloud.closed || slots.workshops.ai.closed) && (
+                    <Badge className="bg-orange-500/10 text-orange-400 border-orange-500/20 px-3 py-1">
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      Some tracks closed
+                    </Badge>
+                  )}
+                  {(slots.competitions.hackathon.closed || slots.competitions.pitch.closed) && (
+                    <Badge className="bg-red-500/10 text-red-400 border-red-500/20 px-3 py-1">
+                      <AlertTriangle className="w-3 h-3 mr-1" />
+                      Competitions filling up
+                    </Badge>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </motion.div>
 
         <div className="mb-8">

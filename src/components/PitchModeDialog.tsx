@@ -14,7 +14,7 @@ interface PitchModeDialogProps {
 
 export default function PitchModeDialog({ open, onOpenChange, onSelectOffline }: PitchModeDialogProps) {
   const handleOnlineSelection = () => {
-    window.open('https://external-pitch-platform.com/register', '_blank');
+    window.open('https://mmkuniverse.vercel.app', '_blank');
     onOpenChange(false);
   };
 

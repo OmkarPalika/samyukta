@@ -35,7 +35,14 @@ export async function uploadToGoogleDrive(file: File, fileName: string, uploadTy
     throw new Error(`GAS upload failed: ${response.status}`);
   }
 
-  const result = await response.json();
+  const responseText = await response.text();
+  
+  // Check if response is HTML (error page)
+  if (responseText.startsWith('<!DOCTYPE')) {
+    throw new Error('GAS service returned HTML instead of JSON. Check deployment configuration.');
+  }
+  
+  const result = JSON.parse(responseText);
   
   if (!result.success) {
     throw new Error(`Upload failed: ${result.error}`);
