@@ -3,14 +3,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/navigation/DashboardNavigation';
-import { User } from '@/entities/User';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
-
-
-interface UserType {
-  full_name: string;
-  role?: string;
-}
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -18,37 +12,14 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
-  const [user, setUser] = React.useState<UserType | null>(null);
-  const [loading, setLoading] = React.useState(true);
+  const { user, loading, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-
-
   React.useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const currentUser = await User.me();
-        setUser(currentUser);
-      } catch {
-        // Redirect to login if not authenticated
-        router.push('/login');
-        return;
-      }
-      setLoading(false);
-    };
-    checkAuth();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await User.logout();
-      setUser(null);
-      router.push('/');
-    } catch (error) {
-      console.error("Logout error:", error);
-      router.push('/');
+    if (!loading && !user) {
+      router.push('/login');
     }
-  };
+  }, [user, loading, router]);
 
   if (loading) {
     return (
@@ -70,12 +41,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="min-h-screen w-full max-w-full bg-gray-900 text-gray-200 flex flex-col overflow-x-hidden">
       <DashboardNavigation 
         user={user} 
-        onLogout={handleLogout} 
+        onLogout={logout} 
         mobileMenuOpen={mobileMenuOpen}
         onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
       />
-      
-
       
       <main className="flex-grow pt-12 sm:pt-16 px-2 sm:px-0">
         {children}

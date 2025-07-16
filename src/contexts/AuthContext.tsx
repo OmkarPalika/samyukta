@@ -34,14 +34,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const userData = await response.json();
           setUser(userData);
         } else {
-          console.error('Auth API returned non-JSON response');
           setUser(null);
         }
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
+    } catch {
       setUser(null);
     } finally {
       setLoading(false);

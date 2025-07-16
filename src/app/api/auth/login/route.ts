@@ -57,14 +57,11 @@ export async function POST(request: NextRequest) {
     
     // Set cookie
     const response = NextResponse.json({
-      success: true,
-      user: {
-        id: userId,
-        name: user.full_name,
-        email: user.email,
-        role: user.role || 'participant',
-        college: user.college
-      }
+      id: userId,
+      full_name: user.full_name,
+      email: user.email,
+      role: user.role || 'participant',
+      college: user.college
     });
     
     response.cookies.set('auth_token', sessionToken, {

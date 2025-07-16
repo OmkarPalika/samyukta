@@ -290,4 +290,27 @@ export class Registration {
 
     return response.json();
   }
+
+  static async updateEmail(teamId: string, oldEmail: string, newEmail: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    const response = await fetch('/api/registrations/update-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        team_id: teamId,
+        old_email: oldEmail,
+        new_email: newEmail
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to update email');
+    }
+
+    return response.json();
+  }
 }

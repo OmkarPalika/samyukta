@@ -23,9 +23,12 @@ export async function GET(request: NextRequest) {
     }
 
     // Try to find user in users collection first (admin/coordinator)
-    const user = await collections.users.findOne({ 
-      _id: ObjectId.isValid(session.user_id) ? new ObjectId(session.user_id) : undefined 
-    }, { projection: { password: 0 } });
+    let user = null;
+    if (ObjectId.isValid(session.user_id)) {
+      user = await collections.users.findOne({ 
+        _id: new ObjectId(session.user_id)
+      }, { projection: { password: 0 } });
+    }
     
     if (user) {
       return NextResponse.json({

@@ -63,16 +63,16 @@ export default function AdminDashboard() {
   const loadAllData = async () => {
     try {
       const [usersData, registrationsData, ticketsData, socialData] = await Promise.all([
-        User.getAll(),
-        Registration.getAll(),
-        HelpTicket.getAll(),
-        Social.getAll()
+        User.getAll().catch(() => []),
+        Registration.getAll().catch(() => []),
+        HelpTicket.getAll().catch(() => []),
+        Social.getAll().catch(() => [])
       ]);
 
-      setUsers(usersData);
-      setRegistrations(registrationsData);
-      setHelpTickets(ticketsData);
-      setSocialItems(socialData);
+      setUsers(Array.isArray(usersData) ? usersData : []);
+      setRegistrations(Array.isArray(registrationsData) ? registrationsData : []);
+      setHelpTickets(Array.isArray(ticketsData) ? ticketsData : []);
+      setSocialItems(Array.isArray(socialData) ? socialData : []);
 
       setStats({
         totalUsers: usersData.length,

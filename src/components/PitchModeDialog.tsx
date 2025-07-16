@@ -1,6 +1,6 @@
 'use client';
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink, FileText } from 'lucide-react';
@@ -23,6 +23,9 @@ export default function PitchModeDialog({ open, onOpenChange, onSelectOffline }:
       <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] bg-gray-800 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white text-center">Choose Your Pitch Mode</DialogTitle>
+          <DialogDescription className="text-gray-400 text-center">
+            Select how you&apos;d like to submit your startup pitch
+          </DialogDescription>
         </DialogHeader>
         
         <div className="grid md:grid-cols-2 gap-4">

@@ -29,6 +29,7 @@ export default function Logo({ href = "/", size = 'lg', showText = true }: LogoP
           alt="Logo"
           width={Number(sizeClasses[size])}
           height={Number(sizeClasses[size])}
+          style={{ width: 'auto', height: 'auto' }}
         />
       </div>
       {showText && (

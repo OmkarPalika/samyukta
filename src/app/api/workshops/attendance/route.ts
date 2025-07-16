@@ -23,13 +23,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Registration not found' }, { status: 404 });
     }
 
+    const now = new Date();
     const attendanceRecord = {
-      workshop_id: workshop_session,
       participant_id,
+      participant_name: participant.full_name,
+      workshop_track: registration.workshop_track,
+      workshop_session,
+      workshop_id: `${registration.workshop_track.toLowerCase()}_${workshop_session}`,
+      action,
+      timestamp: now,
+      date: now.toISOString().split('T')[0],
+      check_in_time: now,
       completion_status: 'attended' as const,
-      check_in_time: new Date(),
-      created_at: new Date(),
-      updated_at: new Date()
+      certificate_url: undefined,
+      created_at: now,
+      updated_at: now
     };
 
     await collections.workshopAttendance.insertOne(attendanceRecord);

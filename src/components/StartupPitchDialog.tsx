@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -131,6 +131,9 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
       <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white">Startup Pitch Details</DialogTitle>
+          <DialogDescription className="text-gray-400">
+            Fill in your startup pitch information for the competition
+          </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-4">

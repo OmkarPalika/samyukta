@@ -1,8 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from '@/entities/User';
-import { User as UserType, RegistrationResponse, HelpTicketResponse } from '@/lib/types';
+import { ClientAuth } from '@/lib/client-auth';
+import { User as UserType, RegistrationResponse } from '@/lib/types';
+
+interface HelpTicketData {
+  id: string;
+  title: string;
+  description: string;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+}
+
+interface Analytics {
+  overview: {
+    total_participants: number;
+    present_today: number;
+  };
+  daily: {
+    meals_distributed: number;
+    accommodation_occupied: number;
+  };
+  tracks: {
+    workshops: Record<string, number>;
+    competitions: Record<string, number>;
+  };
+}
 import { Registration } from '@/entities/Registration';
 import { HelpTicket } from '@/entities/HelpTicket';
 import { Social } from '@/entities/Social';
@@ -30,20 +52,42 @@ export default function CoordinatorDashboard() {
   const [mealType] = useState('lunch');
   const [workshopSession, setWorkshopSession] = useState('session1');
   const [competitionType, setCompetitionType] = useState('Hackathon');
+  const [accommodationAction, setAccommodationAction] = useState('checkin');
+  const [roomNumber, setRoomNumber] = useState('');
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [participants, setParticipants] = useState<RegistrationResponse[]>([]);
-  const [helpTickets, setHelpTickets] = useState<HelpTicketResponse[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<RegistrationResponse | null>(null);
   const [attendanceList, setAttendanceList] = useState<Array<{id: string; name: string; email: string; present: boolean}>>([]);
+  const [helpTickets, setHelpTickets] = useState<HelpTicketData[]>([]);
 
   useEffect(() => {
     loadUserData();
     loadParticipants();
     loadHelpTickets();
+    loadAnalytics();
+    const interval = setInterval(loadAnalytics, 30000);
+    return () => clearInterval(interval);
   }, []);
+
+  const loadAnalytics = async () => {
+    try {
+      const response = await fetch('/api/analytics');
+      if (response.ok) {
+        const data = await response.json();
+        setAnalytics(data);
+      }
+    } catch (error) {
+      console.error('Analytics error:', error);
+    }
+  };
 
   const loadUserData = async () => {
     try {
-      const currentUser = await User.me();
+      const currentUser = await ClientAuth.me();
+      if (!currentUser) {
+        window.location.href = '/login';
+        return;
+      }
       setUser(currentUser);
       
       if (currentUser.id) {
@@ -63,18 +107,20 @@ export default function CoordinatorDashboard() {
   const loadParticipants = async () => {
     try {
       const data = await Registration.getAll();
-      setParticipants(data);
+      setParticipants(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading participants:', error);
+      setParticipants([]);
     }
   };
 
   const loadHelpTickets = async () => {
     try {
       const data = await HelpTicket.getAll();
-      setHelpTickets(data);
+      setHelpTickets(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error loading help tickets:', error);
+      setHelpTickets([]);
     }
   };
 
@@ -121,6 +167,29 @@ export default function CoordinatorDashboard() {
         if (response.ok) {
           const result = await response.json();
           alert(`${result.participant.name} checked in to ${result.competition_type}`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.error}`);
+        }
+      } else if (showScanner === 'accommodation') {
+        // Handle accommodation check-in/out
+        const response = await fetch('/api/accommodation/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            participant_id: data.id, 
+            action: accommodationAction,
+            room_number: accommodationAction === 'checkin' ? roomNumber : undefined
+          })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const message = accommodationAction === 'checkin' 
+            ? `${result.participant.name} checked into Room ${result.room_number}`
+            : `${result.participant.name} checked out`;
+          alert(message);
+          if (accommodationAction === 'checkin') setRoomNumber('');
         } else {
           const error = await response.json();
           alert(`Error: ${error.error}`);
@@ -262,7 +331,7 @@ export default function CoordinatorDashboard() {
             <div className="lg:col-span-3">
               <Tabs defaultValue="gate" className="w-full">
                 {/* Desktop Tabs */}
-                <TabsList className="hidden md:grid w-full grid-cols-4 bg-gray-800/40 mb-6 sm:mb-8 h-12 sm:h-16">
+                <TabsList className="hidden md:grid w-full grid-cols-6 bg-gray-800/40 mb-6 sm:mb-8 h-12 sm:h-16">
                   <TabsTrigger value="gate" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white h-full">
                     <div className="text-center">
                       <div className="font-semibold text-xs sm:text-sm">Gate Entry</div>
@@ -279,6 +348,18 @@ export default function CoordinatorDashboard() {
                     <div className="text-center">
                       <div className="font-semibold text-xs sm:text-sm">Help Tickets</div>
                       <div className="text-xs opacity-70 hidden sm:block">Support</div>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="accommodation" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-purple-500 data-[state=active]:text-white h-full">
+                    <div className="text-center">
+                      <div className="font-semibold text-xs sm:text-sm">Accommodation</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Rooms</div>
+                    </div>
+                  </TabsTrigger>
+                  <TabsTrigger value="analytics" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-orange-500 data-[state=active]:text-white h-full">
+                    <div className="text-center">
+                      <div className="font-semibold text-xs sm:text-sm">Analytics</div>
+                      <div className="text-xs opacity-70 hidden sm:block">Stats</div>
                     </div>
                   </TabsTrigger>
                   <TabsTrigger value="social" className="text-gray-400 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white h-full">
@@ -469,6 +550,102 @@ export default function CoordinatorDashboard() {
                   </Card>
                 </TabsContent>
 
+                <TabsContent value="accommodation" className="space-y-6">
+                  <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                    <CardHeader className="pb-3 sm:pb-4">
+                      <CardTitle className="text-white text-sm sm:text-base">Accommodation Management</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-6">
+                      <div className="space-y-3 sm:space-y-4">
+                        <select 
+                          value={accommodationAction} 
+                          onChange={(e) => setAccommodationAction(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white rounded px-3 py-2 text-sm"
+                        >
+                          <option value="checkin">Check-in</option>
+                          <option value="checkout">Check-out</option>
+                        </select>
+                        {accommodationAction === 'checkin' && (
+                          <Input
+                            value={roomNumber}
+                            onChange={(e) => setRoomNumber(e.target.value)}
+                            placeholder="Room Number (e.g., M101, F201)"
+                            className="bg-gray-700 border-gray-600 text-white text-sm"
+                          />
+                        )}
+                        <Button 
+                          onClick={() => setShowScanner('accommodation')}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-sm sm:text-base"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Accommodation Scanner
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="analytics" className="space-y-6">
+                  {analytics && (
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-blue-400">{analytics.overview.total_participants}</div>
+                            <div className="text-sm text-gray-400">Total Participants</div>
+                          </CardContent>
+                        </Card>
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-green-400">{analytics.overview.present_today}</div>
+                            <div className="text-sm text-gray-400">Present Today</div>
+                          </CardContent>
+                        </Card>
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-orange-400">{analytics.daily.meals_distributed}</div>
+                            <div className="text-sm text-gray-400">Meals Distributed</div>
+                          </CardContent>
+                        </Card>
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardContent className="p-4 text-center">
+                            <div className="text-2xl font-bold text-purple-400">{analytics.daily.accommodation_occupied}</div>
+                            <div className="text-sm text-gray-400">Rooms Occupied</div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                      <div className="grid md:grid-cols-2 gap-6">
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardHeader>
+                            <CardTitle className="text-white text-sm">Workshop Distribution</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {Object.entries(analytics.tracks.workshops).map(([track, count]) => (
+                              <div key={track} className="flex justify-between py-2">
+                                <span className="text-gray-300">{track}</span>
+                                <span className="text-white font-medium">{count as number}</span>
+                              </div>
+                            ))}
+                          </CardContent>
+                        </Card>
+                        <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                          <CardHeader>
+                            <CardTitle className="text-white text-sm">Competition Distribution</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            {Object.entries(analytics.tracks.competitions).map(([track, count]) => (
+                              <div key={track} className="flex justify-between py-2">
+                                <span className="text-gray-300">{track}</span>
+                                <span className="text-white font-medium">{count as number}</span>
+                              </div>
+                            ))}
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </>
+                  )}
+                </TabsContent>
+
                 <TabsContent value="participants" className="space-y-6">
                   <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                     <CardHeader>
@@ -476,7 +653,7 @@ export default function CoordinatorDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {participants.map((participant, index) => (
+                        {(participants || []).map((participant, index) => (
                           <div key={index} className="p-3 sm:p-4 bg-gray-700/30 rounded-lg">
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0">
                               <div className="min-w-0 flex-1">
@@ -508,7 +685,7 @@ export default function CoordinatorDashboard() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {helpTickets.map((ticket, index) => (
+                        {(helpTickets || []).map((ticket, index) => (
                           <div key={index} className="p-3 sm:p-4 bg-gray-700/30 rounded-lg">
                             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-0 mb-2">
                               <h3 className="text-white font-medium text-sm sm:text-base truncate">{ticket.title}</h3>
@@ -586,11 +763,13 @@ export default function CoordinatorDashboard() {
             title={
               showScanner === 'meal' ? 'Meal Distribution Scanner' : 
               showScanner === 'workshop' ? 'Workshop Attendance Scanner' : 
+              showScanner === 'accommodation' ? 'Accommodation Scanner' :
               'Gate Entry Scanner'
             }
             description={
               showScanner === 'meal' ? 'Scan participant QR codes for meal distribution' : 
               showScanner === 'workshop' ? 'Scan participant QR codes for workshop attendance' : 
+              showScanner === 'accommodation' ? 'Scan participant QR codes for accommodation check-in/out' :
               'Scan participant QR codes for gate entry'
             }
             onScan={handleQRScan}

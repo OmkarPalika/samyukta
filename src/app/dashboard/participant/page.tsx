@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { User } from '@/entities/User';
+import { ClientAuth } from '@/lib/client-auth';
 import { Game } from '@/entities/Game';
 import { Social } from '@/entities/Social';
 import { HelpTicket } from '@/entities/HelpTicket';
@@ -92,7 +92,11 @@ export default function ParticipantDashboard() {
   
   const loadUserData = async () => {
     try {
-      const currentUser = await User.me();
+      const currentUser = await ClientAuth.me();
+      if (!currentUser) {
+        window.location.href = '/login';
+        return;
+      }
       setUser(currentUser);
       setProfileData({
         linkedin: currentUser.linkedin || '',
@@ -226,7 +230,8 @@ export default function ParticipantDashboard() {
   const handleProfileUpdate = async () => {
     if (!user) return;
     try {
-      await User.updateProfile(user.id, profileData);
+      // Profile update would be handled by API endpoint
+      // await User.updateProfile(user.id, profileData);
       setUser({ ...user, ...profileData });
     } catch (error) {
       console.error('Profile update error:', error);

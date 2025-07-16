@@ -48,11 +48,15 @@ export interface TeamMemberSchema {
   year: string;
   department: string;
   college?: string;
+  gender?: string;
   accommodation: boolean;
+  accommodation_room?: string;
+  accommodation_status?: 'checked_in' | 'checked_out';
   food_preference: 'veg' | 'non-veg';
   is_club_lead?: boolean;
   club_name?: string;
   present?: boolean;
+  qr_code?: string;
   qr_code_url?: string;
   created_at: Date;
 }
@@ -196,13 +200,25 @@ export interface MealSchema {
   date: string;
 }
 
-export interface MealSchema {
+export interface WorkshopAttendanceLogSchema {
   _id?: ObjectId;
   participant_id: string;
   participant_name: string;
-  meal_type: string;
-  food_preference: 'veg' | 'non-veg';
-  distributed_at: Date;
+  workshop_track: string;
+  workshop_session: string;
+  action: string;
+  timestamp: Date;
+  date: string;
+}
+
+export interface AccommodationLogSchema {
+  _id?: ObjectId;
+  participant_id: string;
+  participant_name: string;
+  gender: string;
+  action: 'checkin' | 'checkout';
+  room_number?: string;
+  timestamp: Date;
   date: string;
 }
 
@@ -320,10 +336,18 @@ export async function initializeDatabase(db: Db) {
       { key: { distributed_at: -1 } }
     ]),
 
-    // Meals collection
-    db.collection('meals').createIndexes([
-      { key: { participant_id: 1, meal_type: 1, date: 1 }, unique: true },
-      { key: { distributed_at: -1 } }
+    // Workshop attendance logs collection
+    db.collection('workshop_attendance_logs').createIndexes([
+      { key: { participant_id: 1, workshop_session: 1, date: 1 } },
+      { key: { workshop_track: 1 } },
+      { key: { timestamp: -1 } }
+    ]),
+
+    // Accommodation logs collection
+    db.collection('accommodation_logs').createIndexes([
+      { key: { participant_id: 1, action: 1, date: 1 } },
+      { key: { room_number: 1 } },
+      { key: { timestamp: -1 } }
     ])
   ]);
 
@@ -354,6 +378,8 @@ export function getCollections(db: Db) {
     games: db.collection<GameSchema>('games'),
     pitchRatings: db.collection<PitchRatingSchema>('pitch_ratings'),
     sessions: db.collection<SessionSchema>('sessions'),
-    meals: db.collection<MealSchema>('meals')
+    meals: db.collection<MealSchema>('meals'),
+    workshopAttendanceLogs: db.collection<WorkshopAttendanceLogSchema>('workshop_attendance_logs'),
+    accommodationLogs: db.collection<AccommodationLogSchema>('accommodation_logs')
   };
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
@@ -26,6 +26,21 @@ export default function Login() {
       passkey: ''
     }
   });
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await ClientAuth.me();
+        if (user) {
+          router.push('/dashboard');
+        }
+      } catch (error) {
+        // User not logged in, continue with login page
+        console.error('Auth check error:', error);
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const checkEmail = async (email: string) => {
     setLoading(true);

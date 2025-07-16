@@ -50,8 +50,9 @@ export default function QRScanner({ onScan, onClose, title, description }: QRSca
           });
         }
       }
-    } catch {
-      setError('Camera access denied. Please use manual input.');
+    } catch (err) {
+      console.log('Camera access error:', err);
+      setError('Camera access denied or not available. Please use manual input below.');
     }
   };
 
@@ -128,6 +129,9 @@ export default function QRScanner({ onScan, onClose, title, description }: QRSca
                   <div className="text-center">
                     <Camera className="w-12 h-12 text-gray-400 mx-auto mb-2" />
                     <p className="text-gray-400 text-sm">Camera preview</p>
+                    {error && (
+                      <p className="text-yellow-400 text-xs mt-1">Use manual input below</p>
+                    )}
                   </div>
                 </div>
               )}

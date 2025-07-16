@@ -3,50 +3,15 @@
 import React from 'react';
 import PublicNavigation from '@/components/navigation/PublicNavigation';
 import Footer from '@/components/shared/Footer';
-import { User } from '@/entities/User';
-
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { useRouter } from 'next/navigation';
-
-interface UserType {
-  full_name: string;
-  role?: string;
-}
 
 interface PublicLayoutProps {
   children: React.ReactNode;
 }
 
 export default function PublicLayout({ children }: PublicLayoutProps) {
-  const [user, setUser] = React.useState<UserType | null>(null);
-  const [loading, setLoading] = React.useState(true);
-  const router = useRouter();
-
-  React.useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
-    try {
-      const currentUser = await User.me();
-      setUser(currentUser);
-    } catch {
-      // Expected behavior when user is not authenticated
-      setUser(null);
-    }
-    setLoading(false);
-  };
-
-  const handleLogout = async () => {
-    try {
-      await User.logout();
-      setUser(null);
-      router.push('/');
-    } catch (error) {
-      console.error("Logout error:", error);
-      router.push('/');
-    }
-  };
+  const { user, loading, logout } = useAuth();
 
   if (loading) {
     return (
@@ -62,7 +27,7 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
-      <PublicNavigation user={user} onLogout={handleLogout} />
+      <PublicNavigation user={user} onLogout={logout} />
       
       <main className="flex-grow nav-offset">
         {children}
