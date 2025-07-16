@@ -1,18 +1,14 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Users, Star, ArrowRight, ChevronLeft, Upload, User as UserIcon, CreditCard, FileText, Clock, AlertTriangle, Info, Copy } from "lucide-react";
+import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard, FileText, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 type Role = 'Student' | 'Working Professional' | 'Academician' | 'Entrepreneur' | 'Researcher' | 'Other';
 type Organization = 'ANITS' | 'College/University' | 'Company' | 'Startup' | 'Freelancer' | 'Other';
@@ -58,9 +54,7 @@ interface FormData {
 }
 
 export default function Register() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<FormData>({
@@ -103,7 +97,6 @@ export default function Register() {
   const roles: Role[] = ['Student', 'Working Professional', 'Academician', 'Entrepreneur', 'Researcher', 'Other'];
   const organizations: Organization[] = ['ANITS', 'College/University', 'Company', 'Startup', 'Freelancer', 'Other'];
   const years = ["1st", "2nd", "3rd", "4th", "5th"];
-  const degrees = ["Bachelors", "Masters", "Associate", "Doctoral", "Other"];
 
   const handleMemberChange = (index: number, field: string, value: string | boolean) => {
     const newMembers = [...formData.members];
@@ -243,7 +236,7 @@ export default function Register() {
           <div className="space-y-6">
             <div className="text-center mb-6">
               <h3 className="text-xl font-bold text-white mb-2">Team Lead Information</h3>
-              <p className="text-gray-300">Let's start with the primary contact person</p>
+              <p className="text-gray-300">Let&apos;s start with the primary contact person</p>
             </div>
             
             <div className="grid md:grid-cols-2 gap-4">
@@ -337,19 +330,13 @@ export default function Register() {
 
                   <div className="space-y-2">
                     <Label className="text-gray-300">Department *</Label>
-                    <Select
-                      value={teamLead.department || ""}
-                      onValueChange={(value) => handleMemberChange(0, 'department', value)}
-                    >
-                      <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                        <SelectValue placeholder="Select department" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {departments.map((dept) => (
-                          <SelectItem key={dept} value={dept}>{dept}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      value={teamLead.stream}
+                      onChange={(e) => handleMemberChange(0, 'stream', e.target.value)}
+                      className="bg-gray-700/50 border-gray-600 text-white"
+                      placeholder="e.g. Computer Science and Engineering, Electronics and Communication"
+                    />
+                    {errors.teamLeadStream && <p className="text-red-400 text-sm">{errors.teamLeadStream}</p>}
                   </div>
                 </>
               )}
@@ -434,7 +421,7 @@ export default function Register() {
                 <UserIcon className="w-8 h-8 text-blue-400" />
               </div>
               <h3 className="text-xl font-bold text-white">Solo Registration</h3>
-              <p className="text-gray-300">You're registering as an individual participant. Ready to proceed!</p>
+              <p className="text-gray-300">You&apos;re registering as an individual participant. Ready to proceed!</p>
             </div>
           );
         }
