@@ -62,9 +62,13 @@ export default function Login() {
     setError('');
 
     try {
-      const result = await ClientAuth.login(data.email, data.password || data.passkey);
+      const credential = userRole === 'participant' ? data.passkey : data.password;
+      const result = await ClientAuth.login(data.email, credential);
       if (result) {
-        router.push('/dashboard');
+        // Add a small delay to ensure cookie is set
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 100);
       } else {
         throw new Error('Login failed');
       }

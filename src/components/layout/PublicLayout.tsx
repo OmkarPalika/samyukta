@@ -6,7 +6,7 @@ import Footer from '@/components/shared/Footer';
 import { User } from '@/entities/User';
 
 import { Card, CardContent } from '@/components/ui/card';
-import router from 'next/router';
+import { useRouter } from 'next/navigation';
 
 interface UserType {
   full_name: string;
@@ -20,6 +20,7 @@ interface PublicLayoutProps {
 export default function PublicLayout({ children }: PublicLayoutProps) {
   const [user, setUser] = React.useState<UserType | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const router = useRouter();
 
   React.useEffect(() => {
     checkAuth();
@@ -40,12 +41,10 @@ export default function PublicLayout({ children }: PublicLayoutProps) {
     try {
       await User.logout();
       setUser(null);
-      // Force redirect to home page
-      router.replace('/');
+      router.push('/');
     } catch (error) {
       console.error("Logout error:", error);
-      // Still redirect to home even if logout fails
-      router.replace('/');
+      router.push('/');
     }
   };
 

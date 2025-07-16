@@ -11,10 +11,10 @@ export default function Dashboard() {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const dashboardData = await ClientAuth.getDashboardData();
-        if (!dashboardData || !dashboardData.user) throw new Error('Not authenticated');
-        
-        const currentUser = dashboardData.user as { role: string };
+        // Add delay to ensure cookie is available
+        await new Promise(resolve => setTimeout(resolve, 200));
+        const currentUser = await ClientAuth.me();
+        if (!currentUser) throw new Error('Not authenticated');
         
         // Route to appropriate dashboard based on role
         if (currentUser.role === 'admin') {
@@ -24,8 +24,8 @@ export default function Dashboard() {
         } else {
           router.push('/dashboard/participant');
         }
-      } catch {
-        // If user is not authenticated, redirect to login
+      } catch (error) {
+        console.error('Auth check failed:', error);
         router.push('/login');
       }
     };

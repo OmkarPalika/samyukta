@@ -32,6 +32,7 @@ export default function ParticipantDashboard() {
   const [loading, setLoading] = useState(true);
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [qrCode, setQrCode] = useState('');
+  const [teamQRCodes, setTeamQRCodes] = useState<Array<{participant_id: string; name: string; qr_code: string}>>([]);
   const [showScanner, setShowScanner] = useState<string | null>(null);
   const [gameStats, setGameStats] = useState({ qrQuest: 0, imposterSuspects: 0 });
   const [profileData, setProfileData] = useState({
@@ -100,16 +101,65 @@ export default function ParticipantDashboard() {
       });
 
       if (currentUser.id) {
-        const qr = await QRGenerator.generateParticipantQR({
-          id: currentUser.id,
-          name: currentUser.full_name,
-          email: currentUser.email,
-          college: currentUser.college,
-          track: currentUser.track,
-          year: currentUser.year,
-          dept: currentUser.dept
-        });
-        setQrCode(qr);
+        // Check if user is registered and get participant_id
+        try {
+          const memberResponse = await fetch(`/api/registrations/team-qr?email=${currentUser.email}`);
+          if (memberResponse.ok) {
+            const memberData = await memberResponse.json();
+            const userMember = memberData.qr_codes.find((m: {name: string}) => m.name === currentUser.full_name);            
+            if (userMember?.participant_id) {
+              // Generate QR with participant_id for registered users
+              const qr = await QRGenerator.generateParticipantQR({
+                id: userMember.participant_id,
+                name: currentUser.full_name,
+                email: currentUser.email,
+                college: currentUser.college,
+                track: currentUser.track,
+                year: currentUser.year,
+                dept: currentUser.dept
+              });
+              setQrCode(qr);
+              setTeamQRCodes(memberData.qr_codes || []);
+            } else {
+              // Fallback for non-registered users
+              const qr = await QRGenerator.generateParticipantQR({
+                id: currentUser.id,
+                name: currentUser.full_name,
+                email: currentUser.email,
+                college: currentUser.college,
+                track: currentUser.track,
+                year: currentUser.year,
+                dept: currentUser.dept
+              });
+              setQrCode(qr);
+            }
+          } else {
+            // User not registered, use regular ID
+            const qr = await QRGenerator.generateParticipantQR({
+              id: currentUser.id,
+              name: currentUser.full_name,
+              email: currentUser.email,
+              college: currentUser.college,
+              track: currentUser.track,
+              year: currentUser.year,
+              dept: currentUser.dept
+            });
+            setQrCode(qr);
+          }
+        } catch (error) {
+          console.error('Failed to fetch registration data:', error);
+          // Fallback QR generation
+          const qr = await QRGenerator.generateParticipantQR({
+            id: currentUser.id,
+            name: currentUser.full_name,
+            email: currentUser.email,
+            college: currentUser.college,
+            track: currentUser.track,
+            year: currentUser.year,
+            dept: currentUser.dept
+          });
+          setQrCode(qr);
+        }
       }
     } catch {
       setUser(null);
@@ -770,17 +820,36 @@ export default function ParticipantDashboard() {
                     <CardTitle className="text-white">Team QR Codes</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-                      {teamMembers.map((member, index) => (
-                        <div key={index} className="text-center p-3 sm:p-4 bg-gray-700/30 rounded-lg">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-lg flex items-center justify-center mx-auto mb-2">
-                            <QrCode className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500/50" />
+                    {teamQRCodes.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+                        {teamQRCodes.map((member, index) => (
+                          <div key={index} className="text-center p-3 sm:p-4 bg-gray-700/30 rounded-lg">
+                            {member.qr_code ? (
+                              <Image
+                                src={member.qr_code}
+                                alt={`QR Code for ${member.name}`}
+                                width={96}
+                                height={96}
+                                className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-2 rounded-lg"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-lg flex items-center justify-center mx-auto mb-2">
+                                <QrCode className="w-12 h-12 sm:w-16 sm:h-16 text-blue-500/50" />
+                              </div>
+                            )}
+                            <p className="text-white font-medium text-sm sm:text-base truncate">{member.name}</p>
+                            <p className="text-gray-400 text-xs">{member.participant_id}</p>
                           </div>
-                          <p className="text-white font-medium text-sm sm:text-base truncate">{member.name}</p>
-                          <p className="text-gray-400 text-xs">TEAM-001-{index + 1}</p>
-                        </div>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <QrCode className="w-16 h-16 text-gray-500 mx-auto mb-4" />
+                        <p className="text-gray-400">No team QR codes available</p>
+                        <p className="text-gray-500 text-sm">QR codes will be generated after registration approval</p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </TabsContent>

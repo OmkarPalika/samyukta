@@ -28,12 +28,24 @@ export async function GET() {
       { $group: { _id: null, total: { $sum: '$team_size' } } }
     ]).toArray().then(result => result[0]?.total || 0);
     
+    const maleAccommodationCount = await collections.teamMembers.countDocuments({
+      accommodation: true,
+      gender: 'Male'
+    });
+    
+    const femaleAccommodationCount = await collections.teamMembers.countDocuments({
+      accommodation: true,
+      gender: 'Female'
+    });
+    
     // Define limits
     const MAX_TOTAL = 400;
     const MAX_CLOUD = 200;
     const MAX_AI = 200;
     const MAX_HACKATHON = 250;
     const MAX_PITCH = 250;
+    const MAX_MALE_ACCOMMODATION = 50;
+    const MAX_FEMALE_ACCOMMODATION = 50;
     
     // Calculate remaining slots
     const remaining_total = Math.max(0, MAX_TOTAL - totalCount);
@@ -41,6 +53,8 @@ export async function GET() {
     const remaining_ai = Math.max(0, MAX_AI - aiCount);
     const remaining_hackathon = Math.max(0, MAX_HACKATHON - hackathonCount);
     const remaining_pitch = Math.max(0, MAX_PITCH - pitchCount);
+    const remaining_male_accommodation = Math.max(0, MAX_MALE_ACCOMMODATION - maleAccommodationCount);
+    const remaining_female_accommodation = Math.max(0, MAX_FEMALE_ACCOMMODATION - femaleAccommodationCount);
     
     // Consolidated slot data
     const slotData = {
@@ -87,6 +101,22 @@ export async function GET() {
           category: 'Pitch',
           slots_available: MAX_PITCH,
           slots_filled: pitchCount
+        }
+      },
+      
+      // Accommodation
+      accommodation: {
+        male: {
+          registered: maleAccommodationCount,
+          max: MAX_MALE_ACCOMMODATION,
+          remaining: remaining_male_accommodation,
+          closed: maleAccommodationCount >= MAX_MALE_ACCOMMODATION
+        },
+        female: {
+          registered: femaleAccommodationCount,
+          max: MAX_FEMALE_ACCOMMODATION,
+          remaining: remaining_female_accommodation,
+          closed: femaleAccommodationCount >= MAX_FEMALE_ACCOMMODATION
         }
       },
       

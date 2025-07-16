@@ -28,6 +28,7 @@ interface StartupPitchDialogProps {
   onOpenChange: (open: boolean) => void;
   onSave: (data: StartupPitchData) => void;
   initialData?: StartupPitchData;
+  registrationTeamSize?: number;
 }
 
 const defaultData: StartupPitchData = {
@@ -43,8 +44,15 @@ const defaultData: StartupPitchData = {
   demoUrl: ''
 };
 
-export default function StartupPitchDialog({ open, onOpenChange, onSave, initialData }: StartupPitchDialogProps) {
-  const [data, setData] = useState<StartupPitchData>(initialData || defaultData);
+export default function StartupPitchDialog({ open, onOpenChange, onSave, initialData, registrationTeamSize }: StartupPitchDialogProps) {
+  const [data, setData] = useState<StartupPitchData>(() => {
+    const baseData = initialData || defaultData;
+    // Set team size from registration if not already set
+    if (!baseData.teamSize && registrationTeamSize) {
+      return { ...baseData, teamSize: registrationTeamSize.toString() };
+    }
+    return baseData;
+  });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
 
@@ -68,8 +76,8 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
     if (!data.targetMarket) newErrors.targetMarket = 'Target market is required';
     if (!data.currentStage) newErrors.currentStage = 'Current stage is required';
     if (!data.teamSize) newErrors.teamSize = 'Team size is required';
-    else if (isNaN(Number(data.teamSize)) || Number(data.teamSize) < 1) {
-      newErrors.teamSize = 'Team size must be a valid number';
+    else if (isNaN(Number(data.teamSize)) || Number(data.teamSize) < 1 || Number(data.teamSize) > 5) {
+      newErrors.teamSize = 'Team size must be between 1 and 5';
     }
 
     setErrors(newErrors);
@@ -120,7 +128,7 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700">
+      <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] max-h-[90vh] overflow-y-auto bg-gray-800 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white">Startup Pitch Details</DialogTitle>
         </DialogHeader>
@@ -210,15 +218,22 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
             </div>
 
             <div className="space-y-2">
-              <Label className="text-gray-300">Team Size *</Label>
+              <Label className="text-gray-300">Team Size * (1-5 members)</Label>
               <Input
                 type="number"
                 min="1"
+                max="5"
                 value={data.teamSize}
-                onChange={(e) => setData({ ...data, teamSize: e.target.value })}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || (Number(value) >= 1 && Number(value) <= 5)) {
+                    setData({ ...data, teamSize: value });
+                  }
+                }}
                 className="bg-gray-700/50 border-gray-600 text-white"
                 placeholder="Number of team members"
               />
+              <p className="text-xs text-gray-400">Editable, but must be between 1-5 members</p>
               {errors.teamSize && <p className="text-red-400 text-sm">{errors.teamSize}</p>}
             </div>
           </div>

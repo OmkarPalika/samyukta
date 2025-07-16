@@ -26,7 +26,10 @@ export default function CoordinatorDashboard() {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState('');
-  const [showScanner, setShowScanner] = useState(false);
+  const [showScanner, setShowScanner] = useState<string | boolean>(false);
+  const [mealType] = useState('lunch');
+  const [workshopSession, setWorkshopSession] = useState('session1');
+  const [competitionType, setCompetitionType] = useState('Hackathon');
   const [participants, setParticipants] = useState<RegistrationResponse[]>([]);
   const [helpTickets, setHelpTickets] = useState<HelpTicketResponse[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<RegistrationResponse | null>(null);
@@ -75,26 +78,74 @@ export default function CoordinatorDashboard() {
     }
   };
 
-  const handleGateEntry = async (data: QRPayload) => {
+  const handleQRScan = async (data: QRPayload) => {
     try {
-      const team = participants.find((p) => 
-        p.members?.some((m) => m.id === data.id)
-      );
-      
-      if (team) {
-        setSelectedTeam(team);
-        setAttendanceList(
-          team.members?.map((m) => ({
-            id: m.id ?? m.participant_id ?? '',
-            name: m.name ?? m.full_name ?? '',
-            email: m.email ?? '',
-            present: false
-          })) || []
+      if (showScanner === 'meal') {
+        // Handle meal distribution
+        const response = await fetch('/api/meals/distribute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_id: data.id, meal_type: mealType })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          alert(`Meal distributed to ${result.participant.name} (${result.participant.food_preference})`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.error}`);
+        }
+      } else if (showScanner === 'workshop') {
+        // Handle workshop attendance
+        const response = await fetch('/api/workshops/attendance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_id: data.id, workshop_session: workshopSession })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          alert(`${result.participant.name} checked in to ${result.workshop_session} (${result.participant.workshop_track})`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.error}`);
+        }
+      } else if (showScanner === 'competition') {
+        // Handle competition check-in
+        const response = await fetch('/api/competitions/checkin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_id: data.id, competition_type: competitionType })
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          alert(`${result.participant.name} checked in to ${result.competition_type}`);
+        } else {
+          const error = await response.json();
+          alert(`Error: ${error.error}`);
+        }
+      } else {
+        // Handle gate entry
+        const team = participants.find((p) => 
+          p.members?.some((m) => m.id === data.id)
         );
+        
+        if (team) {
+          setSelectedTeam(team);
+          setAttendanceList(
+            team.members?.map((m) => ({
+              id: m.id ?? m.participant_id ?? '',
+              name: m.name ?? m.full_name ?? '',
+              email: m.email ?? '',
+              present: false
+            })) || []
+          );
+        }
       }
       setShowScanner(false);
     } catch (error) {
-      console.error('Gate entry error:', error);
+      console.error('QR scan error:', error);
     }
   };
 
@@ -255,7 +306,7 @@ export default function CoordinatorDashboard() {
                 </TabsList>
 
                 <TabsContent value="gate" className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                       <CardHeader className="pb-3 sm:pb-4">
                         <CardTitle className="text-white text-sm sm:text-base">QR Scanner</CardTitle>
@@ -264,11 +315,55 @@ export default function CoordinatorDashboard() {
                         <div className="space-y-3 sm:space-y-4">
                           <p className="text-gray-400 text-sm sm:text-base">Scan participant QR codes for gate entry</p>
                           <Button 
-                            onClick={() => setShowScanner(true)}
+                            onClick={() => setShowScanner('gate')}
                             className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base"
                           >
                             <Camera className="w-4 h-4 mr-2" />
                             Start QR Scanner
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <CardTitle className="text-white text-sm sm:text-base">Meal Distribution</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 sm:p-6">
+                        <div className="space-y-3 sm:space-y-4">
+                          <p className="text-gray-400 text-sm sm:text-base">Distribute meals to participants</p>
+                          <Button 
+                            onClick={() => setShowScanner('meal')}
+                            className="w-full bg-orange-600 hover:bg-orange-700 text-sm sm:text-base"
+                          >
+                            <Camera className="w-4 h-4 mr-2" />
+                            Meal Scanner
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                      <CardHeader className="pb-3 sm:pb-4">
+                        <CardTitle className="text-white text-sm sm:text-base">Workshop Attendance</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 sm:p-6">
+                        <div className="space-y-3 sm:space-y-4">
+                          <select 
+                            value={workshopSession} 
+                            onChange={(e) => setWorkshopSession(e.target.value)}
+                            className="w-full bg-gray-700 border-gray-600 text-white rounded px-3 py-2 text-sm"
+                          >
+                            <option value="session1">Session 1</option>
+                            <option value="session2">Session 2</option>
+                            <option value="session3">Session 3</option>
+                          </select>
+                          <Button 
+                            onClick={() => setShowScanner('workshop')}
+                            className="w-full bg-purple-600 hover:bg-purple-700 text-sm sm:text-base"
+                          >
+                            <Camera className="w-4 h-4 mr-2" />
+                            Workshop Scanner
                           </Button>
                         </div>
                       </CardContent>
@@ -345,6 +440,33 @@ export default function CoordinatorDashboard() {
                       </CardContent>
                     </Card>
                   )}
+                </TabsContent>
+
+                <TabsContent value="competitions" className="space-y-6">
+                  <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
+                    <CardHeader className="pb-3 sm:pb-4">
+                      <CardTitle className="text-white text-sm sm:text-base">Competition Check-in</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-3 sm:p-6">
+                      <div className="space-y-3 sm:space-y-4">
+                        <select 
+                          value={competitionType} 
+                          onChange={(e) => setCompetitionType(e.target.value)}
+                          className="w-full bg-gray-700 border-gray-600 text-white rounded px-3 py-2 text-sm"
+                        >
+                          <option value="Hackathon">Hackathon</option>
+                          <option value="Pitch">Startup Pitch</option>
+                        </select>
+                        <Button 
+                          onClick={() => setShowScanner('competition')}
+                          className="w-full bg-red-600 hover:bg-red-700 text-sm sm:text-base"
+                        >
+                          <Camera className="w-4 h-4 mr-2" />
+                          Competition Scanner
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </TabsContent>
 
                 <TabsContent value="participants" className="space-y-6">
@@ -461,9 +583,17 @@ export default function CoordinatorDashboard() {
 
         {showScanner && (
           <QRScanner
-            title="Gate Entry Scanner"
-            description="Scan participant QR codes for gate entry"
-            onScan={handleGateEntry}
+            title={
+              showScanner === 'meal' ? 'Meal Distribution Scanner' : 
+              showScanner === 'workshop' ? 'Workshop Attendance Scanner' : 
+              'Gate Entry Scanner'
+            }
+            description={
+              showScanner === 'meal' ? 'Scan participant QR codes for meal distribution' : 
+              showScanner === 'workshop' ? 'Scan participant QR codes for workshop attendance' : 
+              'Scan participant QR codes for gate entry'
+            }
+            onScan={handleQRScan}
             onClose={() => setShowScanner(false)}
           />
         )}

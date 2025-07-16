@@ -20,7 +20,7 @@ export default function PitchModeDialog({ open, onOpenChange, onSelectOffline }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl bg-gray-800 border-gray-700">
+      <DialogContent className="max-w-4xl w-[95vw] sm:w-[90vw] md:w-[80vw] lg:w-[70vw] bg-gray-800 border-gray-700">
         <DialogHeader>
           <DialogTitle className="text-white text-center">Choose Your Pitch Mode</DialogTitle>
         </DialogHeader>

@@ -167,12 +167,43 @@ export interface PitchRatingSchema {
   updated_at: Date;
 }
 
+export interface CompetitionCheckinSchema {
+  _id?: ObjectId;
+  participant_id: string;
+  participant_name: string;
+  team_id: string;
+  competition_type: string;
+  checkin_time: Date;
+  date: string;
+  created_at?: Date;
+}
+
 export interface SessionSchema {
   _id?: ObjectId;
   user_id: string;
   session_token: string;
   expires_at: Date;
   created_at: Date;
+}
+
+export interface MealSchema {
+  _id?: ObjectId;
+  participant_id: string;
+  participant_name: string;
+  meal_type: string;
+  food_preference: 'veg' | 'non-veg';
+  distributed_at: Date;
+  date: string;
+}
+
+export interface MealSchema {
+  _id?: ObjectId;
+  participant_id: string;
+  participant_name: string;
+  meal_type: string;
+  food_preference: 'veg' | 'non-veg';
+  distributed_at: Date;
+  date: string;
 }
 
 // Database initialization
@@ -268,11 +299,31 @@ export async function initializeDatabase(db: Db) {
       { key: { created_at: -1 } }
     ]),
 
+    // Competition checkins collection
+    db.collection('competition_checkins').createIndexes([
+      { key: { participant_id: 1, competition_type: 1, date: 1 }, unique: true },
+      { key: { team_id: 1 } },
+      { key: { competition_type: 1 } },
+      { key: { checkin_time: -1 } }
+    ]),
+
     // Sessions collection
     db.collection('sessions').createIndexes([
       { key: { session_token: 1 }, unique: true },
       { key: { user_id: 1 } },
       { key: { expires_at: 1 }, expireAfterSeconds: 0 }
+    ]),
+
+    // Meals collection
+    db.collection('meals').createIndexes([
+      { key: { participant_id: 1, meal_type: 1, date: 1 }, unique: true },
+      { key: { distributed_at: -1 } }
+    ]),
+
+    // Meals collection
+    db.collection('meals').createIndexes([
+      { key: { participant_id: 1, meal_type: 1, date: 1 }, unique: true },
+      { key: { distributed_at: -1 } }
     ])
   ]);
 
@@ -297,10 +348,12 @@ export function getCollections(db: Db) {
     workshopAttendance: db.collection<WorkshopAttendanceSchema>('workshop_attendance'),
     competitions: db.collection<CompetitionSchema>('competitions'),
     competitionRegistrations: db.collection<CompetitionRegistrationSchema>('competition_registrations'),
+    competitionCheckins: db.collection<CompetitionCheckinSchema>('competition_checkins'),
     helpTickets: db.collection<HelpTicketSchema>('help_tickets'),
     socialItems: db.collection<SocialItemSchema>('social_items'),
     games: db.collection<GameSchema>('games'),
     pitchRatings: db.collection<PitchRatingSchema>('pitch_ratings'),
-    sessions: db.collection<SessionSchema>('sessions')
+    sessions: db.collection<SessionSchema>('sessions'),
+    meals: db.collection<MealSchema>('meals')
   };
 }

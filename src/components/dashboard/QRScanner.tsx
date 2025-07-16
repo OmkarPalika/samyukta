@@ -26,6 +26,10 @@ export default function QRScanner({ onScan, onClose, title, description }: QRSca
 
   const startCamera = async () => {
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setError('Camera not supported on this device.');
+        return;
+      }
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',

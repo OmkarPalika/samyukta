@@ -96,6 +96,10 @@ export default function Register() {
       hackathon: { remaining: number; closed: boolean };
       pitch: { remaining: number; closed: boolean };
     };
+    accommodation: {
+      male: { remaining: number; closed: boolean };
+      female: { remaining: number; closed: boolean };
+    };
   } | null>(null);
 
   useEffect(() => {
@@ -210,6 +214,178 @@ export default function Register() {
     setFormData({ ...formData, members: newMembers });
   };
 
+  const renderMemberFields = (member: TeamMember, index: number, isTeamLead = false) => {
+    const showCustomRole = member.role === "Other";
+    const showCollege = member.organization === "College/University";
+    const showCustomOrg = member.organization !== "College/University";
+    const showStudentFields = member.role === "Student";
+    const showCustomDegree = member.degree === "Other";
+    const isDisabled = !isTeamLead && member.sameAsLead;
+    const errorPrefix = isTeamLead ? 'teamLead' : `member${index}`;
+
+    return (
+      <>
+        <div className="space-y-2">
+          <Label className="text-gray-300">Role<span className="text-red-500"> *</span></Label>
+          <Select
+            value={member.role}
+            onValueChange={(value: Role) => handleMemberChange(index, 'role', value)}
+            disabled={isDisabled}
+          >
+            <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+              <SelectValue placeholder="Select your role" />
+            </SelectTrigger>
+            <SelectContent>
+              {roles.map((role) => (
+                <SelectItem key={role} value={role}>{role}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors[`${errorPrefix}Role`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}Role`]}</p>}
+        </div>
+
+        {showCustomRole && (
+          <div className="space-y-2">
+            <Label className="text-gray-300">Specify Role<span className="text-red-500"> *</span></Label>
+            <Input
+              value={member.customRole || ""}
+              onChange={(e) => handleMemberChange(index, 'customRole', e.target.value)}
+              className="bg-gray-700/50 border-gray-600 text-white"
+              placeholder="Enter your role"
+              disabled={isDisabled}
+            />
+            {errors[`${errorPrefix}CustomRole`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}CustomRole`]}</p>}
+          </div>
+        )}
+
+        <div className="space-y-2">
+          <Label className="text-gray-300">Organization Type<span className="text-red-500"> *</span></Label>
+          <Select
+            value={member.organization}
+            onValueChange={(value: Organization) => handleMemberChange(index, 'organization', value)}
+            disabled={isDisabled}
+          >
+            <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+              <SelectValue placeholder="Select organization type" />
+            </SelectTrigger>
+            <SelectContent>
+              {organizations.map((org) => (
+                <SelectItem key={org} value={org}>{org}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors[`${errorPrefix}Org`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}Org`]}</p>}
+        </div>
+
+        {showCollege ? (
+          <div className="space-y-2">
+            <Label className="text-gray-300">College<span className="text-red-500"> *</span></Label>
+            <RadioGroup
+              value={member.college || ""}
+              onValueChange={(value) => handleMemberChange(index, 'college', value)}
+              className="flex space-x-6"
+              disabled={isDisabled}
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="ANITS" id={`anits-${index}`} disabled={isDisabled} />
+                <Label htmlFor={`anits-${index}`} className="text-gray-300">ANITS</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="Other" id={`other-college-${index}`} disabled={isDisabled} />
+                <Label htmlFor={`other-college-${index}`} className="text-gray-300">Other</Label>
+              </div>
+            </RadioGroup>
+            {member.college === "Other" && (
+              <Input
+                value={member.customOrganization || ""}
+                onChange={(e) => handleMemberChange(index, 'customOrganization', e.target.value)}
+                className="bg-gray-700/50 border-gray-600 text-white mt-2"
+                placeholder="Enter college name"
+                disabled={isDisabled}
+              />
+            )}
+            {errors[`${errorPrefix}College`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}College`]}</p>}
+          </div>
+        ) : showCustomOrg && (
+          <div className="space-y-2">
+            <Label className="text-gray-300">Organization Name<span className="text-red-500"> *</span></Label>
+            <Input
+              value={member.customOrganization || ""}
+              onChange={(e) => handleMemberChange(index, 'customOrganization', e.target.value)}
+              className="bg-gray-700/50 border-gray-600 text-white"
+              placeholder="Enter organization name"
+              disabled={isDisabled}
+            />
+            {errors[`${errorPrefix}CustomOrg`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}CustomOrg`]}</p>}
+          </div>
+        )}
+
+        {showStudentFields && (
+          <>
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-gray-300">Degree<span className="text-red-500"> *</span></Label>
+              <RadioGroup
+                value={member.degree || ""}
+                onValueChange={(value) => handleMemberChange(index, 'degree', value)}
+                className="flex flex-wrap gap-4"
+                disabled={isDisabled}
+              >
+                {degrees.map((degree) => (
+                  <div key={degree} className="flex items-center space-x-2">
+                    <RadioGroupItem value={degree} id={`degree-${degree}-${index}`} disabled={isDisabled} />
+                    <Label htmlFor={`degree-${degree}-${index}`} className="text-gray-300">{degree}</Label>
+                  </div>
+                ))}
+              </RadioGroup>
+              {showCustomDegree && (
+                <Input
+                  value={member.customDegree || ""}
+                  onChange={(e) => handleMemberChange(index, 'customDegree', e.target.value)}
+                  className="bg-gray-700/50 border-gray-600 text-white mt-2"
+                  placeholder="Specify degree"
+                  disabled={isDisabled}
+                />
+              )}
+              {errors[`${errorPrefix}Degree`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}Degree`]}</p>}
+              {errors[`${errorPrefix}CustomDegree`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}CustomDegree`]}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Year<span className="text-red-500"> *</span></Label>
+              <Select
+                value={member.year || ""}
+                onValueChange={(value) => handleMemberChange(index, 'year', value)}
+                disabled={isDisabled}
+              >
+                <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={year}>{year}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors[`${errorPrefix}Year`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}Year`]}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Stream<span className="text-red-500"> *</span></Label>
+              <Input
+                value={member.stream || ""}
+                onChange={(e) => handleMemberChange(index, 'stream', e.target.value)}
+                className="bg-gray-700/50 border-gray-600 text-white"
+                placeholder="e.g., Computer Science"
+                disabled={isDisabled}
+              />
+              {errors[`${errorPrefix}Stream`] && <p className="text-red-400 text-sm">{errors[`${errorPrefix}Stream`]}</p>}
+            </div>
+          </>
+        )}
+      </>
+    );
+  };
+
   const handleTeamSizeChange = (size: number) => {
     const newMembers = [...formData.members];
     if (size > formData.teamSize) {
@@ -312,6 +488,10 @@ export default function Register() {
     if (currentStep === 5) {
       await handleSubmit();
     } else if (validateStep(currentStep)) {
+      // Check for email errors before proceeding
+      if (Object.keys(emailErrors).length > 0) {
+        return;
+      }
       let nextStep = currentStep + 1;
       if (currentStep === 2 && formData.teamSize === 1) {
         nextStep = 4;
@@ -471,153 +651,7 @@ export default function Register() {
                 {errors.teamLeadGender && <p className="text-red-400 text-sm">{errors.teamLeadGender}</p>}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-gray-300">Role<span className="text-red-500"> *</span></Label>
-                <Select
-                  value={teamLead.role}
-                  onValueChange={(value: Role) => handleMemberChange(0, 'role', value)}
-                >
-                  <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {roles.map((role) => (
-                      <SelectItem key={role} value={role}>{role}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.teamLeadRole && <p className="text-red-400 text-sm">{errors.teamLeadRole}</p>}
-              </div>
-
-              {teamLead.role === "Other" && (
-                <div className="space-y-2">
-                  <Label className="text-gray-300">Specify Role<span className="text-red-500"> *</span></Label>
-                  <Input
-                    value={teamLead.customRole || ""}
-                    onChange={(e) => handleMemberChange(0, 'customRole', e.target.value)}
-                    className="bg-gray-700/50 border-gray-600 text-white"
-                    placeholder="Enter your role"
-                  />
-                  {errors.teamLeadCustomRole && <p className="text-red-400 text-sm">{errors.teamLeadCustomRole}</p>}
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label className="text-gray-300">Organization Type<span className="text-red-500"> *</span></Label>
-                <Select
-                  value={teamLead.organization}
-                  onValueChange={(value: Organization) => handleMemberChange(0, 'organization', value)}
-                >
-                  <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                    <SelectValue placeholder="Select organization type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {organizations.map((org) => (
-                      <SelectItem key={org} value={org}>{org}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.teamLeadOrg && <p className="text-red-400 text-sm">{errors.teamLeadOrg}</p>}
-              </div>
-
-              {teamLead.organization === "College/University" ? (
-                <div className="space-y-2">
-                  <Label className="text-gray-300">College<span className="text-red-500"> *</span></Label>
-                  <RadioGroup
-                    value={teamLead.college || ""}
-                    onValueChange={(value) => handleMemberChange(0, 'college', value)}
-                    className="flex space-x-6"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="ANITS" id="anits-lead" />
-                      <Label htmlFor="anits-lead" className="text-gray-300">ANITS</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="Other" id="other-college-lead" />
-                      <Label htmlFor="other-college-lead" className="text-gray-300">Other</Label>
-                    </div>
-                  </RadioGroup>
-                  {teamLead.college === "Other" && (
-                    <Input
-                      value={teamLead.customOrganization || ""}
-                      onChange={(e) => handleMemberChange(0, 'customOrganization', e.target.value)}
-                      className="bg-gray-700/50 border-gray-600 text-white mt-2"
-                      placeholder="Enter college name"
-                    />
-                  )}
-                  {errors.teamLeadCollege && <p className="text-red-400 text-sm">{errors.teamLeadCollege}</p>}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label className="text-gray-300">Organization Name<span className="text-red-500"> *</span></Label>
-                  <Input
-                    value={teamLead.customOrganization || ""}
-                    onChange={(e) => handleMemberChange(0, 'customOrganization', e.target.value)}
-                    className="bg-gray-700/50 border-gray-600 text-white"
-                    placeholder="Enter organization name"
-                  />
-                  {errors.teamLeadCustomOrg && <p className="text-red-400 text-sm">{errors.teamLeadCustomOrg}</p>}
-                </div>
-              )}
-
-              {teamLead.role === "Student" && (
-                <>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label className="text-gray-300">Degree<span className="text-red-500"> *</span></Label>
-                    <RadioGroup
-                      value={teamLead.degree || ""}
-                      onValueChange={(value) => handleMemberChange(0, 'degree', value)}
-                      className="flex flex-wrap gap-4"
-                    >
-                      {degrees.map((degree) => (
-                        <div key={degree} className="flex items-center space-x-2">
-                          <RadioGroupItem value={degree} id={`degree-${degree}-lead`} />
-                          <Label htmlFor={`degree-${degree}-lead`} className="text-gray-300">{degree}</Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
-                    {teamLead.degree === "Other" && (
-                      <Input
-                        value={teamLead.customDegree || ""}
-                        onChange={(e) => handleMemberChange(0, 'customDegree', e.target.value)}
-                        className="bg-gray-700/50 border-gray-600 text-white mt-2"
-                        placeholder="Specify degree"
-                      />
-                    )}
-                    {errors.teamLeadDegree && <p className="text-red-400 text-sm">{errors.teamLeadDegree}</p>}
-                    {errors.teamLeadCustomDegree && <p className="text-red-400 text-sm">{errors.teamLeadCustomDegree}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Year<span className="text-red-500"> *</span></Label>
-                    <Select
-                      value={teamLead.year || ""}
-                      onValueChange={(value) => handleMemberChange(0, 'year', value)}
-                    >
-                      <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                        <SelectValue placeholder="Select year" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {years.map((year) => (
-                          <SelectItem key={year} value={year}>{year}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {errors.teamLeadYear && <p className="text-red-400 text-sm">{errors.teamLeadYear}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Stream<span className="text-red-500"> *</span></Label>
-                    <Input
-                      value={teamLead.stream || ""}
-                      onChange={(e) => handleMemberChange(0, 'stream', e.target.value)}
-                      className="bg-gray-700/50 border-gray-600 text-white"
-                      placeholder="e.g., Computer Science"
-                    />
-                    {errors.teamLeadStream && <p className="text-red-400 text-sm">{errors.teamLeadStream}</p>}
-                  </div>
-                </>
-              )}
+              {renderMemberFields(teamLead, 0, true)}
             </div>
 
             <div className="space-y-4 mt-6">
@@ -648,7 +682,7 @@ export default function Register() {
                 <Label htmlFor="lead-accommodation" className="text-gray-300">
                   Accommodation required
                   <Badge className={`ml-2 text-xs ${teamLead.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : teamLead.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                    {teamLead.gender === 'Female' ? 'Female: 50 slots left' : teamLead.gender === 'Male' ? 'Male: 50 slots left' : '50M/50F slots left'}
+                    {teamLead.gender === 'Female' ? `Female: ${slots?.accommodation?.female?.remaining || 50} slots left` : teamLead.gender === 'Male' ? `Male: ${slots?.accommodation?.male?.remaining || 50} slots left` : `${slots?.accommodation?.male?.remaining || 50}M/${slots?.accommodation?.female?.remaining || 50}F slots left`}
                   </Badge>
                 </Label>
               </div>
@@ -733,6 +767,7 @@ export default function Register() {
                 <CardContent>
                   <div className="text-2xl font-bold text-blue-400">₹800</div>
                   <ul className="space-y-2 text-gray-300 mt-4">
+                    <li>• Summit Kit</li>
                     <li>• Workshop access</li>
                     <li>• Meals & refreshments</li>
                     <li>• Certificate</li>
@@ -887,181 +922,7 @@ export default function Register() {
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Role<span className="text-red-500"> *</span></Label>
-                        <Select
-                          value={member.role}
-                          onValueChange={(value: Role) => handleMemberChange(memberIndex, 'role', value)}
-                          disabled={member.sameAsLead}
-                        >
-                          <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                            <SelectValue placeholder="Select your role" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {roles.map((role) => (
-                              <SelectItem key={role} value={role}>{role}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors[`member${memberIndex}Role`] && (
-                          <p className="text-red-400 text-sm">{errors[`member${memberIndex}Role`]}</p>
-                        )}
-                      </div>
-
-                      {member.role === "Other" && (
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Specify Role<span className="text-red-500"> *</span></Label>
-                          <Input
-                            value={member.customRole || ""}
-                            onChange={(e) => handleMemberChange(memberIndex, 'customRole', e.target.value)}
-                            className="bg-gray-700/50 border-gray-600 text-white"
-                            placeholder="Enter your role"
-                            disabled={member.sameAsLead}
-                          />
-                          {errors[`member${memberIndex}CustomRole`] && (
-                            <p className="text-red-400 text-sm">{errors[`member${memberIndex}CustomRole`]}</p>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Organization Type<span className="text-red-500"> *</span></Label>
-                        <Select
-                          value={member.organization}
-                          onValueChange={(value: Organization) => handleMemberChange(memberIndex, 'organization', value)}
-                          disabled={member.sameAsLead}
-                        >
-                          <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                            <SelectValue placeholder="Select organization type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {organizations.map((org) => (
-                              <SelectItem key={org} value={org}>{org}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {errors[`member${memberIndex}Org`] && (
-                          <p className="text-red-400 text-sm">{errors[`member${memberIndex}Org`]}</p>
-                        )}
-                      </div>
-
-                      {member.organization === "College/University" ? (
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">College<span className="text-red-500"> *</span></Label>
-                          <RadioGroup
-                            value={member.college || ""}
-                            onValueChange={(value) => handleMemberChange(memberIndex, 'college', value)}
-                            className="flex space-x-6"
-                            disabled={member.sameAsLead}
-                          >
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="ANITS" id={`anits-${memberIndex}`} disabled={member.sameAsLead} />
-                              <Label htmlFor={`anits-${memberIndex}`} className="text-gray-300">ANITS</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="Other" id={`other-college-${memberIndex}`} disabled={member.sameAsLead} />
-                              <Label htmlFor={`other-college-${memberIndex}`} className="text-gray-300">Other</Label>
-                            </div>
-                          </RadioGroup>
-                          {member.college === "Other" && (
-                            <Input
-                              value={member.customOrganization || ""}
-                              onChange={(e) => handleMemberChange(memberIndex, 'customOrganization', e.target.value)}
-                              className="bg-gray-700/50 border-gray-600 text-white mt-2"
-                              placeholder="Enter college name"
-                              disabled={member.sameAsLead}
-                            />
-                          )}
-                          {errors[`member${memberIndex}College`] && (
-                            <p className="text-red-400 text-sm">{errors[`member${memberIndex}College`]}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <Label className="text-gray-300">Organization Name<span className="text-red-500"> *</span></Label>
-                          <Input
-                            value={member.customOrganization || ""}
-                            onChange={(e) => handleMemberChange(memberIndex, 'customOrganization', e.target.value)}
-                            className="bg-gray-700/50 border-gray-600 text-white"
-                            placeholder="Enter organization name"
-                            disabled={member.sameAsLead}
-                          />
-                          {errors[`member${memberIndex}CustomOrg`] && (
-                            <p className="text-red-400 text-sm">{errors[`member${memberIndex}CustomOrg`]}</p>
-                          )}
-                        </div>
-                      )}
-
-                      {member.role === "Student" && (
-                        <>
-                          <div className="space-y-2 md:col-span-2">
-                            <Label className="text-gray-300">Degree<span className="text-red-500"> *</span></Label>
-                            <RadioGroup
-                              value={member.degree || ""}
-                              onValueChange={(value) => handleMemberChange(memberIndex, 'degree', value)}
-                              className="flex flex-wrap gap-4"
-                              disabled={member.sameAsLead}
-                            >
-                              {degrees.map((degree) => (
-                                <div key={degree} className="flex items-center space-x-2">
-                                  <RadioGroupItem value={degree} id={`degree-${degree}-${memberIndex}`} disabled={member.sameAsLead} />
-                                  <Label htmlFor={`degree-${degree}-${memberIndex}`} className="text-gray-300">{degree}</Label>
-                                </div>
-                              ))}
-                            </RadioGroup>
-                            {member.degree === "Other" && (
-                              <Input
-                                value={member.customDegree || ""}
-                                onChange={(e) => handleMemberChange(memberIndex, 'customDegree', e.target.value)}
-                                className="bg-gray-700/50 border-gray-600 text-white mt-2"
-                                placeholder="Specify degree"
-                                disabled={member.sameAsLead}
-                              />
-                            )}
-                            {errors[`member${memberIndex}Degree`] && (
-                              <p className="text-red-400 text-sm">{errors[`member${memberIndex}Degree`]}</p>
-                            )}
-                            {errors[`member${memberIndex}CustomDegree`] && (
-                              <p className="text-red-400 text-sm">{errors[`member${memberIndex}CustomDegree`]}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-gray-300">Year<span className="text-red-500"> *</span></Label>
-                            <Select
-                              value={member.year || ""}
-                              onValueChange={(value) => handleMemberChange(memberIndex, 'year', value)}
-                              disabled={member.sameAsLead}
-                            >
-                              <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                                <SelectValue placeholder="Select year" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {years.map((year) => (
-                                  <SelectItem key={year} value={year}>{year}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            {errors[`member${memberIndex}Year`] && (
-                              <p className="text-red-400 text-sm">{errors[`member${memberIndex}Year`]}</p>
-                            )}
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="text-gray-300">Stream<span className="text-red-500"> *</span></Label>
-                            <Input
-                              value={member.stream || ""}
-                              onChange={(e) => handleMemberChange(memberIndex, 'stream', e.target.value)}
-                              className="bg-gray-700/50 border-gray-600 text-white"
-                              placeholder="e.g., Computer Science"
-                              disabled={member.sameAsLead}
-                            />
-                            {errors[`member${memberIndex}Stream`] && (
-                              <p className="text-red-400 text-sm">{errors[`member${memberIndex}Stream`]}</p>
-                            )}
-                          </div>
-                        </>
-                      )}
+                      {renderMemberFields(member, memberIndex)}
                     </div>
 
                     <div className="space-y-3">
@@ -1072,11 +933,11 @@ export default function Register() {
                         className="flex space-x-6"
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="veg" id={`veg-${memberIndex}`} disabled={member.sameAsLead} />
+                          <RadioGroupItem value="veg" id={`veg-${memberIndex}`} />
                           <Label htmlFor={`veg-${memberIndex}`} className="text-gray-300">Veg</Label>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="non-veg" id={`non-veg-${memberIndex}`} disabled={member.sameAsLead} />
+                          <RadioGroupItem value="non-veg" id={`non-veg-${memberIndex}`} />
                           <Label htmlFor={`non-veg-${memberIndex}`} className="text-gray-300">Non-Veg</Label>
                         </div>
                       </RadioGroup>
@@ -1091,7 +952,7 @@ export default function Register() {
                       <Label htmlFor={`accommodation-${memberIndex}`} className="text-gray-300">
                         Accommodation required
                         <Badge className={`ml-2 text-xs ${member.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : member.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                          {member.gender === 'Female' ? 'Female: 50 slots left' : member.gender === 'Male' ? 'Male: 50 slots left' : '50M/50F slots left'}
+                          {member.gender === 'Female' ? `Female: ${slots?.accommodation?.female?.remaining || 50} slots left` : member.gender === 'Male' ? `Male: ${slots?.accommodation?.male?.remaining || 50} slots left` : `${slots?.accommodation?.male?.remaining || 50}M/${slots?.accommodation?.female?.remaining || 50}F slots left`}
                         </Badge>
                       </Label>
                     </div>
@@ -1464,7 +1325,13 @@ export default function Register() {
               <div className="bg-gray-800/40 rounded-lg p-4 md:p-6 border border-gray-700 flex items-center justify-center">
                 <div className="text-center text-gray-400">
                   <div className="w-32 h-32 bg-gray-700/50 rounded-lg flex items-center justify-center mb-2">
-                    <span className="text-xs">QR Code</span>
+                    <Image
+                      src="/payment-qr.jpg"
+                      alt="Payment QR Code"
+                      width={128}
+                      height={128}
+                      className="object-contain"
+                    />
                   </div>
                   <p className="text-sm">Scan to Pay</p>
                 </div>
@@ -1683,7 +1550,7 @@ export default function Register() {
 
         <div className="flex justify-between">
           <Button
-            onClick={handlePrevious}
+            onClick={currentStep === 6 ? () => router.push('/') : handlePrevious}
             disabled={currentStep === 1}
             variant="outline"
             className="bg-transparent border-gray-600 text-gray-300 hover:bg-gray-700"
@@ -1731,6 +1598,7 @@ export default function Register() {
             }));
           }}
           initialData={formData.startupPitchData[currentPitchMember]}
+          registrationTeamSize={formData.teamSize}
         />
       </div>
     </div>

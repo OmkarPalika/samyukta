@@ -3,8 +3,13 @@ import { User as UserType } from '@/lib/types';
 export class ClientAuth {
   static async me(): Promise<UserType | null> {
     try {
-      const response = await fetch('/api/auth/me');
-      if (!response.ok) return null;
+      const response = await fetch('/api/auth/me', {
+        credentials: 'include'
+      });
+      if (!response.ok) {
+        console.log('Auth check failed with status:', response.status);
+        return null;
+      }
       
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
@@ -19,25 +24,31 @@ export class ClientAuth {
     }
   }
 
-  static async login(email: string, password: string): Promise<UserType | null> {
+  static async login(email: string, credential: string): Promise<UserType | null> {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+        body: JSON.stringify({ email, password: credential, passkey: credential }),
       });
-      if (!response.ok) return null;
       
       const contentType = response.headers.get('content-type');
       if (!contentType?.includes('application/json')) {
         console.error('Login API returned non-JSON response');
-        return null;
+        throw new Error('Invalid server response');
       }
       
-      return await response.json();
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      return data;
     } catch (error) {
       console.error('Login failed:', error);
-      return null;
+      throw error;
     }
   }
 
