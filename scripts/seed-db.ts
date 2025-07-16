@@ -2,15 +2,18 @@
 
 import { config } from 'dotenv';
 import { getTypedCollections } from '../src/lib/db-utils';
-import { MOCK_USERS, MOCK_COMPETITIONS } from '../src/lib/mock-data';
+import { MOCK_USERS, MOCK_COMPETITIONS, MOCK_WORKSHOPS } from '../src/lib/mock-data';
+import getClientPromise from '../src/lib/mongodb';
 import bcrypt from 'bcryptjs';
 
 // Load environment variables
 config({ path: '.env.local' });
 
 async function main() {
+  let client;
   try {
     console.log('🌱 Seeding database...');
+    client = await getClientPromise();
     const collections = await getTypedCollections();
     
     // Seed users from mock data
@@ -27,6 +30,31 @@ async function main() {
             track: user.track,
             year: user.year,
             dept: user.dept,
+            updated_at: new Date()
+          },
+          $setOnInsert: {
+            created_at: new Date()
+          }
+        },
+        { upsert: true }
+      );
+    }
+
+    // Seed workshops from mock data
+    console.log('🎓 Seeding workshops...');
+    for (const workshop of MOCK_WORKSHOPS) {
+      await collections.workshops.updateOne(
+        { name: workshop.name },
+        {
+          $set: {
+            track: workshop.track,
+            instructor: workshop.instructor,
+            description: workshop.description,
+            schedule: new Date(workshop.schedule),
+            duration_hours: workshop.duration_hours,
+            capacity: workshop.capacity,
+            enrolled: workshop.enrolled,
+            status: workshop.status,
             updated_at: new Date()
           },
           $setOnInsert: {
@@ -68,11 +96,16 @@ async function main() {
     
     console.log('✅ Database seeded successfully!');
     console.log(`👤 Users: ${MOCK_USERS.length} seeded`);
+    console.log(`🎓 Workshops: ${MOCK_WORKSHOPS.length} seeded`);
     console.log(`🏆 Competitions: ${MOCK_COMPETITIONS.length} seeded`);
-    process.exit(0);
   } catch (error) {
     console.error('❌ Error seeding database:', error);
-    process.exit(1);
+    throw error;
+  } finally {
+    if (client) {
+      await client.close();
+    }
+    process.exit(0);
   }
 }
 

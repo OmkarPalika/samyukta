@@ -16,9 +16,12 @@ import {
   Copy
 } from 'lucide-react';
 import { MapLocation } from '@/lib/types';
+import { useNavigation } from '@/hooks/useClientSide';
 
 export default function InteractiveMap() {
   const [selectedLocation] = useState<MapLocation | null>(null);
+
+  const { getCurrentURL } = useNavigation();
 
   const openInGoogleMaps = (location: MapLocation) => {
     const url = `https://www.google.com/maps/search/?api=1&query=${location.coordinates.lat},${location.coordinates.lng}`;
@@ -37,7 +40,7 @@ export default function InteractiveMap() {
 
   const shareLocation = async (location: MapLocation) => {
     if (navigator.share) {
-      const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+      const currentUrl = getCurrentURL();
       await navigator.share({
         title: location.name,
         text: location.description,

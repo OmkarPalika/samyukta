@@ -15,7 +15,7 @@ export default function Dashboard() {
         
         // Route to appropriate dashboard based on role
         if (currentUser.role === 'admin') {
-          router.push('/admin');
+          router.push('/dashboard/admin');
         } else if (currentUser.role === 'coordinator') {
           router.push('/dashboard/coordinator');
         } else {

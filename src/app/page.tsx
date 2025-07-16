@@ -25,10 +25,12 @@ import { User } from "@/entities/User";
 import { User as UserType } from "@/lib/types";
 import { EVENT_CONFIG, URL_CONFIG } from "@/lib/config";
 import { PARTNERS_DATA } from "@/data";
+import { useNavigation } from "@/hooks/useClientSide";
 
 export default function Home() {
   const [timeLeft, setTimeLeft] = useState<Record<string, number>>({});
   const [user, setUser] = useState<UserType | null>(null);
+  const { openExternal } = useNavigation();
   
   const baseUrl = useMemo(() => 
     process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app', 
@@ -176,7 +178,7 @@ export default function Home() {
                   </Button>
                 </Link>
                 <Button 
-                  onClick={() => window.open(`mailto:samyukta.summit@gmail.com?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`, '_blank')}
+                  onClick={() => openExternal(`mailto:samyukta.summit@gmail.com?subject=Sponsorship Inquiry - ${EVENT_CONFIG.name}`)}
                   className="w-fit mx-auto md:mx-0 px-12 py-6 text-lg bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-600 hover:to-pink-600 rounded-xl"
                 >
                   Sponsor Us

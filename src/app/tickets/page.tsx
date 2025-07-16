@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Loading from "@/components/shared/Loading";
 import { User } from "@/entities/User";
+import { Competition } from "@/lib/types";
 
 export default function Tickets() {
   const [teamSize, setTeamSize] = useState([1]);
@@ -37,6 +38,7 @@ export default function Tickets() {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,6 +55,13 @@ export default function Tickets() {
         const response = await fetch('/api/registrations/stats');
         const data = await response.json();
         setStats(data);
+        
+        // Fetch competitions
+        const compResponse = await fetch('/api/competitions');
+        if (compResponse.ok) {
+          const compData = await compResponse.json();
+          setCompetitions(compData);
+        }
       } catch (error) {
         console.error('Failed to fetch stats:', error);
       } finally {
@@ -267,25 +276,47 @@ export default function Tickets() {
                         <div className="text-spacing">
                           <Label className="text-white text-xs sm:text-sm font-medium">Optional Competition Entry</Label>
                           <div className="space-y-1 sm:space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="hackathon"
-                                checked={competitionTrack === 'hackathon'}
-                                onCheckedChange={(checked) => setCompetitionTrack(checked ? 'hackathon' : '')}
-                              />
-                              <Label htmlFor="hackathon" className="text-xs sm:text-sm text-gray-300">
-                                Hackathon Entry (+₹150)
-                              </Label>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="hackathon"
+                                  checked={competitionTrack === 'hackathon'}
+                                  onCheckedChange={(checked) => setCompetitionTrack(checked ? 'hackathon' : '')}
+                                />
+                                <Label htmlFor="hackathon" className="text-xs sm:text-sm text-gray-300">
+                                  Hackathon Entry (+₹150)
+                                </Label>
+                              </div>
+                              {(() => {
+                                const comp = competitions.find(c => c.category === 'Hackathon');
+                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
+                                return comp && (
+                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                    {slotsLeft} left
+                                  </Badge>
+                                );
+                              })()}
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id="pitch"
-                                checked={competitionTrack === 'pitch'}
-                                onCheckedChange={(checked) => setCompetitionTrack(checked ? 'pitch' : '')}
-                              />
-                              <Label htmlFor="pitch" className="text-xs sm:text-sm text-gray-300">
-                                Startup Pitch Entry (+₹100)
-                              </Label>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id="pitch"
+                                  checked={competitionTrack === 'pitch'}
+                                  onCheckedChange={(checked) => setCompetitionTrack(checked ? 'pitch' : '')}
+                                />
+                                <Label htmlFor="pitch" className="text-xs sm:text-sm text-gray-300">
+                                  Startup Pitch Entry (+₹100)
+                                </Label>
+                              </div>
+                              {(() => {
+                                const comp = competitions.find(c => c.category === 'Pitch');
+                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
+                                return comp && (
+                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                    {slotsLeft} left
+                                  </Badge>
+                                );
+                              })()}
                             </div>
                           </div>
                         </div>
@@ -330,13 +361,35 @@ export default function Tickets() {
                         <div className="text-spacing">
                           <Label className="text-white text-xs sm:text-sm font-medium">Competition Track</Label>
                           <RadioGroup value={comboCompetition} onValueChange={setComboCompetition} className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="hackathon" id="combo-hackathon" />
-                              <Label htmlFor="combo-hackathon" className="text-xs sm:text-sm text-gray-300">Hackathon Track (₹950)</Label>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="hackathon" id="combo-hackathon" />
+                                <Label htmlFor="combo-hackathon" className="text-xs sm:text-sm text-gray-300">Hackathon Track (₹950)</Label>
+                              </div>
+                              {(() => {
+                                const comp = competitions.find(c => c.category === 'Hackathon');
+                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
+                                return comp && (
+                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                    {slotsLeft} left
+                                  </Badge>
+                                );
+                              })()}
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <RadioGroupItem value="pitch" id="combo-pitch" />
-                              <Label htmlFor="combo-pitch" className="text-xs sm:text-sm text-gray-300">Startup Pitch Track (₹900)</Label>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="pitch" id="combo-pitch" />
+                                <Label htmlFor="combo-pitch" className="text-xs sm:text-sm text-gray-300">Startup Pitch Track (₹900)</Label>
+                              </div>
+                              {(() => {
+                                const comp = competitions.find(c => c.category === 'Pitch');
+                                const slotsLeft = comp ? comp.slots_available - comp.slots_filled : 0;
+                                return comp && (
+                                  <Badge className={`text-xs ${slotsLeft > 50 ? 'bg-green-500/10 text-green-400 border-green-500/20' : slotsLeft > 20 ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                                    {slotsLeft} left
+                                  </Badge>
+                                );
+                              })()}
                             </div>
                           </RadioGroup>
                         </div>

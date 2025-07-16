@@ -1,18 +1,20 @@
-import { 
-  LoginUser, 
-  Competition, 
-  // CompetitionRegistration, 
-  // HelpTicket, 
-  // SocialItem, 
-  GameAction, 
+import {
+  LoginUser,
+  Competition,
+  CompetitionRegistration, 
+  HelpTicket, 
+  SocialItem, 
+  GameAction,
   GameStats,
   RegistrationStats,
   PitchRating,
-  MapLocation
+  MapLocation,
+  Workshop
 } from './types';
 import { EVENT_CONFIG, DEMO_CREDENTIALS } from './config';
-import { 
-  CONTACTS_DATA} from '@/data';
+import {
+  CONTACTS_DATA
+} from '@/data';
 
 // Mock Users Database
 export const MOCK_USERS: LoginUser[] = [
@@ -76,151 +78,185 @@ export const MOCK_COMPETITIONS: Competition[] = [
   }
 ];
 
+// Mock Workshops
+export const MOCK_WORKSHOPS: Workshop[] = [
+  {
+    id: 'workshop-1',
+    name: 'Cloud Computing Workshop',
+    track: 'Cloud',
+    instructor: 'Madhu Vadlamani',
+    description: 'Learn about cloud computing and its applications',
+    schedule: new Date('2025-08-08T09:00:00Z'),
+    duration_hours: 8,
+    capacity: 250,
+    enrolled: 0,
+    materials_url: 'https://workshop.cloud/materials',
+    status: 'upcoming',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  },
+  {
+    id: 'workshop-2',
+    name: 'AI Workshop',
+    track: 'AI',
+    instructor: '',
+    description: 'Learn about AI and its applications',
+    schedule: new Date('2025-02-22T14:00:00Z'),
+    duration_hours: 8,
+    capacity: 250,
+    enrolled: 0,
+    materials_url: 'https://workshop.ai/materials',
+    status: 'upcoming',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  }
+];
+
 // Mock Competition Registrations (mutable for API operations)
-// export const MOCK_COMPETITION_REGISTRATIONS: CompetitionRegistration[] = [
-//   {
-//     id: 'reg-1',
-//     competition_id: 'comp-1',
-//     user_id: 'user-1',
-//     team_id: 'team-1',
-//     registration_type: 'individual',
-//     transaction_id: 'TXN123456',
-//     payment_screenshot_url: 'uploads/payments/screenshot.jpg',
-//     status: 'approved',
-//     created_at: '2025-01-15T10:00:00Z',
-//     updated_at: '2025-01-16T10:00:00Z'
-//   }
-// ];
+export const MOCK_COMPETITION_REGISTRATIONS: CompetitionRegistration[] = [
+  {
+    id: 'reg-1',
+    competition_id: 'comp-1',
+    user_id: 'user-1',
+    team_id: 'team-1',
+    registration_type: 'individual',
+    transaction_id: 'TXN123456',
+    payment_screenshot_url: 'uploads/payments/screenshot.jpg',
+    status: 'approved',
+    created_at: '2025-01-15T10:00:00Z',
+    updated_at: '2025-01-16T10:00:00Z'
+  }
+];
 
 // Mock Help Tickets (mutable for API operations)
-// export const MOCK_HELP_TICKETS: HelpTicket[] = [
-//   {
-//     id: '1',
-//     title: 'Login Issue',
-//     description: 'Cannot access my dashboard after registration',
-//     submitted_by: 'user123',
-//     status: 'open',
-//     priority: 'medium',
-//     created_at: new Date().toISOString()
-//   },
-//   {
-//     id: '2',
-//     title: 'Payment Verification',
-//     description: 'Payment made but status not updated',
-//     submitted_by: 'user456',
-//     status: 'in_progress',
-//     priority: 'high',
-//     created_at: new Date().toISOString()
-//   }
-// ];
+export const MOCK_HELP_TICKETS: HelpTicket[] = [
+  {
+    id: '1',
+    title: 'Login Issue',
+    description: 'Cannot access my dashboard after registration',
+    submitted_by: 'user123',
+    status: 'open',
+    priority: 'medium',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: '2',
+    title: 'Payment Verification',
+    description: 'Payment made but status not updated',
+    submitted_by: 'user456',
+    status: 'in_progress',
+    priority: 'high',
+    created_at: new Date().toISOString()
+  }
+];
 
 // Mock Social Items (mutable for API operations)
-// export const MOCK_SOCIAL_ITEMS: SocialItem[] = [
-//   {
-//     id: '1',
-//     file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
-//     caption: 'Opening ceremony with 400+ enthusiastic participants',
-//     uploaded_by: 'event_team',
-//     status: 'approved',
-//     category: 'ceremony',
-//     likes: 45,
-//     comments: 12,
-//     shares: 8,
-//     tags: ['opening', 'ceremony', 'samyukta2025'],
-//     created_at: '2024-08-06T09:00:00Z'
-//   },
-//   {
-//     id: '2',
-//     file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
-//     caption: 'AWS workshop in progress - Cloud computing mastery',
-//     uploaded_by: 'coordinator_1',
-//     status: 'approved',
-//     category: 'workshop',
-//     likes: 32,
-//     comments: 8,
-//     shares: 5,
-//     tags: ['aws', 'workshop', 'cloud'],
-//     created_at: '2024-08-06T11:30:00Z'
-//   },
-//   {
-//     id: '3',
-//     file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
-//     caption: 'Team collaboration during hackathon',
-//     uploaded_by: 'participant_23',
-//     status: 'approved',
-//     category: 'hackathon',
-//     likes: 67,
-//     comments: 15,
-//     shares: 12,
-//     tags: ['hackathon', 'teamwork', 'coding'],
-//     created_at: '2024-08-08T14:00:00Z'
-//   },
-//   {
-//     id: '4',
-//     file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
-//     caption: 'Cultural night performances and celebrations',
-//     uploaded_by: 'cultural_team',
-//     status: 'approved',
-//     category: 'cultural',
-//     likes: 89,
-//     comments: 23,
-//     shares: 18,
-//     tags: ['cultural', 'dance', 'music'],
-//     created_at: '2024-08-06T19:00:00Z'
-//   },
-//   {
-//     id: '5',
-//     file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
-//     caption: 'Networking session with industry experts',
-//     uploaded_by: 'networking_team',
-//     status: 'approved',
-//     category: 'networking',
-//     likes: 28,
-//     comments: 5,
-//     shares: 3,
-//     tags: ['networking', 'industry', 'experts'],
-//     created_at: '2024-08-07T16:00:00Z'
-//   },
-//   {
-//     id: '6',
-//     file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-//     caption: 'AI/ML workshop with Google Cloud experts',
-//     uploaded_by: 'tech_team',
-//     status: 'approved',
-//     category: 'workshop',
-//     likes: 43,
-//     comments: 9,
-//     shares: 6,
-//     tags: ['ai', 'ml', 'google'],
-//     created_at: '2024-08-07T10:00:00Z'
-//   },
-//   {
-//     id: '7',
-//     file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
-//     caption: 'Prize distribution ceremony',
-//     uploaded_by: 'admin_team',
-//     status: 'approved',
-//     category: 'ceremony',
-//     likes: 76,
-//     comments: 18,
-//     shares: 14,
-//     tags: ['awards', 'winners', 'celebration'],
-//     created_at: '2024-08-08T18:00:00Z'
-//   },
-//   {
-//     id: '8',
-//     file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
-//     caption: 'Group photo with all participants',
-//     uploaded_by: 'photo_team',
-//     status: 'approved',
-//     category: 'group',
-//     likes: 120,
-//     comments: 34,
-//     shares: 28,
-//     tags: ['group', 'memories', 'finale'],
-//     created_at: '2024-08-08T17:00:00Z'
-//   }
-// ];
+export const MOCK_SOCIAL_ITEMS: SocialItem[] = [
+  {
+    id: '1',
+    file_url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=600&fit=crop',
+    caption: 'Opening ceremony with 400+ enthusiastic participants',
+    uploaded_by: 'event_team',
+    status: 'approved',
+    category: 'ceremony',
+    likes: 45,
+    comments: 12,
+    shares: 8,
+    tags: ['opening', 'ceremony', 'samyukta2025'],
+    created_at: '2024-08-06T09:00:00Z'
+  },
+  {
+    id: '2',
+    file_url: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&h=600&fit=crop',
+    caption: 'AWS workshop in progress - Cloud computing mastery',
+    uploaded_by: 'coordinator_1',
+    status: 'approved',
+    category: 'workshop',
+    likes: 32,
+    comments: 8,
+    shares: 5,
+    tags: ['aws', 'workshop', 'cloud'],
+    created_at: '2024-08-06T11:30:00Z'
+  },
+  {
+    id: '3',
+    file_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&h=600&fit=crop',
+    caption: 'Team collaboration during hackathon',
+    uploaded_by: 'participant_23',
+    status: 'approved',
+    category: 'hackathon',
+    likes: 67,
+    comments: 15,
+    shares: 12,
+    tags: ['hackathon', 'teamwork', 'coding'],
+    created_at: '2024-08-08T14:00:00Z'
+  },
+  {
+    id: '4',
+    file_url: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&h=600&fit=crop',
+    caption: 'Cultural night performances and celebrations',
+    uploaded_by: 'cultural_team',
+    status: 'approved',
+    category: 'cultural',
+    likes: 89,
+    comments: 23,
+    shares: 18,
+    tags: ['cultural', 'dance', 'music'],
+    created_at: '2024-08-06T19:00:00Z'
+  },
+  {
+    id: '5',
+    file_url: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&h=600&fit=crop',
+    caption: 'Networking session with industry experts',
+    uploaded_by: 'networking_team',
+    status: 'approved',
+    category: 'networking',
+    likes: 28,
+    comments: 5,
+    shares: 3,
+    tags: ['networking', 'industry', 'experts'],
+    created_at: '2024-08-07T16:00:00Z'
+  },
+  {
+    id: '6',
+    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+    caption: 'AI/ML workshop with Google Cloud experts',
+    uploaded_by: 'tech_team',
+    status: 'approved',
+    category: 'workshop',
+    likes: 43,
+    comments: 9,
+    shares: 6,
+    tags: ['ai', 'ml', 'google'],
+    created_at: '2024-08-07T10:00:00Z'
+  },
+  {
+    id: '7',
+    file_url: 'https://images.unsplash.com/photo-1559223607-b4d0555ae227?w=800&h=600&fit=crop',
+    caption: 'Prize distribution ceremony',
+    uploaded_by: 'admin_team',
+    status: 'approved',
+    category: 'ceremony',
+    likes: 76,
+    comments: 18,
+    shares: 14,
+    tags: ['awards', 'winners', 'celebration'],
+    created_at: '2024-08-08T18:00:00Z'
+  },
+  {
+    id: '8',
+    file_url: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&h=600&fit=crop',
+    caption: 'Group photo with all participants',
+    uploaded_by: 'photo_team',
+    status: 'approved',
+    category: 'group',
+    likes: 120,
+    comments: 34,
+    shares: 28,
+    tags: ['group', 'memories', 'finale'],
+    created_at: '2024-08-08T17:00:00Z'
+  }
+];
 
 // Mock Game Data (mutable for API operations)
 export const MOCK_GAME_DATA: GameAction[] = [];
