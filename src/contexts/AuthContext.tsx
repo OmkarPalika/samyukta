@@ -29,12 +29,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await fetch('/api/auth/me');
       if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
+        const contentType = response.headers.get('content-type');
+        if (contentType?.includes('application/json')) {
+          const userData = await response.json();
+          setUser(userData);
+        } else {
+          console.error('Auth API returned non-JSON response');
+          setUser(null);
+        }
       } else {
         setUser(null);
       }
-    } catch {
+    } catch (error) {
+      console.error('Auth check failed:', error);
       setUser(null);
     } finally {
       setLoading(false);

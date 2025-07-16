@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/entities/User";
+import { ClientAuth } from "@/lib/client-auth";
 import { PageLoading } from "@/components/shared/Loading";
 
 export default function Dashboard() {
@@ -11,7 +11,10 @@ export default function Dashboard() {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        const currentUser = await User.me();
+        const dashboardData = await ClientAuth.getDashboardData();
+        if (!dashboardData || !dashboardData.user) throw new Error('Not authenticated');
+        
+        const currentUser = dashboardData.user as { role: string };
         
         // Route to appropriate dashboard based on role
         if (currentUser.role === 'admin') {

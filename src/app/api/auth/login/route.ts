@@ -6,6 +6,11 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { email, password, passkey } = body;
+    
+    if (!email) {
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
+    }
+    
     const collections = await getTypedCollections();
     
     let user = null;
@@ -72,6 +77,15 @@ export async function POST(request: NextRequest) {
     return response;
   } catch (error) {
     console.error('Login API error:', error);
-    return NextResponse.json({ error: 'Login failed', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
+    
+    // Ensure we always return JSON
+    if (error instanceof Error && error.message.includes('Database connection failed')) {
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 503 });
+    }
+    
+    return NextResponse.json({ 
+      error: 'Login failed', 
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 });
   }
 }

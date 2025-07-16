@@ -21,7 +21,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User } from "@/entities/User";
+import { ClientAuth } from "@/lib/client-auth";
 import { User as UserType } from "@/lib/types";
 import { EVENT_CONFIG, URL_CONFIG } from "@/lib/config";
 import { PARTNERS_DATA } from "@/data";
@@ -90,7 +90,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    User.me()
+    ClientAuth.me()
       .then(setUser)
       .catch(() => setUser(null));
   }, []);

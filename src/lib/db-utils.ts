@@ -11,8 +11,13 @@ export async function getDb() {
 }
 
 export async function getTypedCollections() {
-  const db = await getDbPromise()
-  return getCollections(db)
+  try {
+    const db = await getDbPromise()
+    return getCollections(db)
+  } catch (error) {
+    console.error('Database connection failed:', error)
+    throw new Error('Database connection failed')
+  }
 }
 
 export async function findById(collection: string, id: string) {

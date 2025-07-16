@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard, FileText, Copy, Upload, InfoIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,18 @@ export default function Register() {
   const [showPitchDialog, setShowPitchDialog] = useState(false);
   const [showPitchModeDialog, setShowPitchModeDialog] = useState(false);
   const [currentPitchMember, setCurrentPitchMember] = useState(0);
+  const [emailErrors, setEmailErrors] = useState<Record<string, string>>({});
+  const [slots, setSlots] = useState({ pitch: { available: 250 }, hackathon: { available: 250 } });
+
+  const fetchSlots = async () => {
+    try {
+      const response = await fetch('/api/registrations/slots');
+      const data = await response.json();
+      setSlots(data);
+    } catch (error) {
+      console.error('Failed to fetch slots:', error);
+    }
+  };
 
   const [formData, setFormData] = useState<FormData>({
     teamSize: 1,
@@ -132,6 +144,32 @@ export default function Register() {
     const newMembers = [...formData.members];
     newMembers[index] = { ...newMembers[index], [field]: value };
     setFormData({ ...formData, members: newMembers });
+    
+    if (field === 'email' && typeof value === 'string') {
+      checkEmailExists(value, index);
+    }
+  };
+
+  const checkEmailExists = async (email: string, memberIndex: number) => {
+    if (!email || !email.includes('@')) return;
+    
+    try {
+      const response = await fetch(`/api/registrations/check-email?email=${encodeURIComponent(email)}`);
+      const data = await response.json();
+      
+      const newEmailErrors = { ...emailErrors };
+      const errorKey = memberIndex === 0 ? 'teamLeadEmail' : `member${memberIndex}Email`;
+      
+      if (data.exists) {
+        newEmailErrors[errorKey] = 'Email already registered';
+      } else {
+        delete newEmailErrors[errorKey];
+      }
+      
+      setEmailErrors(newEmailErrors);
+    } catch (error) {
+      console.error('Email check failed:', error);
+    }
   };
 
   const copyFromTeamLead = (index: number) => {
@@ -251,7 +289,7 @@ export default function Register() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.keys(newErrors).length === 0 && Object.keys(emailErrors).length === 0;
   };
 
   const handleNext = async () => {
@@ -382,7 +420,9 @@ export default function Register() {
                   className="bg-gray-700/50 border-gray-600 text-white"
                   placeholder="email@example.com"
                 />
-                {errors.teamLeadEmail && <p className="text-red-400 text-sm">{errors.teamLeadEmail}</p>}
+                {(errors.teamLeadEmail || emailErrors.teamLeadEmail) && (
+                  <p className="text-red-400 text-sm">{errors.teamLeadEmail || emailErrors.teamLeadEmail}</p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -587,7 +627,7 @@ export default function Register() {
                 <Checkbox
                   id="lead-accommodation"
                   checked={teamLead.accommodation}
-                  onCheckedChange={(checked) => handleMemberChange(0, 'accommodation', checked)}
+                  onCheckedChange={(checked) => handleMemberChange(0, 'accommodation', !!checked)}
                 />
                 <Label htmlFor="lead-accommodation" className="text-gray-300">
                   Accommodation required
@@ -792,8 +832,8 @@ export default function Register() {
                           className="bg-gray-700/50 border-gray-600 text-white"
                           placeholder="email@example.com"
                         />
-                        {errors[`member${memberIndex}Email`] && (
-                          <p className="text-red-400 text-sm">{errors[`member${memberIndex}Email`]}</p>
+                        {(errors[`member${memberIndex}Email`] || emailErrors[`member${memberIndex}Email`]) && (
+                          <p className="text-red-400 text-sm">{errors[`member${memberIndex}Email`] || emailErrors[`member${memberIndex}Email`]}</p>
                         )}
                       </div>
 
@@ -1030,7 +1070,7 @@ export default function Register() {
                       <Checkbox
                         id={`accommodation-${memberIndex}`}
                         checked={member.accommodation}
-                        onCheckedChange={(checked) => handleMemberChange(memberIndex, 'accommodation', checked)}
+                        onCheckedChange={(checked) => handleMemberChange(memberIndex, 'accommodation', !!checked)}
                       />
                       <Label htmlFor={`accommodation-${memberIndex}`} className="text-gray-300">
                         Accommodation required
@@ -1164,7 +1204,48 @@ export default function Register() {
                             </SelectItem>
                           </SelectContent>
                         </Select>
-
+                        {memberTrack.competitionTrack === "Startup Pitch" && (
+                          <div className="mt-2">
+                            {formData.startupPitchData[index] ? (
+                              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                                <div className="flex items-center space-x-2">
+                                  <Check className="w-4 h-4 text-green-400" />
+                                  <span className="text-green-400 text-sm font-medium">Pitch details saved</span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCurrentPitchMember(index);
+                                    setShowPitchDialog(true);
+                                  }}
+                                  className="text-blue-400 hover:text-blue-300 h-auto p-1"
+                                >
+                                  Edit Details
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setCurrentPitchMember(index);
+                                    setShowPitchDialog(true);
+                                  }}
+                                  className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
+                                >
+                                  Add Pitch Details
+                                </Button>
+                                {errors[`member${index}PitchDetails`] && (
+                                  <p className="text-red-400 text-sm mt-1">{errors[`member${index}PitchDetails`]}</p>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="space-y-4">
@@ -1209,10 +1290,51 @@ export default function Register() {
                               />
                               <Label htmlFor={`pitch-${index}`} className="text-gray-300">
                                 Startup Pitch (+₹100)
-                                <Badge className="ml-2 text-xs bg-purple-500/10 text-purple-400">35 left</Badge>
+                                <Badge className="ml-2 text-xs bg-purple-500/10 text-purple-400">{slots.pitch.available} left</Badge>
                               </Label>
                             </div>
-
+                            {memberTrack.competitionTrack === "Startup Pitch" && (
+                              <div className="mt-2">
+                                {formData.startupPitchData[index] ? (
+                                  <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                                    <div className="flex items-center space-x-2">
+                                      <Check className="w-4 h-4 text-green-400" />
+                                      <span className="text-green-400 text-sm font-medium">Pitch details saved</span>
+                                    </div>
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => {
+                                        setCurrentPitchMember(index);
+                                        setShowPitchDialog(true);
+                                      }}
+                                      className="text-blue-400 hover:text-blue-300 h-auto p-1"
+                                    >
+                                      Edit Details
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        setCurrentPitchMember(index);
+                                        setShowPitchModeDialog(true);
+                                      }}
+                                      className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
+                                    >
+                                      Add Pitch Details
+                                    </Button>
+                                    {errors[`member${index}PitchDetails`] && (
+                                      <p className="text-red-400 text-sm mt-1">{errors[`member${index}PitchDetails`]}</p>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1444,6 +1566,10 @@ export default function Register() {
     }
   };
 
+  useEffect(() => {
+    fetchSlots();
+  }, []);
+
   return (
     <div className="min-h-screen max-w-4xl mx-auto">
       <div className="container-narrow section-padding">
@@ -1529,16 +1655,7 @@ export default function Register() {
 
         <StartupPitchDialog
           open={showPitchDialog}
-          onOpenChange={(open) => {
-            setShowPitchDialog(open);
-            if (!open && !formData.startupPitchData[currentPitchMember]) {
-              const newTracks = [...formData.memberTracks];
-              if (newTracks[currentPitchMember]) {
-                newTracks[currentPitchMember] = { ...newTracks[currentPitchMember], competitionTrack: "" };
-                setFormData({ ...formData, memberTracks: newTracks });
-              }
-            }
-          }}
+          onOpenChange={setShowPitchDialog}
           onSave={(pitchData) => {
             setFormData(prev => ({
               ...prev,

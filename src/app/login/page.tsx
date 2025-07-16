@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
-import { User } from '@/entities/User';
+import { ClientAuth } from '@/lib/client-auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,7 +32,12 @@ export default function Login() {
     setError('');
 
     try {
-      const result = await User.checkEmail(email);
+      const response = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const result = await response.json();
       if (result.exists && result.role) {
         setUserRole(result.role);
         setStep('auth');
@@ -57,13 +62,12 @@ export default function Login() {
     setError('');
 
     try {
-      const result = await User.login({
-        email: data.email,
-        password: data.password || undefined,
-        passkey: data.passkey || undefined
-      });
-      console.log('Login successful:', result);
-      router.push('/dashboard');
+      const result = await ClientAuth.login(data.email, data.password || data.passkey);
+      if (result) {
+        router.push('/dashboard');
+      } else {
+        throw new Error('Login failed');
+      }
     } catch (err) {
       console.error('Login error:', err);
       if (err instanceof Error) {

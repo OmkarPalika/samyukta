@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import Loading from "@/components/shared/Loading";
-import { User } from "@/entities/User";
+import { ClientAuth } from "@/lib/client-auth";
 import { Competition } from "@/lib/types";
 
 export default function Tickets() {
@@ -45,7 +45,7 @@ export default function Tickets() {
       try {
         // Check authentication status
         try {
-          await User.me();
+          await ClientAuth.me();
           setIsAuthenticated(true);
         } catch {
           setIsAuthenticated(false);
