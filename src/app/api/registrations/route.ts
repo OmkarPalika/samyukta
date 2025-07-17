@@ -167,7 +167,8 @@ export async function POST(request: NextRequest) {
     await collections.registrations.insertOne(registration);
     
     // Insert team members with email sending
-    const memberPromises = registrationData.members.map(async (member: { participant_id: string; passkey: string; full_name: string; email: string; whatsapp: string; year: string; department: string; accommodation: boolean; food_preference: 'veg' | 'non-veg'; workshop_track: string; is_club_lead?: boolean; club_name?: string }) => {
+    const memberPromises = registrationData.members.map(async (member: { participant_id: string; passkey: string; full_name: string; email: string; whatsapp: string; gender?: string; role?: string; custom_role?: string; organization?: string; custom_organization?: string; college?: string; degree?: string; custom_degree?: string; year: string; department: string; stream?: string; accommodation: boolean; food_preference: 'veg' | 'non-veg'; workshop_track: string; competition_track?: string; is_club_lead?: boolean; club_name?: string; club_designation?: string }) => {
+      console.log(`Member ${member.full_name} gender: ${member.gender}`);
       const teamMember = {
         registration_id: teamId,
         participant_id: member.participant_id,
@@ -175,13 +176,24 @@ export async function POST(request: NextRequest) {
         full_name: member.full_name,
         email: member.email,
         whatsapp: member.whatsapp,
+        gender: member.gender || 'Not specified',
+        role: member.role || 'Student',
+        custom_role: member.custom_role,
+        organization: member.organization || 'College/University',
+        custom_organization: member.custom_organization,
+        college: member.college || registrationData.college,
+        degree: member.degree,
+        custom_degree: member.custom_degree,
         year: member.year,
         department: member.department,
-        college: registrationData.college,
+        stream: member.stream,
         accommodation: member.accommodation,
         food_preference: member.food_preference as 'veg' | 'non-veg',
+        workshop_track: member.workshop_track,
+        competition_track: member.competition_track,
         is_club_lead: member.is_club_lead || false,
         club_name: member.club_name || undefined,
+        club_designation: member.club_designation,
         present: false,
         created_at: new Date()
       };

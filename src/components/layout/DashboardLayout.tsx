@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardNavigation from '@/components/navigation/DashboardNavigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { User } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface DashboardLayoutProps {
@@ -13,7 +14,6 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     if (!loading && !user) {
@@ -40,10 +40,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen w-full max-w-full bg-gray-900 text-gray-200 flex flex-col overflow-x-hidden">
       <DashboardNavigation 
-        user={user} 
-        onLogout={logout} 
-        mobileMenuOpen={mobileMenuOpen}
-        onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
+        user={{
+          ...user,
+          role: (user?.role as 'admin' | 'coordinator' | 'participant') || 'participant'
+        } as User} 
+        onLogout={logout}
       />
       
       <main className="flex-grow pt-12 sm:pt-16 px-2 sm:px-0">

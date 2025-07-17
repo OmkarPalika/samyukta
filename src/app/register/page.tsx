@@ -541,14 +541,24 @@ export default function Register() {
         full_name: member.fullName,
         email: member.email,
         whatsapp: member.whatsapp,
+        gender: member.gender,
+        role: member.role,
+        custom_role: member.customRole,
+        organization: member.organization,
+        custom_organization: member.customOrganization,
+        college: member.college,
+        degree: member.degree,
+        custom_degree: member.customDegree,
         year: member.year || "N/A",
         department: member.stream || "N/A",
+        stream: member.stream,
         accommodation: member.accommodation,
         food_preference: member.foodPreference,
         workshop_track: formData.memberTracks[index]?.workshopTrack || "",
         competition_track: formData.memberTracks[index]?.competitionTrack || "",
         is_club_lead: member.isClubMember || false,
-        club_name: member.clubName || ""
+        club_name: member.clubName || "",
+        club_designation: member.clubDesignation
       }));
       const registrationData = {
         college: formData.members[0].organization === "College/University"
@@ -1067,7 +1077,11 @@ export default function Register() {
 
                             if (value === "Startup Pitch") {
                               setCurrentPitchMember(index);
-                              setShowPitchModeDialog(true);
+                              if (slots && slots.total.remaining <= 50) {
+                                setShowPitchModeDialog(true);
+                              } else {
+                                setShowPitchDialog(true);
+                              }
                             }
                           }}
                         >
@@ -1176,7 +1190,11 @@ export default function Register() {
 
                                   if (checked) {
                                     setCurrentPitchMember(index);
-                                    setShowPitchModeDialog(true);
+                                    if (slots && slots.total.remaining <= 50) {
+                                      setShowPitchModeDialog(true);
+                                    } else {
+                                      setShowPitchDialog(true);
+                                    }
                                   }
                                 }}
                               />

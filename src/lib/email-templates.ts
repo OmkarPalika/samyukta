@@ -184,7 +184,7 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
         <div style="display: grid; gap: 12px;">
         ${data.teamMembers.map((member, index) => `
           <div style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 10px; color: #ffffff; font-size: 14px; font-weight: 500; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="background: ${theme.gradient}; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff; flex-shrink: 0; text-align: center; line-height: 28px; vertical-align: middle;">${index + 1}</span>
+            <span style="background: ${theme.gradient}; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff; flex-shrink: 0;">${index + 1}</span>
             <span style="flex: 1;">${member}</span>
           </div>
         `).join('')}
@@ -257,9 +257,9 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
                 Launch Dashboard
               </a>
               
-              <a href="https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '+918897892720'}?text=Hi! I just registered for Samyukta 2025 🎉" style="display: inline-flex; align-items: center; background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); margin: 0 8px 12px 8px;">
+              <a href="${process.env.NEXT_PUBLIC_WHATSAPP_GROUP_LINK || 'https://chat.whatsapp.com/E0qy5iN3g5dJgZiBwo36XS?mode=r_c'}" style="display: inline-flex; align-items: center; background: linear-gradient(135deg, #25D366, #128C7E); color: #ffffff; text-decoration: none; padding: 15px 30px; border-radius: 30px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3); transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.1); margin: 0 8px 12px 8px;">
                 <span style="margin-right: 8px;">💬</span>
-                Join WhatsApp
+                Join WhatsApp Group
               </a>
             </div>
           </div>

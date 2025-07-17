@@ -13,7 +13,7 @@ const inter = Inter({
   preload: true,
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta.vercel.app';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
