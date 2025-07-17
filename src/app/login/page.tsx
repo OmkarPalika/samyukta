@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
 import { ClientAuth } from '@/lib/client-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +19,7 @@ export default function Login() {
   const [step, setStep] = useState<'email' | 'auth'>('email');
   const [userRole, setUserRole] = useState<'admin' | 'coordinator' | 'participant' | null>(null);
   const router = useRouter();
+  const { checkAuth } = useAuth();
 
   const form = useForm({
     defaultValues: {
@@ -26,21 +28,6 @@ export default function Login() {
       passkey: ''
     }
   });
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const user = await ClientAuth.me();
-        if (user) {
-          router.push('/dashboard');
-        }
-      } catch (error) {
-        // User not logged in, continue with login page
-        console.error('Auth check error:', error);
-      }
-    };
-    checkAuth();
-  }, [router]);
 
   const checkEmail = async (email: string) => {
     setLoading(true);
@@ -80,10 +67,14 @@ export default function Login() {
       const credential = userRole === 'participant' ? data.passkey : data.password;
       const result = await ClientAuth.login(data.email, credential);
       if (result) {
-        // Add a small delay to ensure cookie is set
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 100);
+        await checkAuth();
+        if (result.role === 'admin') {
+          router.replace('/dashboard/admin');
+        } else if (result.role === 'coordinator') {
+          router.replace('/dashboard/coordinator');
+        } else {
+          router.replace('/dashboard/participant');
+        }
       } else {
         throw new Error('Login failed');
       }

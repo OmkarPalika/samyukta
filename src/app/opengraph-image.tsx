@@ -80,7 +80,7 @@ export default async function Image() {
               fontWeight: 500,
             }}
           >
-            Hackathons • AI/ML Workshops • Cloud Computing • Pitch Competitions
+            Hackathons • AI/ML Workshops • Cloud Computing • Pitch Competitions • Games • Networking
           </div>
         </div>
       </div>

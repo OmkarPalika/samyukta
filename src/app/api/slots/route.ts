@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getTypedCollections } from '@/lib/db-utils';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const collections = await getTypedCollections();
@@ -127,6 +130,9 @@ export async function GET() {
         pitch_price: 300
       },
       
+      // Pitch mode configuration
+      pitch_mode_enabled: totalCount >= 350,
+      
       // Legacy format for backward compatibility
       remaining_total,
       remaining_cloud,
@@ -153,7 +159,13 @@ export async function GET() {
       direct_join_pitch_price: 300
     };
     
-    return NextResponse.json(slotData);
+    return NextResponse.json(slotData, {
+      headers: {
+        'Cache-Control': 'no-store, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
+    });
   } catch (error) {
     console.error('Failed to fetch slot data:', error);
     return NextResponse.json(

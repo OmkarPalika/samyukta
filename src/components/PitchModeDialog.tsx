@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ExternalLink, FileText } from 'lucide-react';
-
+import { useEffect } from 'react';
+import { shouldShowPitchModeDialog } from '@/lib/pitch-selection';
 
 interface PitchModeDialogProps {
   open: boolean;
@@ -13,6 +14,22 @@ interface PitchModeDialogProps {
 }
 
 export default function PitchModeDialog({ open, onOpenChange, onSelectOffline }: PitchModeDialogProps) {
+  useEffect(() => {
+    // Fetch registration count when dialog opens
+    if (open) {
+      fetch('/api/slots')
+        .then(res => res.json())
+        .then(data => {
+          // If under threshold, skip the mode dialog and go directly to offline
+          if (!shouldShowPitchModeDialog(data.total.remaining)) {
+            onSelectOffline();
+            onOpenChange(false);
+          }
+        })
+        .catch(err => console.error('Failed to fetch registration count:', err));
+    }
+  }, [open, onSelectOffline, onOpenChange]);
+  
   const handleOnlineSelection = () => {
     window.open('https://mmkuniverse.vercel.app', '_blank');
     onOpenChange(false);

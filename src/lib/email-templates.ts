@@ -184,7 +184,7 @@ export const generateRegistrationConfirmationEmail = (data: RegistrationData): s
         <div style="display: grid; gap: 12px;">
         ${data.teamMembers.map((member, index) => `
           <div style="background: rgba(255,255,255,0.05); padding: 12px 16px; border-radius: 10px; color: #ffffff; font-size: 14px; font-weight: 500; display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.1);">
-            <span style="background: ${theme.gradient}; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff; flex-shrink: 0; text-align: center; line-height: 28px; vertical-align: middle;">${index + 1}</span>
+            <span style="background: ${theme.gradient}; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-right: 12px; color: #ffffff; flex-shrink: 0;">${index + 1}</span>
             <span style="flex: 1;">${member}</span>
           </div>
         `).join('')}
