@@ -11,37 +11,37 @@ export default function DashboardTabs() {
   const getTabValue = () => {
     if (!pathname) return 'dashboard';
     if (pathname === '/dashboard' || pathname === '/dashboard/participant') return 'dashboard';
-    if (pathname.includes('/dashboard/games')) return 'games';
-    if (pathname.includes('/dashboard/competitions')) return 'competitions';
-    if (pathname.includes('/dashboard/team')) return 'team';
-    if (pathname.includes('/dashboard/social')) return 'social';
-    if (pathname.includes('/dashboard/schedule')) return 'schedule';
-    if (pathname.includes('/dashboard/help')) return 'help';
+    if (pathname.includes('/dashboard/participant/games')) return 'games';
+    if (pathname.includes('/dashboard/participant/competitions')) return 'competitions';
+    if (pathname.includes('/dashboard/participant/team')) return 'team';
+    if (pathname.includes('/dashboard/participant/social')) return 'social';
+    if (pathname.includes('/dashboard/participant/schedule')) return 'schedule';
+    if (pathname.includes('/dashboard/participant/help')) return 'help';
     return 'dashboard';
   };
 
   const handleTabChange = (value: string) => {
     switch (value) {
       case 'games':
-        router.push('/dashboard/games');
+        router.push('/dashboard/participant/games');
         break;
       case 'competitions':
-        router.push('/dashboard/competitions');
+        router.push('/dashboard/participant/competitions');
         break;
       case 'team':
-        router.push('/dashboard/team');
+        router.push('/dashboard/participant/team');
         break;
       case 'social':
-        router.push('/dashboard/social');
+        router.push('/dashboard/participant/social');
         break;
       case 'schedule':
-        router.push('/dashboard/schedule');
+        router.push('/dashboard/participant/schedule');
         break;
       case 'help':
-        router.push('/dashboard/help');
+        router.push('/dashboard/participant/help');
         break;
       default:
-        router.push('/dashboard/participant');
+        router.push('/dashboard');
     }
   };
 

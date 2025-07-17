@@ -73,7 +73,7 @@ export default function Login() {
         } else if (result.role === 'coordinator') {
           router.replace('/dashboard/coordinator');
         } else {
-          router.replace('/dashboard/participant');
+          router.replace('/dashboard');
         }
       } else {
         throw new Error('Login failed');
