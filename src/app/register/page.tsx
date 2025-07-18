@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { uploadFile, validateFile } from "@/lib/file-upload";
 import StartupPitchDialog from '@/components/StartupPitchDialog';
 import PitchModeDialog from "@/components/PitchModeDialog";
+import { TeamTrackSelection, PriceSummary, TrackSelectionMode, IndividualTrackSelection } from "@/components/registration";
 
 
 type Role = 'Student' | 'Working Professional' | 'Academician' | 'Entrepreneur' | 'Researcher' | 'Other';
@@ -54,6 +55,8 @@ interface StartupPitchData {
   fundingStatus: string;
   pitchDeck: File | null;
   demoUrl: string;
+  teamMembers?: number[];
+  externalMembers?: string[];
 }
 
 interface FormData {
@@ -86,6 +89,7 @@ export default function Register() {
   const [showPitchModeDialog, setShowPitchModeDialog] = useState(false);
   const [currentPitchMember, setCurrentPitchMember] = useState(0);
   const [emailErrors, setEmailErrors] = useState<Record<string, string>>({});
+  const [trackSelectionMode, setTrackSelectionMode] = useState<'shared' | 'individual'>('shared');
   const [slots, setSlots] = useState<{
     total: { remaining: number; closed: boolean };
     workshops: {
@@ -510,16 +514,76 @@ export default function Register() {
 
   const calculatePrice = () => {
     let total = 0;
+    
     if (formData.tickets.combo) {
+      // Base price for combo tickets
       total = 900 * formData.teamSize;
-      if (formData.teamSize > 1) total -= formData.teamSize * 10;
+      
+      // Apply team discount for combo tickets
+      if (formData.teamSize > 1) {
+        total -= formData.teamSize * 10;
+      }
+      
+      // Combo pass already includes competition access, no need to add extra fees
     } else {
+      // Base price for workshop-only tickets
       total = 800 * formData.teamSize;
-      formData.memberTracks.forEach(track => {
-        if (track.competitionTrack === "Hackathon") total += 150;
-        else if (track.competitionTrack === "Startup Pitch") total += 100;
-      });
+      
+      if (trackSelectionMode === 'shared' || formData.teamSize === 1) {
+        // In shared mode, apply the same competition track to all members
+        const sharedTrack = formData.memberTracks[0] || { workshopTrack: "", competitionTrack: "" };
+        
+        if (sharedTrack.competitionTrack === "Hackathon") {
+          // Add hackathon fee for all members
+          total += 150 * formData.teamSize;
+        } else if (sharedTrack.competitionTrack === "Startup Pitch") {
+          // In shared mode, charge per member for the pitch
+          total += 100 * formData.teamSize;
+        }
+      } else {
+        // In individual mode, calculate based on individual selections
+        // Count unique pitches for pricing
+        const pitchOwners = new Set();
+        const pitchParticipants = new Set();
+        
+        // Track hackathon participants
+        let hackathonCount = 0;
+        
+        formData.memberTracks.forEach((track, index) => {
+          if (track.competitionTrack === "Hackathon") {
+            hackathonCount++;
+          } else if (track.competitionTrack === "Startup Pitch") {
+            // If this member has their own pitch data
+            if (formData.startupPitchData[index]) {
+              pitchOwners.add(index);
+              // Add all team members of this pitch
+              if (formData.startupPitchData[index].teamMembers) {
+                formData.startupPitchData[index].teamMembers.forEach((memberIndex: number) => {
+                  pitchParticipants.add(memberIndex);
+                });
+              } else {
+                // If no team members specified, just count the owner
+                pitchParticipants.add(index);
+              }
+            }
+          }
+        });
+        
+        // For members who selected Startup Pitch but aren't part of any pitch yet
+        formData.memberTracks.forEach((track, index) => {
+          if (track.competitionTrack === "Startup Pitch" && !pitchParticipants.has(index)) {
+            total += 100; // Add individual pitch fee
+          }
+        });
+        
+        // Add the cost for unique pitches
+        total += pitchOwners.size * 100;
+        
+        // Add hackathon fees
+        total += hackathonCount * 150;
+      }
     }
+    
     return total;
   };
 
@@ -1015,303 +1079,68 @@ export default function Register() {
               <p className="text-gray-300">Select workshop and competition tracks for each team member</p>
             </div>
 
-            {formData.members.map((member, index) => {
-              const memberTrack = formData.memberTracks[index] || { workshopTrack: "", competitionTrack: "" };
-              return (
-                <Card key={index} className="bg-gray-800/40 border-gray-700">
-                  <CardHeader>
-                    <CardTitle className="text-white">
-                      {member.fullName || `Member ${index + 1}`} {index === 0 && "(Team Lead)"}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-gray-300">Workshop Track<span className="text-red-500"> *</span></Label>
-                      <Select
-                        value={memberTrack.workshopTrack}
-                        onValueChange={(value) => {
-                          const newTracks = [...formData.memberTracks];
-                          while (newTracks.length <= index) {
-                            newTracks.push({ workshopTrack: "", competitionTrack: "" });
-                          }
-                          newTracks[index] = { ...memberTrack, workshopTrack: value };
-                          setFormData({ ...formData, memberTracks: newTracks });
-                        }}
-                      >
-                        <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                          <SelectValue placeholder="Select workshop track" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Cloud Computing (AWS)" disabled={slots?.workshops.cloud.closed}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>Cloud Computing (AWS)</span>
-                              <Badge className={`ml-2 text-xs ${slots?.workshops.cloud.closed ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
-                                {slots?.workshops.cloud.closed ? 'FULL' : `${slots?.workshops.cloud.remaining || 0} left`}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="AI/ML (Google)" disabled={slots?.workshops.ai.closed}>
-                            <div className="flex items-center justify-between w-full">
-                              <span>AI/ML (Google)</span>
-                              <Badge className={`ml-2 text-xs ${slots?.workshops.ai.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
-                                {slots?.workshops.ai.closed ? 'FULL' : `${slots?.workshops.ai.remaining || 0} left`}
-                              </Badge>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+            {/* Only show track selection mode if team size > 1 */}
+            {formData.teamSize > 1 && (
+              <TrackSelectionMode
+                value={trackSelectionMode}
+                onChange={(mode) => {
+                  setTrackSelectionMode(mode);
+                  // Reset member tracks when changing modes
+                  setFormData({ ...formData, memberTracks: [] });
+                }}
+              />
+            )}
 
-                    {formData.tickets.combo ? (
-                      <div className="space-y-2">
-                        <Label className="text-gray-300">Competition Track<span className="text-red-500"> *</span></Label>
-                        <Select
-                          value={memberTrack.competitionTrack}
-                          onValueChange={(value) => {
-                            const newTracks = [...formData.memberTracks];
-                            while (newTracks.length <= index) {
-                              newTracks.push({ workshopTrack: "", competitionTrack: "" });
-                            }
-                            newTracks[index] = { ...memberTrack, competitionTrack: value };
-                            setFormData({ ...formData, memberTracks: newTracks });
-
-                            if (value === "Startup Pitch") {
-                              setCurrentPitchMember(index);
-                              if (slots && slots.total.remaining <= 50) {
-                                setShowPitchModeDialog(true);
-                              } else {
-                                setShowPitchDialog(true);
-                              }
-                            }
-                          }}
-                        >
-                          <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
-                            <SelectValue placeholder="Select competition track" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Hackathon" disabled={slots?.competitions.hackathon.closed}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>Hackathon</span>
-                                <Badge className={`ml-2 text-xs ${slots?.competitions.hackathon.closed ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                  {slots?.competitions.hackathon.closed ? 'FULL' : `${slots?.competitions.hackathon.remaining || 0} left`}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                            <SelectItem value="Startup Pitch" disabled={slots?.competitions.pitch.closed}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>Startup Pitch</span>
-                                <Badge className={`ml-2 text-xs ${slots?.competitions.pitch.closed ? 'bg-red-500/10 text-red-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                                  {slots?.competitions.pitch.closed ? 'FULL' : `${slots?.competitions.pitch.remaining || 0} left`}
-                                </Badge>
-                              </div>
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {memberTrack.competitionTrack === "Startup Pitch" && (
-                          <div className="mt-2">
-                            {formData.startupPitchData[index] ? (
-                              <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                                <div className="flex items-center space-x-2">
-                                  <Check className="w-4 h-4 text-green-400" />
-                                  <span className="text-green-400 text-sm font-medium">Pitch details saved</span>
-                                </div>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => {
-                                    setCurrentPitchMember(index);
-                                    setShowPitchDialog(true);
-                                  }}
-                                  className="text-blue-400 hover:text-blue-300 h-auto p-1"
-                                >
-                                  Edit Details
-                                </Button>
-                              </div>
-                            ) : (
-                              <>
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => {
-                                    setCurrentPitchMember(index);
-                                    setShowPitchDialog(true);
-                                  }}
-                                  className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
-                                >
-                                  Add Pitch Details
-                                </Button>
-                                {errors[`member${index}PitchDetails`] && (
-                                  <p className="text-red-400 text-sm mt-1">{errors[`member${index}PitchDetails`]}</p>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        <Label className="text-gray-300">Add-ons (Optional)</Label>
-                        <div className="space-y-3">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox
-                              id={`hackathon-${index}`}
-                              checked={memberTrack.competitionTrack === "Hackathon"}
-                              onCheckedChange={(checked) => {
-                                const newTracks = [...formData.memberTracks];
-                                while (newTracks.length <= index) {
-                                  newTracks.push({ workshopTrack: "", competitionTrack: "" });
-                                }
-                                newTracks[index] = { ...memberTrack, competitionTrack: checked ? "Hackathon" : "" };
-                                setFormData({ ...formData, memberTracks: newTracks });
-                              }}
-                            />
-                            <Label htmlFor={`hackathon-${index}`} className="text-gray-300">
-                              Hackathon (+₹150)
-                              <Badge className={`ml-2 text-xs ${slots?.competitions.hackathon.closed ? 'bg-red-500/10 text-red-400' : 'bg-blue-500/10 text-blue-400'}`}>
-                                {slots?.competitions.hackathon.closed ? 'FULL' : `${slots?.competitions.hackathon.remaining || 0} left`}
-                              </Badge>
-                            </Label>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox
-                                id={`pitch-${index}`}
-                                checked={memberTrack.competitionTrack === "Startup Pitch"}
-                                onCheckedChange={(checked) => {
-                                  const newTracks = [...formData.memberTracks];
-                                  while (newTracks.length <= index) {
-                                    newTracks.push({ workshopTrack: "", competitionTrack: "" });
-                                  }
-                                  newTracks[index] = { ...memberTrack, competitionTrack: checked ? "Startup Pitch" : "" };
-                                  const newFormData = { ...formData, memberTracks: newTracks };
-                                  setFormData(newFormData);
-
-                                  if (checked) {
-                                    setCurrentPitchMember(index);
-                                    if (slots && slots.total.remaining <= 50) {
-                                      setShowPitchModeDialog(true);
-                                    } else {
-                                      setShowPitchDialog(true);
-                                    }
-                                  }
-                                }}
-                              />
-                              <Label htmlFor={`pitch-${index}`} className="text-gray-300">
-                                Startup Pitch (+₹100)
-                                <Badge className={`ml-2 text-xs ${slots?.competitions.pitch.closed ? 'bg-red-500/10 text-red-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                                  {slots?.competitions.pitch.closed ? 'FULL' : `${slots?.competitions.pitch.remaining || 0} left`}
-                                </Badge>
-                              </Label>
-                            </div>
-                            {memberTrack.competitionTrack === "Startup Pitch" && (
-                              <div className="mt-2">
-                                {formData.startupPitchData[index] ? (
-                                  <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                                    <div className="flex items-center space-x-2">
-                                      <Check className="w-4 h-4 text-green-400" />
-                                      <span className="text-green-400 text-sm font-medium">Pitch details saved</span>
-                                    </div>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => {
-                                        setCurrentPitchMember(index);
-                                        setShowPitchDialog(true);
-                                      }}
-                                      className="text-blue-400 hover:text-blue-300 h-auto p-1"
-                                    >
-                                      Edit Details
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <Button
-                                      type="button"
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => {
-                                        setCurrentPitchMember(index);
-                                        setShowPitchModeDialog(true);
-                                      }}
-                                      className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
-                                    >
-                                      Add Pitch Details
-                                    </Button>
-                                    {errors[`member${index}PitchDetails`] && (
-                                      <p className="text-red-400 text-sm mt-1">{errors[`member${index}PitchDetails`]}</p>
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-
-            <div className="bg-gray-800/40 rounded-lg p-6 border border-gray-700">
-              <h4 className="text-lg font-bold text-white mb-4">Price Summary</h4>
-              <div className="space-y-2">
-                <div className="flex justify-between text-gray-300">
-                  <span>{formData.tickets.combo ? 'Combo Pass' : 'Workshop Pass'}</span>
-                  <span>₹{formData.tickets.combo ? 900 : 800}</span>
-                </div>
-                <div className="flex justify-between text-gray-300">
-                  <span>Team Size</span>
-                  <span>x{formData.teamSize}</span>
-                </div>
-                {!formData.tickets.combo && formData.memberTracks.map((track, index) => {
-                  if (track.competitionTrack === "Hackathon") {
-                    return (
-                      <div key={`hackathon-${index}`} className="flex justify-between text-gray-300">
-                        <span>Hackathon Add-on</span>
-                        <span>+₹150</span>
-                      </div>
-                    );
-                  } else if (track.competitionTrack === "Startup Pitch") {
-                    return (
-                      <div key={`pitch-${index}`} className="flex justify-between text-gray-300">
-                        <span>Startup Pitch Add-on</span>
-                        <span>+₹100</span>
-                      </div>
-                    );
+            {/* Show team track selection only in shared mode */}
+            {(trackSelectionMode === 'shared' || formData.teamSize === 1) && (
+              <TeamTrackSelection
+                members={formData.members}
+                memberTracks={formData.memberTracks}
+                startupPitchData={formData.startupPitchData}
+                isComboTicket={formData.tickets.combo}
+                slots={slots}
+                errors={errors}
+                onTrackChange={(newTracks) => setFormData({ ...formData, memberTracks: newTracks })}
+                onOpenPitchDialog={(memberIndex) => {
+                  setCurrentPitchMember(memberIndex);
+                  if (slots && slots.total.remaining <= 50) {
+                    setShowPitchModeDialog(true);
+                  } else {
+                    setShowPitchDialog(true);
                   }
-                  return null;
-                })}
-                {formData.teamSize > 1 && formData.tickets.combo && (
-                  <div className="flex justify-between text-green-400">
-                    <span>Team Discount</span>
-                    <span>-₹{formData.teamSize * 10}</span>
-                  </div>
-                )}
-                <div className="border-t border-gray-600 pt-2 mt-2">
-                  <div className="flex justify-between text-xl font-bold text-white">
-                    <span>Total</span>
-                    <span>₹{(() => {
-                      let total = 0;
-                      if (formData.tickets.combo) {
-                        total = 900 * formData.teamSize;
-                        if (formData.teamSize > 1) total -= formData.teamSize * 10;
-                      } else {
-                        total = 800 * formData.teamSize;
-                        formData.memberTracks.forEach(track => {
-                          if (track.competitionTrack === "Hackathon") total += 150;
-                          else if (track.competitionTrack === "Startup Pitch") total += 100;
-                        });
-                      }
-                      return total;
-                    })()}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+                }}
+              />
+            )}
+            
+            {/* Show individual track selection UI only in individual mode */}
+            {trackSelectionMode === 'individual' && formData.teamSize > 1 && (
+              <IndividualTrackSelection
+                members={formData.members}
+                memberTracks={formData.memberTracks}
+                startupPitchData={formData.startupPitchData}
+                isComboTicket={formData.tickets.combo}
+                slots={slots}
+                errors={errors}
+                onTrackChange={(newTracks) => setFormData({ ...formData, memberTracks: newTracks })}
+                onOpenPitchDialog={(memberIndex) => {
+                  setCurrentPitchMember(memberIndex);
+                  if (slots && slots.total.remaining <= 50) {
+                    setShowPitchModeDialog(true);
+                  } else {
+                    setShowPitchDialog(true);
+                  }
+                }}
+              />
+            )}
+
+            {/* Using the PriceSummary component */}
+            <PriceSummary
+              isComboTicket={formData.tickets.combo}
+              teamSize={formData.teamSize}
+              memberTracks={formData.memberTracks}
+              startupPitchData={formData.startupPitchData}
+              trackSelectionMode={trackSelectionMode}
+            />
           </div>
         );
 
@@ -1617,6 +1446,8 @@ export default function Register() {
           }}
           initialData={formData.startupPitchData[currentPitchMember]}
           registrationTeamSize={formData.teamSize}
+          teamMembers={formData.members}
+          currentMemberIndex={currentPitchMember}
         />
       </div>
     </div>

@@ -21,6 +21,8 @@ interface StartupPitchData {
   pitchDeck: File | null;
   pitchDeckUrl?: string;
   demoUrl: string;
+  teamMembers?: number[]; // Indices of team members participating in the pitch
+  externalMembers?: string[]; // Names of external team members not in registration
 }
 
 interface StartupPitchDialogProps {
@@ -29,6 +31,8 @@ interface StartupPitchDialogProps {
   onSave: (data: StartupPitchData) => void;
   initialData?: StartupPitchData;
   registrationTeamSize?: number;
+  teamMembers?: Array<{ fullName: string; email: string; }>;
+  currentMemberIndex?: number;
 }
 
 const defaultData: StartupPitchData = {
@@ -41,20 +45,56 @@ const defaultData: StartupPitchData = {
   teamSize: '',
   fundingStatus: '',
   pitchDeck: null,
-  demoUrl: ''
+  demoUrl: '',
+  externalMembers: []
 };
 
-export default function StartupPitchDialog({ open, onOpenChange, onSave, initialData, registrationTeamSize }: StartupPitchDialogProps) {
+export default function StartupPitchDialog({ 
+  open, 
+  onOpenChange, 
+  onSave, 
+  initialData, 
+  registrationTeamSize,
+  teamMembers = [],
+  currentMemberIndex = 0
+}: StartupPitchDialogProps) {
   const [data, setData] = useState<StartupPitchData>(() => {
     const baseData = initialData || defaultData;
     // Set team size from registration if not already set
     if (!baseData.teamSize && registrationTeamSize) {
       return { ...baseData, teamSize: registrationTeamSize.toString() };
     }
+    // Initialize teamMembers if not set
+    if (!baseData.teamMembers) {
+      return { ...baseData, teamMembers: [currentMemberIndex] };
+    }
     return baseData;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState(false);
+
+  // Handle team size change and initialize external members if needed
+  const handleTeamSizeChange = (value: string) => {
+    // Initialize external members if team size increases beyond registration size
+    if (Number(value) > (registrationTeamSize || 1)) {
+      const currentExternalCount = data.externalMembers?.length || 0;
+      const neededExternalCount = Number(value) - (registrationTeamSize || 1);
+      
+      if (currentExternalCount < neededExternalCount) {
+        // Add empty slots for new external members
+        const newExternalMembers = [...(data.externalMembers || [])];
+        while (newExternalMembers.length < neededExternalCount) {
+          newExternalMembers.push('');
+        }
+        setData({ ...data, teamSize: value, externalMembers: newExternalMembers });
+      } else {
+        setData({ ...data, teamSize: value });
+      }
+    } else {
+      // If team size is less than or equal to registration size, no external members needed
+      setData({ ...data, teamSize: value, externalMembers: [] });
+    }
+  };
 
   const pitchCategories = ['Early Stage', 'Growth Stage', 'Social Impact', 'Tech Innovation', 'Other'];
   const currentStages = ['Idea Stage', 'Prototype', 'MVP', 'Revenue Generating', 'Scaling'];
@@ -78,6 +118,27 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
     if (!data.teamSize) newErrors.teamSize = 'Team size is required';
     else if (isNaN(Number(data.teamSize)) || Number(data.teamSize) < 1 || Number(data.teamSize) > 5) {
       newErrors.teamSize = 'Team size must be between 1 and 5';
+    }
+    
+    // Validate team members selection only if team size is changed
+    if (Number(data.teamSize) !== (registrationTeamSize || 1) && 
+        (!data.teamMembers || data.teamMembers.length === 0)) {
+      newErrors.teamMembers = 'Please select at least one team member';
+    }
+    
+    // Validate external members if pitch team size > registration team size
+    if (Number(data.teamSize) > (registrationTeamSize || 1)) {
+      const externalMembersNeeded = Number(data.teamSize) - (registrationTeamSize || 1);
+      const externalMembersAdded = data.externalMembers?.filter(name => name.trim() !== '').length || 0;
+      
+      if (externalMembersAdded < externalMembersNeeded) {
+        newErrors.externalMembers = `Please add ${externalMembersNeeded - externalMembersAdded} more external team member(s)`;
+      }
+      
+      // Check if any external member name is empty
+      if (data.externalMembers?.some(name => name.trim() === '')) {
+        newErrors.externalMembersEmpty = 'External member names cannot be empty';
+      }
     }
 
     setErrors(newErrors);
@@ -230,7 +291,7 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === '' || (Number(value) >= 1 && Number(value) <= 5)) {
-                    setData({ ...data, teamSize: value });
+                    handleTeamSizeChange(value);
                   }
                 }}
                 className="bg-gray-700/50 border-gray-600 text-white"
@@ -240,6 +301,109 @@ export default function StartupPitchDialog({ open, onOpenChange, onSave, initial
               {errors.teamSize && <p className="text-red-400 text-sm">{errors.teamSize}</p>}
             </div>
           </div>
+          
+          {/* Show team members selection if team size is changed from registration team size */}
+          {Number(data.teamSize) !== (registrationTeamSize || 1) && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-gray-300">Team Members Participating in Pitch *</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {teamMembers.map((member, index) => (
+                    <div key={index} className="flex items-center space-x-2 bg-gray-700/30 p-2 rounded-md">
+                      <input
+                        type="checkbox"
+                        id={`member-${index}`}
+                        checked={data.teamMembers?.includes(index) || false}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setData(prev => {
+                            const currentMembers = prev.teamMembers || [];
+                            if (isChecked && !currentMembers.includes(index)) {
+                              return { ...prev, teamMembers: [...currentMembers, index] };
+                            } else if (!isChecked) {
+                              return { ...prev, teamMembers: currentMembers.filter(i => i !== index) };
+                            }
+                            return prev;
+                          });
+                        }}
+                        className="rounded border-gray-600"
+                      />
+                      <label htmlFor={`member-${index}`} className="text-gray-300 text-sm cursor-pointer flex-1">
+                        {member.fullName || `Member ${index + 1}`} {index === currentMemberIndex && "(Current)"}
+                      </label>
+                    </div>
+                  ))}
+                </div>
+                {data.teamMembers?.length === 0 && (
+                  <p className="text-yellow-400 text-sm">Please select at least one team member</p>
+                )}
+              </div>
+              
+              {/* External team members section - show when pitch team size > registration team size */}
+              {Number(data.teamSize) > (registrationTeamSize || 1) && (
+                <div className="space-y-2 border-t border-gray-700 pt-4">
+                  <Label className="text-gray-300 flex items-center justify-between">
+                    <span>External Team Members</span>
+                    <span className="text-xs text-gray-400">
+                      {data.externalMembers?.length || 0} of {Number(data.teamSize) - (registrationTeamSize || 1)} added
+                    </span>
+                  </Label>
+                  
+                  <div className="space-y-2">
+                    {data.externalMembers?.map((name, index) => (
+                      <div key={index} className="flex items-center space-x-2">
+                        <Input
+                          value={name}
+                          onChange={(e) => {
+                            const newExternalMembers = [...(data.externalMembers || [])];
+                            newExternalMembers[index] = e.target.value;
+                            setData({ ...data, externalMembers: newExternalMembers });
+                          }}
+                          className="bg-gray-700/50 border-gray-600 text-white flex-1"
+                          placeholder={`External member ${index + 1} name`}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            const newExternalMembers = [...(data.externalMembers || [])];
+                            newExternalMembers.splice(index, 1);
+                            setData({ ...data, externalMembers: newExternalMembers });
+                          }}
+                          className="text-red-400 hover:text-red-300 h-10 w-10"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    
+                    {(data.externalMembers?.length || 0) < (Number(data.teamSize) - (registrationTeamSize || 1)) && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          const newExternalMembers = [...(data.externalMembers || []), ''];
+                          setData({ ...data, externalMembers: newExternalMembers });
+                        }}
+                        className="text-blue-400 border-blue-400 hover:bg-blue-400/10 w-full"
+                      >
+                        Add External Team Member
+                      </Button>
+                    )}
+                    
+                    {errors.externalMembers && (
+                      <p className="text-red-400 text-sm">{errors.externalMembers}</p>
+                    )}
+                    {errors.externalMembersEmpty && (
+                      <p className="text-red-400 text-sm">{errors.externalMembersEmpty}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label className="text-gray-300">Funding Status (Optional)</Label>
