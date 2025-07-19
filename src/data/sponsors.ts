@@ -25,6 +25,7 @@ export const SPONSORS_DATA = [
     amount: "Main Venue",
     sponsors: [
       {
+        logo: "/sponsors/anits.png",
         name: "ANITS",
         website: "https://anits.edu.in",
         description: "Anil Neerukonda Institute of Technology and Sciences"
@@ -40,14 +41,16 @@ export const SPONSORS_DATA = [
     amount: "Technical Workshops",
     sponsors: [
       {
+        logo: "/sponsors/aws.jpeg",
         name: "AWS Educate",
         website: "https://aws.amazon.com/education/awseducate",
         description: "Amazon's global initiative to provide students with resources for cloud learning"
       },
       {
-        name: "GDG Vizag",
-        website: "https://gdg.community.dev/gdg-vizag",
-        description: "Google Developer Group Visakhapatnam"
+        logo: "/sponsors/google.jpeg",
+        name: "GDG Vijayawada",
+        website: "https://gdg.community.dev/gdg-vijayawada/",
+        description: "Google Developer Group Vijayawada, a community of developers"
       }
     ]
   },
@@ -60,6 +63,7 @@ export const SPONSORS_DATA = [
     amount: "Coding Competition",
     sponsors: [
       {
+        logo: "/sponsors/gfg.jpeg",
         name: "GeeksforGeeks",
         website: "https://geeksforgeeks.org",
         description: "Leading programming education platform"
@@ -75,21 +79,25 @@ export const SPONSORS_DATA = [
     amount: "Entrepreneurship Track",
     sponsors: [
       {
+        logo: "/sponsors/iic.jpeg",
         name: "Institute's Innovation Council (IIC)",
         website: "https://mic.gov.in",
         description: "Fostering innovation and entrepreneurship in educational institutions"
       },
       {
+        logo: "/sponsors/mmk-universe.png",
         name: "MMK Universe",
-        website: "#",
+        website: "https://mmkuniverse.vercel.app",
         description: "Supporting startup ecosystem and innovation"
       },
       {
+        logo: "/sponsors/bizverve.png",
         name: "BizVerve Club",
         website: "#",
         description: "Student entrepreneurship club"
       },
       {
+        logo: "/sponsors/a-hub-tie.png",
         name: "A-Hub/TIE",
         website: "#",
         description: "Startup incubation and mentorship"
@@ -105,6 +113,7 @@ export const SPONSORS_DATA = [
     amount: "Industry Exposure",
     sponsors: [
       {
+        logo: "/sponsors/amtz.png",
         name: "AMTZ",
         website: "https://amtz.in",
         description: "Andhra Pradesh MedTech Zone"
@@ -120,14 +129,32 @@ export const SPONSORS_DATA = [
     amount: "Merchandise & Goodies",
     sponsors: [
       {
+        logo: "/sponsors/uniglobal.jpeg",
         name: "UNIGLOBAL",
-        website: "#",
+        website: "http://uniglobaleducon.com/",
         description: "Overseas consultancy firm"
       },
       {
+        logo: "/sponsors/interview-buddy.svg",
         name: "Interview Buddy",
-        website: "#",
+        website: "https://interviewbuddy.net/",
         description: "Career preparation and interview training"
+      }
+    ]
+  },
+  {
+    tier: "Games Sponsors",
+    color: "from-indigo-400 to-sky-500",
+    bg_color: "bg-indigo-500/10",
+    text_color: "text-indigo-400",
+    border_color: "border-indigo-500/20",
+    amount: "Games",
+    sponsors: [
+      {
+        logo: "/sponsors/prismatica.jpg",
+        name: "Prismatica",
+        website: "#",
+        description: "Student-led club"
       }
     ]
   }
@@ -135,13 +162,13 @@ export const SPONSORS_DATA = [
 
 // Partners List
 export const PARTNERS_DATA = [
-  "AWS Educate", 
-  "Google Cloud", 
+  "AWS Educate",
+  "Google Cloud",
   "GeeksforGeeks",
-  "Institute's Innovation Council", 
+  "Institute's Innovation Council",
   "AMTZ",
-  "UniGlobal", 
-  "Interview Buddy", 
+  "UniGlobal",
+  "Interview Buddy",
   "MMK Universe"
 ] as const;
 

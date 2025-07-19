@@ -137,7 +137,7 @@ export default function TeamContent({ teamData }: TeamContentProps) {
                 <div className="pt-4">
                   <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-4 py-2">
                     <Calendar className="w-4 h-4 mr-2" />
-                    Expected by July 15th, 2025
+                    Expected by July 25th, 2025
                   </Badge>
                 </div>
               </div>

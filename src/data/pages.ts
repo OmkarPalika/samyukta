@@ -88,15 +88,51 @@ export const PAGES_DATA = {
           {
             name: "Prof. V. Rajya Lakshmi",
             role: "Principal, ANITS",
-            image: "/team/principal.jpg",
+            image: "/team/principal.png",
             social: {}
           },
           {
             name: "Prof. G. Srinivas",
             role: "HoD, CSE",
-            image: "/team/hod.jpg",
+            image: "/team/hod-cse.png",
             social: {}
-          }
+          },
+          {
+            name: "Prof. K. Selvani Deepthi",
+            role: "HoD, CSM",
+            image: "/team/hod-csm.png",
+            social: {}
+          },
+          {
+            name: "Prof. Adinarayana Salina",
+            role: "HoD, CSD",
+            image: "/team/hod-csd.png",
+            social: {}
+          },
+          {
+            name: "Prof. M. Rekha Sundari",
+            role: "HoD, IT",
+            image: "/team/hod-it.png",
+            social: {}
+          },
+          {
+            name: "Prof. B. Jagadeesh",
+            role: "HoD, ECE",
+            image: "/team/hod-ece.png",
+            social: {}
+          },
+          {
+            name: "Prof. J. Vijaya Kumar",
+            role: "HoD, EEE",
+            image: "/team/hod-eee.png",
+            social: {}
+          },
+          {
+            name: "Prof. B. Naga Raju",
+            role: "HoD, MECH",
+            image: "/team/hod-mech.png",
+            social: {}
+          },
         ]
       },
       {
@@ -106,25 +142,25 @@ export const PAGES_DATA = {
           {
             name: "Dr. D. Nagatej",
             role: "Associate Professor, CSE",
-            image: "/team/nagatej.jpg",
+            image: "/team/nagatej.png",
             social: {}
           },
           {
             name: "Mr. B. Ravi Kumar",
             role: "Assistant Professor, CSE",
-            image: "/team/ravi.jpg",
+            image: "/team/ravi.png",
             social: {}
           },
           {
             name: "Mr. B. Mahesh",
             role: "Assistant Professor, CSE",
-            image: "/team/mahesh.jpg",
+            image: "/team/mahesh.png",
             social: {}
           },
           {
             name: "Mr. N. Srinivas",
             role: "Assistant Professor, CSE",
-            image: "/team/srinivas.jpg",
+            image: "/team/srinivas.png",
             social: {}
           }
         ]
