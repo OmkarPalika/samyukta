@@ -142,7 +142,7 @@ export const PAGES_DATA = {
           {
             name: "Dr. D. Nagatej",
             role: "Associate Professor, CSE",
-            image: "/team/nagatej.png",
+            image: "/team/nagatej.jpg",
             social: {}
           },
           {
