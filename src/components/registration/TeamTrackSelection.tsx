@@ -92,10 +92,8 @@ export default function TeamTrackSelection({
                 setSharedTracks({ ...sharedTracks, workshopTrack: value });
                 // Always apply to all members
                 const newTracks = ensureTracksInitialized();
-                newTracks.forEach((track, i) => {
-                  newTracks[i] = { ...track, workshopTrack: value };
-                });
-                onTrackChange(newTracks);
+                const updatedTracks = newTracks.map(track => ({ ...track, workshopTrack: value }));
+                onTrackChange(updatedTracks);
               }}
             >
               <SelectTrigger className="bg-gray-700/50 border-gray-600 text-white">
@@ -131,10 +129,8 @@ export default function TeamTrackSelection({
                   setSharedTracks({ ...sharedTracks, competitionTrack: value });
                   // Always apply to all members
                   const newTracks = ensureTracksInitialized();
-                  newTracks.forEach((track, i) => {
-                    newTracks[i] = { ...track, competitionTrack: value };
-                  });
-                  onTrackChange(newTracks);
+                  const updatedTracks = newTracks.map(track => ({ ...track, competitionTrack: value }));
+                  onTrackChange(updatedTracks);
                   
                   // Open pitch dialog if needed
                   if (value === "Startup Pitch") {

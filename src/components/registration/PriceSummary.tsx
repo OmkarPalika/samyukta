@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useMemo } from 'react';
 import { Card } from "@/components/ui/card";
 
 interface TeamMemberTrack {
@@ -37,20 +38,28 @@ export default function PriceSummary({
   trackSelectionMode = 'individual'
 }: PriceSummaryProps) {
   // Calculate the total price based on ticket type and selected tracks
-  const calculatePrice = () => {
+  const calculatePrice = useCallback(() => {
     let total = 0;
-    const counts = countCompetitionTracks();
     
     if (isComboTicket) {
-      // Base price for combo tickets
-      total = 900 * teamSize;
+      // Calculate combo pass price based on individual competition track selections
+      // Ensure we calculate for all team members, even if memberTracks is shorter
+      for (let i = 0; i < teamSize; i++) {
+        const track = memberTracks[i];
+        if (track?.competitionTrack === "Hackathon") {
+          total += 950; // ₹950 for combo + hackathon
+        } else if (track?.competitionTrack === "Startup Pitch") {
+          total += 900; // ₹900 for combo + startup pitch
+        } else {
+          // Default combo price if no competition track selected yet
+          total += 900;
+        }
+      }
       
       // Apply team discount for combo tickets
       if (teamSize > 1) {
         total -= teamSize * 10;
       }
-      
-      // Combo pass already includes competition access, no need to add extra fees
     } else {
       // Base price for workshop-only tickets
       total = 800 * teamSize;
@@ -68,16 +77,38 @@ export default function PriceSummary({
         }
       } else {
         // In individual mode, calculate based on individual selections
-        total += counts.hackathon * 150;
-        total += counts.pitch * 100;
+        // Count hackathon participants
+        let hackathonCount = 0;
+        let pitchCount = 0;
+        
+        // Count unique pitches for pricing
+        const pitchOwners = new Set();
+        
+        memberTracks.forEach((track, index) => {
+          if (track.competitionTrack === "Hackathon") {
+            hackathonCount++;
+          } else if (track.competitionTrack === "Startup Pitch") {
+            // If this member has their own pitch data
+            if (startupPitchData[index]) {
+              pitchOwners.add(index);
+            } else {
+              // Individual pitch without startup data
+              pitchCount++;
+            }
+          }
+        });
+        
+        total += hackathonCount * 150;
+        total += pitchCount * 100;
+        total += pitchOwners.size * 100;
       }
     }
     
     return total;
-  };
+  }, [isComboTicket, teamSize, memberTracks, trackSelectionMode, startupPitchData]);
 
   // Count how many members selected each competition track
-  const countCompetitionTracks = () => {
+  const countCompetitionTracks = useCallback(() => {
     const counts = {
       hackathon: 0,
       pitch: 0
@@ -134,24 +165,48 @@ export default function PriceSummary({
     }
     
     return counts;
-  };
+  }, [memberTracks, teamSize, trackSelectionMode, startupPitchData]);
 
-  const trackCounts = countCompetitionTracks();
-  const total = calculatePrice();
+  const trackCounts = useMemo(() => countCompetitionTracks(), [countCompetitionTracks]);
+  const total = useMemo(() => calculatePrice(), [calculatePrice]);
 
   return (
     <Card className="bg-gray-800/40 rounded-lg p-6 border border-gray-700">
       <h4 className="text-lg font-bold text-white mb-4">Price Summary</h4>
       <div className="space-y-2">
-        <div className="flex justify-between text-gray-300">
-          <span>{isComboTicket ? 'Combo Pass' : 'Workshop Pass'}</span>
-          <span>₹{isComboTicket ? 900 : 800}</span>
-        </div>
-        
-        <div className="flex justify-between text-gray-300">
-          <span>Team Size</span>
-          <span>x{teamSize}</span>
-        </div>
+        {isComboTicket ? (
+          // Show individual combo pass pricing breakdown
+          <>
+            {Array.from({ length: teamSize }, (_, index) => {
+              const track = memberTracks[index];
+              return (
+                <div key={index} className="flex justify-between text-gray-300">
+                  <span>
+                    Combo Pass - Member {index + 1}
+                    {track?.competitionTrack && ` (${track.competitionTrack})`}
+                  </span>
+                  <span>
+                    ₹{track?.competitionTrack === "Hackathon" ? 950 : 
+                       track?.competitionTrack === "Startup Pitch" ? 900 : 900}
+                  </span>
+                </div>
+              );
+            })}
+          </>
+        ) : (
+          // Show workshop pass pricing
+          <>
+            <div className="flex justify-between text-gray-300">
+              <span>Workshop Pass</span>
+              <span>₹800</span>
+            </div>
+            
+            <div className="flex justify-between text-gray-300">
+              <span>Team Size</span>
+              <span>x{teamSize}</span>
+            </div>
+          </>
+        )}
         
         {!isComboTicket && trackCounts.hackathon > 0 && (
           <div className="flex justify-between text-gray-300">

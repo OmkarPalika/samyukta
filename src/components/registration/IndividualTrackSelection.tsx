@@ -94,15 +94,17 @@ export default function IndividualTrackSelection({
   // Handle workshop track change for a specific member
   const handleWorkshopTrackChange = (index: number, value: string) => {
     const newTracks = ensureTracksInitialized();
-    newTracks[index] = { ...newTracks[index], workshopTrack: value };
-    onTrackChange(newTracks);
+    const updatedTracks = [...newTracks];
+    updatedTracks[index] = { ...updatedTracks[index], workshopTrack: value };
+    onTrackChange(updatedTracks);
   };
 
   // Handle competition track change for a specific member
   const handleCompetitionTrackChange = (index: number, value: string) => {
     const newTracks = ensureTracksInitialized();
-    newTracks[index] = { ...newTracks[index], competitionTrack: value };
-    onTrackChange(newTracks);
+    const updatedTracks = [...newTracks];
+    updatedTracks[index] = { ...updatedTracks[index], competitionTrack: value };
+    onTrackChange(updatedTracks);
   };
 
   return (

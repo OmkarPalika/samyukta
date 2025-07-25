@@ -516,15 +516,24 @@ export default function Register() {
     let total = 0;
     
     if (formData.tickets.combo) {
-      // Base price for combo tickets
-      total = 900 * formData.teamSize;
+      // Calculate combo pass price based on individual competition track selections
+      // Ensure we calculate for all team members, even if memberTracks is shorter
+      for (let i = 0; i < formData.teamSize; i++) {
+        const track = formData.memberTracks[i];
+        if (track?.competitionTrack === "Hackathon") {
+          total += 950; // ₹950 for combo + hackathon
+        } else if (track?.competitionTrack === "Startup Pitch") {
+          total += 900; // ₹900 for combo + startup pitch
+        } else {
+          // Default combo price if no competition track selected yet
+          total += 900;
+        }
+      }
       
       // Apply team discount for combo tickets
       if (formData.teamSize > 1) {
         total -= formData.teamSize * 10;
       }
-      
-      // Combo pass already includes competition access, no need to add extra fees
     } else {
       // Base price for workshop-only tickets
       total = 800 * formData.teamSize;
@@ -863,8 +872,9 @@ export default function Register() {
                   <ul className="space-y-2 text-gray-300 mt-4">
                     <li>• Everything in Entry + Workshop</li>
                     <li>• Competition access</li>
-                    <li>• Team discounts</li>
-                    <li>• Perfect for professionals</li>
+                    <li>• ₹900 for Startup Pitch</li>
+                    <li>• ₹950 for Hackathon</li>
+                    <li>• Team discounts available</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -1100,7 +1110,7 @@ export default function Register() {
                 isComboTicket={formData.tickets.combo}
                 slots={slots}
                 errors={errors}
-                onTrackChange={(newTracks) => setFormData({ ...formData, memberTracks: newTracks })}
+                onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
                 onOpenPitchDialog={(memberIndex) => {
                   setCurrentPitchMember(memberIndex);
                   if (slots && slots.total.remaining <= 50) {
@@ -1121,7 +1131,7 @@ export default function Register() {
                 isComboTicket={formData.tickets.combo}
                 slots={slots}
                 errors={errors}
-                onTrackChange={(newTracks) => setFormData({ ...formData, memberTracks: newTracks })}
+                onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
                 onOpenPitchDialog={(memberIndex) => {
                   setCurrentPitchMember(memberIndex);
                   if (slots && slots.total.remaining <= 50) {
