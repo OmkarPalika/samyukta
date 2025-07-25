@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { User } from '@/entities/User';
 import { Registration } from '@/entities/Registration';
 import { Game } from '@/entities/Game';
@@ -14,13 +15,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { QrCode, Users, Trophy, HelpCircle, Camera, Shield } from 'lucide-react';
+import { QrCode, Users, Trophy, HelpCircle, Camera, Shield, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import Image from 'next/image';
 import { PageLoading } from '@/components/shared/Loading';
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [qrCode, setQrCode] = useState('');
@@ -304,7 +306,16 @@ export default function AdminDashboard() {
                 <TabsContent value="users" className="space-y-6">
                   <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                     <CardHeader>
-                      <CardTitle className="text-white">User Management</CardTitle>
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-white">User Management</CardTitle>
+                        <Button
+                          onClick={() => window.location.href = '/dashboard/admin/user-management'}
+                          className="bg-blue-500 hover:bg-blue-600 text-white"
+                        >
+                          <Users className="w-4 h-4 mr-2" />
+                          Advanced Management
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -356,7 +367,16 @@ export default function AdminDashboard() {
                 <TabsContent value="registrations" className="space-y-6">
                   <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                     <CardHeader>
-                      <CardTitle className="text-white">Registration Control</CardTitle>
+                      <div className="flex justify-between items-center">
+                        <CardTitle className="text-white">Registration Control</CardTitle>
+                        <Button
+                          onClick={() => router.push('/dashboard/admin/registration-management')}
+                          className="bg-blue-600 hover:bg-blue-700"
+                        >
+                          <FileText className="w-4 h-4 mr-2" />
+                          Manage Registrations
+                        </Button>
+                      </div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">

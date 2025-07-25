@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardTabs from '@/components/dashboard/DashboardTabs';
 import { ClientAuth } from '@/lib/client-auth';
+import { User } from '@/entities/User';
 import { User as UserType } from '@/lib/types';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/button';
@@ -51,8 +52,8 @@ export default function ProfilePage() {
   const handleProfileUpdate = async () => {
     if (!user) return;
     try {
-      // Profile update would be handled by API endpoint
-      // await User.updateProfile(user.id, profileData);
+      await User.updateProfile(user.id, profileData);
+      // Update local user state with the new data
       setUser({ ...user, ...profileData });
       alert('Profile updated successfully!');
     } catch (error) {

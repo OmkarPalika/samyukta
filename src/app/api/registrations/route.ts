@@ -4,17 +4,33 @@ import { sendRegistrationConfirmation } from '@/lib/email';
 
 export async function GET(request: NextRequest) {
   try {
+    const token = request.cookies.get('auth_token')?.value;
+    
+    if (!token) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const collections = await getTypedCollections();
+    
+    // Validate session
+    const session = await collections.sessions.findOne({ 
+      session_token: token,
+      expires_at: { $gt: new Date() }
+    });
+    
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const limit = parseInt(searchParams.get('limit') || '50');
     const status = searchParams.get('status');
     const college = searchParams.get('college');
     const ticketType = searchParams.get('ticket_type');
     const workshopTrack = searchParams.get('workshop_track');
     const competitionTrack = searchParams.get('competition_track');
     const search = searchParams.get('search');
-    
-    const collections = await getTypedCollections();
     
     // Build filter
     const filter: Record<string, unknown> = {};
@@ -52,7 +68,7 @@ export async function GET(request: NextRequest) {
           .toArray();
         
         return {
-          id: registration._id?.toString(),
+          _id: registration._id?.toString(),
           team_id: registration.team_id,
           college: registration.college,
           team_size: registration.team_size,
@@ -63,14 +79,25 @@ export async function GET(request: NextRequest) {
           transaction_id: registration.transaction_id,
           payment_screenshot_url: registration.payment_screenshot_url,
           status: registration.status,
+          registration_code: registration.registration_code,
+          qr_code_url: registration.qr_code_url,
           created_at: registration.created_at.toISOString(),
           updated_at: registration.updated_at.toISOString(),
-          team_leader: members.length > 0 ? {
-            full_name: members[0].full_name,
-            email: members[0].email,
-            whatsapp: members[0].whatsapp
-          } : null,
-          members_count: members.length
+          members: members.map(member => ({
+            _id: member._id.toString(),
+            full_name: member.full_name,
+            email: member.email,
+            phone: member.phone,
+            whatsapp: member.whatsapp,
+            year: member.year,
+            department: member.department,
+            college: member.college,
+            gender: member.gender,
+            accommodation: member.accommodation,
+            food_preference: member.food_preference,
+            is_club_lead: member.is_club_lead,
+            club_name: member.club_name
+          }))
         };
       })
     );

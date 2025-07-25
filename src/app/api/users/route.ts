@@ -9,13 +9,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
+    const collections = await getTypedCollections();
+    
+    // Validate session
+    const session = await collections.sessions.findOne({ 
+      session_token: token,
+      expires_at: { $gt: new Date() }
+    });
+    
+    if (!session) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const role = searchParams.get('role');
     const search = searchParams.get('search');
-    
-    const collections = await getTypedCollections();
     
     // Build filter
     const filter: Record<string, unknown> = {};
@@ -28,16 +38,16 @@ export async function GET(request: NextRequest) {
       ];
     }
     
-    // Get total count
-    const total = await collections.users.countDocuments(filter);
-    
-    // Get users with pagination
+    // Get users with pagination (only admin/coordinator users)
     const users = await collections.users
       .find(filter, { projection: { password: 0 } })
       .sort({ created_at: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .toArray();
+    
+    // Get total count
+    const total = await collections.users.countDocuments(filter);
     
     const formattedUsers = users.map(user => ({
       id: user._id?.toString(),

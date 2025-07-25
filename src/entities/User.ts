@@ -17,6 +17,28 @@ export class User {
     const user = await users.findOne({ email })
     return user ? { id: user._id.toString(), ...user } as unknown as UserData : null
   }
+
+  static async getAll(): Promise<UserData[]> {
+    try {
+      const response = await fetch('/api/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      
+      const data = await response.json();
+      return data.users || [];
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+      throw error;
+    }
+  }
   static async me(): Promise<UserData> {
     try {
       // Replace with your actual API endpoint
@@ -117,28 +139,6 @@ export class User {
     }
   }
 
-  static async getAll(): Promise<UserData[]> {
-    try {
-      const response = await fetch('/api/users', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
-      const data = await response.json();
-      return data.users || [];
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-      throw error;
-    }
-  }
-
   static async updateRole(userId: string, role: string): Promise<void> {
     try {
       const response = await fetch(`/api/users/${userId}/role`, {
@@ -178,7 +178,7 @@ export class User {
     }
   }
 
-  static async updateProfile(userId: string, profileData: Partial<UserData>): Promise<void> {
+  static async updateProfile(userId: string, profileData: Partial<UserData>): Promise<UserData> {
     try {
       const response = await fetch(`/api/users/${userId}/profile`, {
         method: 'PATCH',
@@ -190,8 +190,12 @@ export class User {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update profile');
       }
+
+      const result = await response.json();
+      return result.user;
     } catch (error) {
       console.error('Failed to update profile:', error);
       throw error;

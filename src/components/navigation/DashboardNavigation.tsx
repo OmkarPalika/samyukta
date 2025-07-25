@@ -6,7 +6,7 @@ import Logo from '@/components/shared/Logo';
 import UserMenu from '@/components/shared/UserMenu';
 import {
   Menu, QrCode, Trophy, Users, Camera, Calendar, HelpCircle,
-  LogOut, Home, Settings, Bell
+  LogOut, Home, Settings, Bell, Shield, FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -29,16 +29,28 @@ export default function DashboardNavigation({ user, onLogout }: DashboardNavigat
     setIsOpen(false);
   };
 
-  const dashboardItems = useMemo(() => [
-    { path: '/dashboard', label: 'Dashboard', icon: <Home className="w-5 h-5 mr-3" /> },
-    { path: '/dashboard/games', label: 'Games', icon: <QrCode className="w-5 h-5 mr-3 text-green-400" /> },
-    { path: '/dashboard/competitions', label: 'Competitions', icon: <Trophy className="w-5 h-5 mr-3 text-orange-400" /> },
-    { path: '/dashboard/team', label: 'Team', icon: <Users className="w-5 h-5 mr-3 text-violet-400" /> },
-    { path: '/dashboard/social', label: 'Social', icon: <Camera className="w-5 h-5 mr-3 text-pink-400" /> },
-    { path: '/dashboard/schedule', label: 'Schedule', icon: <Calendar className="w-5 h-5 mr-3 text-yellow-400" /> },
-    { path: '/dashboard/notifications', label: 'Notifications', icon: <Bell className="w-5 h-5 mr-3 text-blue-400" /> },
-    { path: '/dashboard/help', label: 'Help & Support', icon: <HelpCircle className="w-5 h-5 mr-3 text-emerald-400" /> }
-  ], []);
+  const dashboardItems = useMemo(() => {
+    const baseItems = [
+      { path: '/dashboard', label: 'Dashboard', icon: <Home className="w-5 h-5 mr-3" /> },
+      { path: '/dashboard/games', label: 'Games', icon: <QrCode className="w-5 h-5 mr-3 text-green-400" /> },
+      { path: '/dashboard/competitions', label: 'Competitions', icon: <Trophy className="w-5 h-5 mr-3 text-orange-400" /> },
+      { path: '/dashboard/team', label: 'Team', icon: <Users className="w-5 h-5 mr-3 text-violet-400" /> },
+      { path: '/dashboard/social', label: 'Social', icon: <Camera className="w-5 h-5 mr-3 text-pink-400" /> },
+      { path: '/dashboard/schedule', label: 'Schedule', icon: <Calendar className="w-5 h-5 mr-3 text-yellow-400" /> },
+      { path: '/dashboard/notifications', label: 'Notifications', icon: <Bell className="w-5 h-5 mr-3 text-blue-400" /> },
+      { path: '/dashboard/help', label: 'Help & Support', icon: <HelpCircle className="w-5 h-5 mr-3 text-emerald-400" /> }
+    ];
+
+    // Add admin-only items
+    if (user?.role === 'admin') {
+      baseItems.push(
+        { path: '/dashboard/admin/registration-management', label: 'Registrations', icon: <FileText className="w-5 h-5 mr-3 text-cyan-400" /> },
+        { path: '/dashboard/admin/user-management', label: 'User Management', icon: <Shield className="w-5 h-5 mr-3 text-red-400" /> }
+      );
+    }
+
+    return baseItems;
+  }, [user?.role]);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/90 backdrop-blur-lg border-b border-gray-800">
