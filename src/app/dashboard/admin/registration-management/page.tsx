@@ -81,6 +81,11 @@ export default function RegistrationManagementPage() {
   const [editForm, setEditForm] = useState<Partial<TeamMember>>({});
   const [showEditDialog, setShowEditDialog] = useState(false);
 
+  // Edit registration modal
+  const [editingRegistration, setEditingRegistration] = useState<Registration | null>(null);
+  const [registrationForm, setRegistrationForm] = useState<Partial<Registration>>({});
+  const [showEditRegistrationDialog, setShowEditRegistrationDialog] = useState(false);
+
   // Status update
   const [updating, setUpdating] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -201,6 +206,49 @@ export default function RegistrationManagementPage() {
     } catch (error) {
       console.error('Failed to update member:', error);
       toast.error('Failed to update member');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleEditRegistration = (registration: Registration) => {
+    setEditingRegistration(registration);
+    setRegistrationForm({
+      college: registration.college,
+      ticket_type: registration.ticket_type,
+      workshop_track: registration.workshop_track,
+      competition_track: registration.competition_track,
+      total_amount: registration.total_amount,
+      transaction_id: registration.transaction_id,
+      status: registration.status
+    });
+    setShowEditRegistrationDialog(true);
+  };
+
+  const handleSaveRegistration = async () => {
+    if (!editingRegistration) return;
+
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/registrations/${editingRegistration._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(registrationForm),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update registration');
+      }
+
+      toast.success('Registration updated successfully');
+      setShowEditRegistrationDialog(false);
+      loadRegistrations(); // Reload registrations
+    } catch (error) {
+      console.error('Failed to update registration:', error);
+      toast.error('Failed to update registration');
     } finally {
       setUpdating(false);
     }
@@ -507,30 +555,44 @@ export default function RegistrationManagementPage() {
             {selectedRegistration && (
               <div className="space-y-6">
                 {/* Registration Info */}
-                <div className="grid grid-cols-2 gap-4 p-4 bg-gray-700/30 rounded-lg">
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">Team ID</Label>
-                    <p className="text-white font-medium">{selectedRegistration.team_id}</p>
+                <div className="bg-gray-700/30 rounded-lg p-4">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold text-white">Registration Information</h3>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleEditRegistration(selectedRegistration)}
+                      className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+                    >
+                      <Edit className="h-3 w-3 mr-1" />
+                      Edit
+                    </Button>
                   </div>
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">College</Label>
-                    <p className="text-white">{selectedRegistration.college}</p>
-                  </div>
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">Ticket Type</Label>
-                    <p className="text-white">{selectedRegistration.ticket_type}</p>
-                  </div>
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">Total Amount</Label>
-                    <p className="text-white">₹{selectedRegistration.total_amount}</p>
-                  </div>
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">Workshop Track</Label>
-                    <p className="text-white">{selectedRegistration.workshop_track}</p>
-                  </div>
-                  <div className='space-y-1'>
-                    <Label className="text-gray-300">Competition Track</Label>
-                    <p className="text-white">{selectedRegistration.competition_track}</p>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">Team ID</Label>
+                      <p className="text-white font-medium">{selectedRegistration.team_id}</p>
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">College</Label>
+                      <p className="text-white">{selectedRegistration.college}</p>
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">Ticket Type</Label>
+                      <p className="text-white">{selectedRegistration.ticket_type}</p>
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">Total Amount</Label>
+                      <p className="text-white">₹{selectedRegistration.total_amount}</p>
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">Workshop Track</Label>
+                      <p className="text-white">{selectedRegistration.workshop_track}</p>
+                    </div>
+                    <div className='space-y-1'>
+                      <Label className="text-gray-300">Competition Track</Label>
+                      <p className="text-white">{selectedRegistration.competition_track}</p>
+                    </div>
                   </div>
                 </div>
 
@@ -789,6 +851,139 @@ export default function RegistrationManagementPage() {
                 {updating ? 'Saving...' : 'Save Changes'}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Registration Dialog */}
+        <Dialog open={showEditRegistrationDialog} onOpenChange={setShowEditRegistrationDialog}>
+          <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Registration: {editingRegistration?.team_id}</DialogTitle>
+            </DialogHeader>
+
+            {editingRegistration && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className='space-y-2'>
+                    <Label htmlFor="college" className="text-gray-300">College/Organization</Label>
+                    <Input
+                      id="college"
+                      value={registrationForm.college || ''}
+                      onChange={(e) => setRegistrationForm({ ...registrationForm, college: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                  
+                  <div className='space-y-2'>
+                    <Label htmlFor="ticket_type" className="text-gray-300">Ticket Type</Label>
+                    <Select 
+                      value={registrationForm.ticket_type || ''} 
+                      onValueChange={(value: 'Combo' | 'Custom') => setRegistrationForm({ ...registrationForm, ticket_type: value })}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="Combo">Combo</SelectItem>
+                        <SelectItem value="Custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor="workshop_track" className="text-gray-300">Workshop Track</Label>
+                    <Select 
+                      value={registrationForm.workshop_track || ''} 
+                      onValueChange={(value: 'Cloud' | 'AI' | 'None') => setRegistrationForm({ ...registrationForm, workshop_track: value })}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="Cloud">Cloud</SelectItem>
+                        <SelectItem value="AI">AI</SelectItem>
+                        <SelectItem value="None">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor="competition_track" className="text-gray-300">Competition Track</Label>
+                    <Select 
+                      value={registrationForm.competition_track || ''} 
+                      onValueChange={(value: 'Hackathon' | 'Pitch' | 'None') => setRegistrationForm({ ...registrationForm, competition_track: value })}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="Hackathon">Hackathon</SelectItem>
+                        <SelectItem value="Pitch">Pitch</SelectItem>
+                        <SelectItem value="None">None</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor="total_amount" className="text-gray-300">Total Amount (₹)</Label>
+                    <Input
+                      id="total_amount"
+                      type="number"
+                      value={registrationForm.total_amount || ''}
+                      onChange={(e) => setRegistrationForm({ ...registrationForm, total_amount: Number(e.target.value) })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor="transaction_id" className="text-gray-300">Transaction ID</Label>
+                    <Input
+                      id="transaction_id"
+                      value={registrationForm.transaction_id || ''}
+                      onChange={(e) => setRegistrationForm({ ...registrationForm, transaction_id: e.target.value })}
+                      className="bg-gray-700 border-gray-600 text-white"
+                    />
+                  </div>
+                </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor="status" className="text-gray-300">Status</Label>
+                  <Select 
+                    value={registrationForm.status || ''} 
+                    onValueChange={(value: 'completed' | 'pending_review' | 'confirmed' | 'pending') => setRegistrationForm({ ...registrationForm, status: value })}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="pending_review">Pending Review</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowEditRegistrationDialog(false)}
+                    className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveRegistration}
+                    disabled={updating}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    {updating ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

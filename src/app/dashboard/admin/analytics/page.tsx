@@ -23,6 +23,7 @@ import { RegistrationChart } from '@/components/admin/analytics/RegistrationChar
 import { RevenueChart } from '@/components/admin/analytics/RevenueChart';
 import { DemographicsChart } from '@/components/admin/analytics/DemographicsChart';
 import { ParticipationChart } from '@/components/admin/analytics/ParticipationChart';
+import { TeamSizeAnalysis } from '@/components/admin/analytics/TeamSizeAnalysis';
 import { ExportTools } from '@/components/admin/analytics/ExportTools';
 
 // Chart component types
@@ -50,26 +51,58 @@ interface DemographicsData {
 
 interface ParticipationData {
   workshops: {
-    cloud: { registered: number; attended: number; completion_rate: number };
-    ai: { registered: number; attended: number; completion_rate: number };
+    cloud: { 
+      teams: { registered: number; attended: number };
+      members: { registered: number; attended: number };
+      completion_rate: number;
+    };
+    ai: { 
+      teams: { registered: number; attended: number };
+      members: { registered: number; attended: number };
+      completion_rate: number;
+    };
   };
   competitions: {
-    hackathon: { registered: number; active: number; submitted: number };
-    pitch: { registered: number; active: number; submitted: number };
+    hackathon: { 
+      teams: { registered: number; submitted: number };
+      members: { registered: number; submitted: number };
+      submission_rate: number;
+    };
+    pitch: { 
+      teams: { registered: number; submitted: number };
+      members: { registered: number; submitted: number };
+      submission_rate: number;
+    };
   };
   overall: {
-    total_participants: number;
-    workshop_participants: number;
-    competition_participants: number;
-    combo_participants: number;
+    teams: {
+      total_teams: number;
+      workshop_teams: number;
+      competition_teams: number;
+      combo_teams: number;
+    };
+    members: {
+      total_members: number;
+      workshop_members: number;
+      competition_members: number;
+      combo_members: number;
+    };
   };
 }
 
 interface AnalyticsData {
   registrationTrends: {
-    data: Array<{ date: string; count: number; cumulative: number }>;
-    total: number;
-    growth: number;
+    data: Array<{ 
+      date: string; 
+      teams: number; 
+      members: number;
+      cumulativeTeams: number;
+      cumulativeMembers: number;
+    }>;
+    totalTeams: number;
+    totalMembers: number;
+    teamGrowth: number;
+    memberGrowth: number;
   };
   revenueData: {
     data: RevenueDataPoint[];
@@ -89,10 +122,37 @@ export default function AnalyticsPage() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [teamAnalysisData, setTeamAnalysisData] = useState<{
+    teamSizeDistribution: Array<{
+      _id: number;
+      count: number;
+      total_members: number;
+      total_revenue: number;
+      workshop_teams: number;
+      competition_teams: number;
+      combo_teams: number;
+    }>;
+    ticketTypeAnalysis: Array<{
+      workshop_track: string;
+      competition_track: string;
+      teams: number;
+      revenue: number;
+      team_sizes: Record<string, number>;
+    }>;
+    summary: {
+      totalTeams: number;
+      totalMembers: number;
+      avgTeamSize: number;
+      totalRevenue: number;
+      revenuePerTeam: number;
+      revenuePerMember: number;
+    };
+  } | null>(null);
+  const [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
   const [refreshing, setRefreshing] = useState(false);
 
-  const loadUserData = async () => {
+  const loadUserData = useCallback(async () => {
     try {
       const user = await User.me();
       if (!user || user.role !== 'admin') {
@@ -104,7 +164,7 @@ export default function AnalyticsPage() {
       console.error('Failed to load user data:', error);
       router.push('/login');
     }
-  };
+  }, [router]);
 
   const loadAnalyticsData = useCallback(async () => {
     try {
@@ -129,17 +189,42 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     loadUserData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loadUserData]);
+
+
+  const loadTeamAnalysisData = useCallback(async () => {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    
+    setTeamAnalysisLoading(true);
+    try {
+      const response = await fetch(`/api/admin/analytics?type=team-size-analysis`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch team analysis data');
+      }
+
+      const data = await response.json();
+      setTeamAnalysisData(data);
+    } catch (error) {
+      console.error('Error loading team analysis data:', error);
+      toast.error('Failed to load team analysis data');
+    } finally {
+      setTeamAnalysisLoading(false);
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     if (currentUser) {
       loadAnalyticsData();
+      loadTeamAnalysisData();
     }
-  }, [currentUser, dateRange, loadAnalyticsData]);
+  }, [currentUser, dateRange, loadAnalyticsData, loadTeamAnalysisData]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadAnalyticsData();
+    await Promise.all([loadAnalyticsData(), loadTeamAnalysisData()]);
     setRefreshing(false);
     toast.success('Analytics data refreshed');
   };
@@ -246,12 +331,12 @@ export default function AnalyticsPage() {
             <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Registrations</p>
+                  <p className="text-gray-400 text-xs sm:text-sm">Total Members</p>
                   <p className="text-xl sm:text-2xl font-bold text-white truncate">
-                    {analyticsData?.registrationTrends?.data?.slice(-1)[0]?.cumulative || 0}
+                    {analyticsData?.registrationTrends?.data?.slice(-1)[0]?.cumulativeMembers || 0}
                   </p>
                   <p className="text-green-400 text-xs sm:text-sm">
-                    +{analyticsData?.registrationTrends?.data?.slice(-7).reduce((sum: number, d: { count: number }) => sum + d.count, 0) || 0} this week
+                    +{analyticsData?.registrationTrends?.data?.slice(-7).reduce((sum: number, d: { members: number }) => sum + d.members, 0) || 0} this week
                   </p>
                 </div>
                 <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0" />
@@ -299,10 +384,13 @@ export default function AnalyticsPage() {
                 <div className="min-w-0 flex-1">
                   <p className="text-gray-400 text-xs sm:text-sm">Event Participation</p>
                   <p className="text-xl sm:text-2xl font-bold text-white truncate">
-                    {analyticsData?.participation?.overall?.total_participants || 0}
+                    {analyticsData?.participation?.overall?.members?.total_members || 0} members
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {analyticsData?.participation?.overall?.teams?.total_teams || 0} teams
                   </p>
                   <p className="text-yellow-400 text-xs sm:text-sm">
-                    {analyticsData?.participation?.overall?.combo_participants || 0} combo tickets
+                    {analyticsData?.participation?.overall?.members?.combo_members || 0} combo participants
                   </p>
                 </div>
                 <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 flex-shrink-0" />
@@ -313,7 +401,7 @@ export default function AnalyticsPage() {
 
         {/* Analytics Tabs - Mobile First */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 bg-gray-800/40 mb-4 sm:mb-6 h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-gray-800/40 mb-4 sm:mb-6 h-auto">
             <TabsTrigger 
               value="overview" 
               className="text-gray-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
@@ -337,6 +425,12 @@ export default function AnalyticsPage() {
               className="text-gray-400 data-[state=active]:bg-orange-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
             >
               Demographics
+            </TabsTrigger>
+            <TabsTrigger 
+              value="team-analysis" 
+              className="text-gray-400 data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
+            >
+              Team Analysis
             </TabsTrigger>
             <TabsTrigger 
               value="export" 
@@ -366,9 +460,18 @@ export default function AnalyticsPage() {
               />
               <ParticipationChart 
                 data={analyticsData?.participation || { 
-                  workshops: { cloud: { registered: 0, attended: 0, completion_rate: 0 }, ai: { registered: 0, attended: 0, completion_rate: 0 } },
-                  competitions: { hackathon: { registered: 0, active: 0, submitted: 0 }, pitch: { registered: 0, active: 0, submitted: 0 } },
-                  overall: { total_participants: 0, workshop_participants: 0, competition_participants: 0, combo_participants: 0 }
+                  workshops: { 
+                    cloud: { teams: { registered: 0, attended: 0 }, members: { registered: 0, attended: 0 }, completion_rate: 0 }, 
+                    ai: { teams: { registered: 0, attended: 0 }, members: { registered: 0, attended: 0 }, completion_rate: 0 } 
+                  },
+                  competitions: { 
+                    hackathon: { teams: { registered: 0, submitted: 0 }, members: { registered: 0, submitted: 0 }, submission_rate: 0 }, 
+                    pitch: { teams: { registered: 0, submitted: 0 }, members: { registered: 0, submitted: 0 }, submission_rate: 0 } 
+                  },
+                  overall: { 
+                    teams: { total_teams: 0, workshop_teams: 0, competition_teams: 0, combo_teams: 0 },
+                    members: { total_members: 0, workshop_members: 0, competition_members: 0, combo_members: 0 }
+                  }
                 }}
                 loading={loading}
               />
@@ -409,6 +512,24 @@ export default function AnalyticsPage() {
                 totalUsers: 0 
               }}
               loading={loading}
+            />
+          </TabsContent>
+
+          <TabsContent value="team-analysis" className="space-y-4 sm:space-y-6">
+            <TeamSizeAnalysis 
+              data={teamAnalysisData || {
+                teamSizeDistribution: [],
+                ticketTypeAnalysis: [],
+                summary: {
+                  totalTeams: 0,
+                  totalMembers: 0,
+                  avgTeamSize: 0,
+                  totalRevenue: 0,
+                  revenuePerTeam: 0,
+                  revenuePerMember: 0
+                }
+              }}
+              loading={teamAnalysisLoading}
             />
           </TabsContent>
 

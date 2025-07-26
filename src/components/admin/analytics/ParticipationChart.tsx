@@ -10,18 +10,42 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Compos
 
 interface ParticipationData {
   workshops: {
-    cloud: { registered: number; attended: number; completion_rate: number };
-    ai: { registered: number; attended: number; completion_rate: number };
+    cloud: { 
+      teams: { registered: number; attended: number };
+      members: { registered: number; attended: number };
+      completion_rate: number;
+    };
+    ai: { 
+      teams: { registered: number; attended: number };
+      members: { registered: number; attended: number };
+      completion_rate: number;
+    };
   };
   competitions: {
-    hackathon: { registered: number; active: number; submitted: number };
-    pitch: { registered: number; active: number; submitted: number };
+    hackathon: { 
+      teams: { registered: number; submitted: number };
+      members: { registered: number; submitted: number };
+      submission_rate: number;
+    };
+    pitch: { 
+      teams: { registered: number; submitted: number };
+      members: { registered: number; submitted: number };
+      submission_rate: number;
+    };
   };
   overall: {
-    total_participants: number;
-    workshop_participants: number;
-    competition_participants: number;
-    combo_participants: number;
+    teams: {
+      total_teams: number;
+      workshop_teams: number;
+      competition_teams: number;
+      combo_teams: number;
+    };
+    members: {
+      total_members: number;
+      workshop_members: number;
+      competition_members: number;
+      combo_members: number;
+    };
   };
 }
 
@@ -56,65 +80,83 @@ const COLORS = [
 export function ParticipationChart({ data, loading }: ParticipationChartProps) {
   const [viewType, setViewType] = useState<'workshops' | 'competitions' | 'overview'>('overview');
   const [chartType, setChartType] = useState<'pie' | 'bar'>('pie');
+  const [showMembers, setShowMembers] = useState(true);
 
   const chartData = useMemo(() => {
+    const totalParticipants = showMembers ? data.overall.members.total_members : data.overall.teams.total_teams;
+    const workshopParticipants = showMembers ? data.overall.members.workshop_members : data.overall.teams.workshop_teams;
+    const competitionParticipants = showMembers ? data.overall.members.competition_members : data.overall.teams.competition_teams;
+    const comboParticipants = showMembers ? data.overall.members.combo_members : data.overall.teams.combo_teams;
+    
     const overviewData = [
       {
         name: 'Workshop Only',
-        value: data.overall.workshop_participants,
+        value: workshopParticipants - comboParticipants,
         fill: COLORS[0],
-        percentage: Math.round((data.overall.workshop_participants / data.overall.total_participants) * 100)
+        percentage: totalParticipants > 0 ? Math.round(((workshopParticipants - comboParticipants) / totalParticipants) * 100) : 0
       },
       {
         name: 'Competition Only', 
-        value: data.overall.competition_participants,
+        value: competitionParticipants - comboParticipants,
         fill: COLORS[1],
-        percentage: Math.round((data.overall.competition_participants / data.overall.total_participants) * 100)
+        percentage: totalParticipants > 0 ? Math.round(((competitionParticipants - comboParticipants) / totalParticipants) * 100) : 0
       },
       {
         name: 'Combo (Both)',
-        value: data.overall.combo_participants,
+        value: comboParticipants,
         fill: COLORS[2],
-        percentage: Math.round((data.overall.combo_participants / data.overall.total_participants) * 100)
+        percentage: totalParticipants > 0 ? Math.round((comboParticipants / totalParticipants) * 100) : 0
       }
     ];
 
     const workshopChartData = [
       {
         name: 'Cloud Computing',
-        registered: data.workshops.cloud.registered,
-        attended: data.workshops.cloud.attended,
+        registered: showMembers ? data.workshops.cloud.members.registered : data.workshops.cloud.teams.registered,
+        attended: showMembers ? data.workshops.cloud.members.attended : data.workshops.cloud.teams.attended,
         completion_rate: data.workshops.cloud.completion_rate,
-        noShows: data.workshops.cloud.registered - data.workshops.cloud.attended,
+        noShows: (showMembers ? data.workshops.cloud.members.registered : data.workshops.cloud.teams.registered) - 
+                 (showMembers ? data.workshops.cloud.members.attended : data.workshops.cloud.teams.attended),
+        teams: data.workshops.cloud.teams.registered,
+        members: data.workshops.cloud.members.registered,
       },
       {
         name: 'AI/ML',
-        registered: data.workshops.ai.registered,
-        attended: data.workshops.ai.attended,
+        registered: showMembers ? data.workshops.ai.members.registered : data.workshops.ai.teams.registered,
+        attended: showMembers ? data.workshops.ai.members.attended : data.workshops.ai.teams.attended,
         completion_rate: data.workshops.ai.completion_rate,
-        noShows: data.workshops.ai.registered - data.workshops.ai.attended,
+        noShows: (showMembers ? data.workshops.ai.members.registered : data.workshops.ai.teams.registered) - 
+                 (showMembers ? data.workshops.ai.members.attended : data.workshops.ai.teams.attended),
+        teams: data.workshops.ai.teams.registered,
+        members: data.workshops.ai.members.registered,
       }
     ];
 
     const competitionChartData = [
       {
         name: 'Hackathon',
-        registered: data.competitions.hackathon.registered,
-        active: data.competitions.hackathon.active,
-        submitted: data.competitions.hackathon.submitted,
-        inactive: data.competitions.hackathon.registered - data.competitions.hackathon.active,
+        registered: showMembers ? data.competitions.hackathon.members.registered : data.competitions.hackathon.teams.registered,
+        submitted: showMembers ? data.competitions.hackathon.members.submitted : data.competitions.hackathon.teams.submitted,
+        submission_rate: data.competitions.hackathon.submission_rate,
+        notSubmitted: (showMembers ? data.competitions.hackathon.members.registered : data.competitions.hackathon.teams.registered) - 
+                      (showMembers ? data.competitions.hackathon.members.submitted : data.competitions.hackathon.teams.submitted),
+        teams: data.competitions.hackathon.teams.registered,
+        members: data.competitions.hackathon.members.registered,
       },
       {
         name: 'Startup Pitch',
-        registered: data.competitions.pitch.registered,
-        active: data.competitions.pitch.active,
-        submitted: data.competitions.pitch.submitted,
-        inactive: data.competitions.pitch.registered - data.competitions.pitch.active,
+        registered: showMembers ? data.competitions.pitch.members.registered : data.competitions.pitch.teams.registered,
+        submitted: showMembers ? data.competitions.pitch.members.submitted : data.competitions.pitch.teams.submitted,
+        submission_rate: data.competitions.pitch.submission_rate,
+        notSubmitted: (showMembers ? data.competitions.pitch.members.registered : data.competitions.pitch.teams.registered) - 
+                      (showMembers ? data.competitions.pitch.members.submitted : data.competitions.pitch.teams.submitted),
+        teams: data.competitions.pitch.teams.registered,
+        members: data.competitions.pitch.members.registered,
       }
     ];
 
     return { overviewData, workshopChartData, competitionChartData };
-  }, [data]);
+  }, [data, showMembers]);
 
   if (loading) {
     return (
@@ -132,39 +174,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
     );
   }
 
-  const workshopData = [
-    {
-      name: 'Cloud Computing (AWS)',
-      registered: data.workshops.cloud.registered,
-      attended: data.workshops.cloud.attended,
-      completion_rate: data.workshops.cloud.completion_rate,
-      icon: '☁️'
-    },
-    {
-      name: 'AI/ML (Google)',
-      registered: data.workshops.ai.registered,
-      attended: data.workshops.ai.attended,
-      completion_rate: data.workshops.ai.completion_rate,
-      icon: '🤖'
-    }
-  ];
 
-  const competitionData = [
-    {
-      name: 'Hackathon',
-      registered: data.competitions.hackathon.registered,
-      active: data.competitions.hackathon.active,
-      submitted: data.competitions.hackathon.submitted,
-      icon: '💻'
-    },
-    {
-      name: 'Startup Pitch',
-      registered: data.competitions.pitch.registered,
-      active: data.competitions.pitch.active,
-      submitted: data.competitions.pitch.submitted,
-      icon: '🚀'
-    }
-  ];
 
   return (
     <Card className="bg-gray-800/40 border-gray-700">
@@ -175,6 +185,15 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
             Event Participation
           </CardTitle>
           <div className="flex gap-2">
+            <Select value={showMembers ? 'members' : 'teams'} onValueChange={(value) => setShowMembers(value === 'members')}>
+              <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-800 border-gray-700">
+                <SelectItem value="teams">Teams</SelectItem>
+                <SelectItem value="members">Members</SelectItem>
+              </SelectContent>
+            </Select>
             {viewType === 'overview' && (
               <Select value={chartType} onValueChange={(value: 'pie' | 'bar') => setChartType(value)}>
                 <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
@@ -207,26 +226,26 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{data.overall.total_participants}</div>
-                <div className="text-sm text-gray-400">Total Participants</div>
+                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.total_members : data.overall.teams.total_teams}</div>
+                <div className="text-sm text-gray-400">Total {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
               <div className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <Code className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{data.overall.workshop_participants}</div>
-                <div className="text-sm text-gray-400">Workshop Attendees</div>
+                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.workshop_members : data.overall.teams.workshop_teams}</div>
+                <div className="text-sm text-gray-400">Workshop {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
               <div className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <Trophy className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{data.overall.competition_participants}</div>
-                <div className="text-sm text-gray-400">Competition Participants</div>
+                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.competition_members : data.overall.teams.competition_teams}</div>
+                <div className="text-sm text-gray-400">Competition {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
               <div className="bg-gray-700/30 rounded-lg p-4 text-center">
                 <Target className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{data.overall.combo_participants}</div>
-                <div className="text-sm text-gray-400">Combo Participants</div>
+                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.combo_members : data.overall.teams.combo_teams}</div>
+                <div className="text-sm text-gray-400">Combo {showMembers ? 'Members' : 'Teams'}</div>
               </div>
             </div>
 
@@ -238,10 +257,13 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                   <PieChart>
                     <ChartTooltip 
                       content={<ChartTooltipContent />}
-                      formatter={(value: number, name: string) => [
-                        `${value} participants (${((value / data.overall.total_participants) * 100).toFixed(1)}%)`,
-                        name
-                      ]}
+                      formatter={(value: number, name: string) => {
+                        const total = showMembers ? data.overall.members.total_members : data.overall.teams.total_teams;
+                        return [
+                          `${value} ${showMembers ? 'members' : 'teams'} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
+                          name
+                        ];
+                      }}
                     />
                     <Pie
                       data={chartData.overviewData}
@@ -338,7 +360,26 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
 
             {/* Workshop Details */}
             <div className="space-y-4">
-              {workshopData.map((workshop) => (
+              {[
+                {
+                  name: 'Cloud Computing (AWS)',
+                  teams: data.workshops.cloud.teams.registered,
+                  members: data.workshops.cloud.members.registered,
+                  teamsAttended: data.workshops.cloud.teams.attended,
+                  membersAttended: data.workshops.cloud.members.attended,
+                  completion_rate: data.workshops.cloud.completion_rate,
+                  icon: '☁️'
+                },
+                {
+                  name: 'AI/ML (Google)',
+                  teams: data.workshops.ai.teams.registered,
+                  members: data.workshops.ai.members.registered,
+                  teamsAttended: data.workshops.ai.teams.attended,
+                  membersAttended: data.workshops.ai.members.attended,
+                  completion_rate: data.workshops.ai.completion_rate,
+                  icon: '🤖'
+                }
+              ].map((workshop) => (
                 <div key={workshop.name} className="bg-gray-700/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -352,16 +393,16 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                   
                   <div className="grid grid-cols-3 gap-4 mb-3">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-blue-400">{workshop.registered}</div>
-                      <div className="text-xs text-gray-400">Registered</div>
+                      <div className="text-xl font-bold text-blue-400">{showMembers ? workshop.members : workshop.teams}</div>
+                      <div className="text-xs text-gray-400">Registered {showMembers ? 'Members' : 'Teams'}</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-green-400">{workshop.attended}</div>
+                      <div className="text-xl font-bold text-green-400">{showMembers ? workshop.membersAttended : workshop.teamsAttended}</div>
                       <div className="text-xs text-gray-400">Attended</div>
                     </div>
                     <div className="text-center">
                       <div className="text-xl font-bold text-purple-400">
-                        {workshop.registered - workshop.attended}
+                        {showMembers ? (workshop.members - workshop.membersAttended) : (workshop.teams - workshop.teamsAttended)}
                       </div>
                       <div className="text-xs text-gray-400">No-shows</div>
                     </div>
@@ -370,7 +411,11 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                   <div className="w-full bg-gray-600 rounded-full h-2">
                     <div
                       className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${(workshop.attended / workshop.registered) * 100}%` }}
+                      style={{ 
+                        width: `${showMembers 
+                          ? (workshop.membersAttended / workshop.members) * 100 
+                          : (workshop.teamsAttended / workshop.teams) * 100}%` 
+                      }}
                     />
                   </div>
                 </div>
@@ -429,7 +474,26 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
 
             {/* Competition Details */}
             <div className="space-y-4">
-              {competitionData.map((competition) => (
+              {[
+                {
+                  name: 'Hackathon',
+                  teams: data.competitions.hackathon.teams.registered,
+                  members: data.competitions.hackathon.members.registered,
+                  teamsSubmitted: data.competitions.hackathon.teams.submitted,
+                  membersSubmitted: data.competitions.hackathon.members.submitted,
+                  submission_rate: data.competitions.hackathon.submission_rate,
+                  icon: '💻'
+                },
+                {
+                  name: 'Startup Pitch',
+                  teams: data.competitions.pitch.teams.registered,
+                  members: data.competitions.pitch.members.registered,
+                  teamsSubmitted: data.competitions.pitch.teams.submitted,
+                  membersSubmitted: data.competitions.pitch.members.submitted,
+                  submission_rate: data.competitions.pitch.submission_rate,
+                  icon: '🚀'
+                }
+              ].map((competition) => (
                 <div key={competition.name} className="bg-gray-700/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -437,45 +501,40 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                       <h4 className="text-white font-medium">{competition.name}</h4>
                     </div>
                     <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                      {Math.round((competition.submitted / competition.registered) * 100)}% submission rate
+                      {competition.submission_rate.toFixed(1)}% submission rate
                     </Badge>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-4 mb-3">
                     <div className="text-center">
-                      <div className="text-xl font-bold text-blue-400">{competition.registered}</div>
-                      <div className="text-xs text-gray-400">Registered</div>
+                      <div className="text-xl font-bold text-blue-400">{showMembers ? competition.members : competition.teams}</div>
+                      <div className="text-xs text-gray-400">Registered {showMembers ? 'Members' : 'Teams'}</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-xl font-bold text-green-400">{competition.active}</div>
-                      <div className="text-xs text-gray-400">Active</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xl font-bold text-yellow-400">{competition.submitted}</div>
+                      <div className="text-xl font-bold text-green-400">{showMembers ? competition.membersSubmitted : competition.teamsSubmitted}</div>
                       <div className="text-xs text-gray-400">Submitted</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xl font-bold text-yellow-400">
+                        {showMembers ? (competition.members - competition.membersSubmitted) : (competition.teams - competition.teamsSubmitted)}
+                      </div>
+                      <div className="text-xs text-gray-400">Pending</div>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Active Participation</span>
-                      <span className="text-white">{Math.round((competition.active / competition.registered) * 100)}%</span>
+                      <span className="text-gray-400">Submission Rate</span>
+                      <span className="text-white">{competition.submission_rate.toFixed(1)}%</span>
                     </div>
                     <div className="w-full bg-gray-600 rounded-full h-2">
                       <div
                         className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(competition.active / competition.registered) * 100}%` }}
-                      />
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-400">Submission Rate</span>
-                      <span className="text-white">{Math.round((competition.submitted / competition.registered) * 100)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-600 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-green-500 to-yellow-500 h-2 rounded-full transition-all duration-500"
-                        style={{ width: `${(competition.submitted / competition.registered) * 100}%` }}
+                        style={{ 
+                          width: `${showMembers 
+                            ? (competition.membersSubmitted / competition.members) * 100 
+                            : (competition.teamsSubmitted / competition.teams) * 100}%` 
+                        }}
                       />
                     </div>
                   </div>

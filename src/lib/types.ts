@@ -3,11 +3,15 @@ export interface User {
   id: string;
   email: string;
   full_name: string;
+  phone?: string;
+  whatsapp?: string;
   role: 'admin' | 'coordinator' | 'participant';
   college?: string;
   track?: string;
   year?: string;
   dept?: string;
+  designation?: string;
+  committee?: string;
   linkedin?: string;
   instagram?: string;
   portfolio?: string;

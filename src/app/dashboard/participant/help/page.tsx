@@ -125,7 +125,7 @@ export default function HelpPage() {
                 
                 <div className="p-3 bg-gray-700/30 rounded-lg">
                   <h4 className="text-white font-medium mb-1">How do I contact the organizers?</h4>
-                  <p className="text-gray-400 text-sm">Submit a help ticket through this tab or email us at support@samyukta2025.com</p>
+                  <p className="text-gray-400 text-sm">Submit a help ticket through this tab or email us at samyukta.summit@gmail.com</p>
                 </div>
               </CardContent>
             </Card>
@@ -143,7 +143,7 @@ export default function HelpPage() {
                   </div>
                   <div>
                     <h4 className="text-white font-medium">Email Support</h4>
-                    <p className="text-gray-400 text-sm">support@samyukta2025.com</p>
+                    <p className="text-gray-400 text-sm">samyukta.summit@gmail.com</p>
                   </div>
                 </div>
                 
@@ -153,7 +153,7 @@ export default function HelpPage() {
                   </div>
                   <div>
                     <h4 className="text-white font-medium">Helpline</h4>
-                    <p className="text-gray-400 text-sm">+91 9876543210 (10 AM - 6 PM)</p>
+                    <p className="text-gray-400 text-sm">+91 8897892720 (10 AM - 6 PM)</p>
                   </div>
                 </div>
                 

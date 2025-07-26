@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminLayout from '@/components/layout/AdminLayout';
+import { UserManagementTable } from '@/components/admin/UserManagementTable';
 import { User } from '@/entities/User';
 import { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
@@ -10,37 +11,27 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  Search, 
-  Edit, 
-  Save, 
-  X, 
-  Filter,
   Users,
-  UserCheck
+  UserPlus,
+  Save,
+  X,
+  RefreshCw
 } from 'lucide-react';
 
 export default function UserManagementPage() {
   const router = useRouter();
-  const [, setCurrentUser] = useState<UserType | null>(null);
-  const [users, setUsers] = useState<UserType[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<UserType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  
-  // Edit user modal
-  const [editingUser, setEditingUser] = useState<UserType | null>(null);
-  const [editForm, setEditForm] = useState<Partial<UserType>>({});
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [updating, setUpdating] = useState(false);
 
-  // Define functions before useEffect
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Create user modal
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [createForm, setCreateForm] = useState<Partial<UserType & { password: string }>>({});
+  const [creating, setCreating] = useState(false);
+
   const loadUserData = useCallback(async () => {
     try {
       const user = await User.me();
@@ -48,7 +39,7 @@ export default function UserManagementPage() {
         router.push('/dashboard');
         return;
       }
-      setCurrentUser(user);
+
     } catch (error) {
       console.error('Failed to load user data:', error);
       router.push('/login');
@@ -57,6 +48,7 @@ export default function UserManagementPage() {
 
   const loadAllUsers = useCallback(async () => {
     try {
+      setLoading(true);
       const usersData = await User.getAll();
       setUsers(usersData);
     } catch (error) {
@@ -67,74 +59,83 @@ export default function UserManagementPage() {
     }
   }, []);
 
-  const filterUsers = useCallback(() => {
-    let filtered = users;
-
-    if (searchTerm) {
-      filtered = filtered.filter(user => 
-        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.college?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.dept?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (roleFilter !== 'all') {
-      filtered = filtered.filter(user => user.role === roleFilter);
-    }
-
-    setFilteredUsers(filtered);
-  }, [users, searchTerm, roleFilter]);
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadAllUsers();
+    setRefreshing(false);
+    toast.success('Users data refreshed');
+  };
 
   useEffect(() => {
     loadUserData();
     loadAllUsers();
   }, [loadUserData, loadAllUsers]);
 
-  useEffect(() => {
-    filterUsers();
-  }, [filterUsers]);
-
-  const handleEditUser = (user: UserType) => {
-    setEditingUser(user);
-    setEditForm({
-      full_name: user.full_name,
-      email: user.email,
-      role: user.role,
-      college: user.college,
-      dept: user.dept,
-      year: user.year,
-      track: user.track,
-      linkedin: user.linkedin,
-      instagram: user.instagram,
-      portfolio: user.portfolio
+  const handleCreateUser = () => {
+    setCreateForm({
+      full_name: '',
+      email: '',
+      password: '',
+      phone: '',
+      whatsapp: '',
+      role: 'participant',
+      dept: '',
+      year: '',
+      designation: '',
+      committee: '',
+      track: '',
+      linkedin: '',
+      instagram: '',
+      portfolio: ''
     });
-    setShowEditDialog(true);
+    setShowCreateDialog(true);
   };
 
-  const handleSaveUser = async () => {
-    if (!editingUser) return;
-    
-    setUpdating(true);
+  const handleSaveNewUser = async () => {
+    setCreating(true);
     try {
-      await User.updateProfile(editingUser.id, editForm);
-      toast.success('User updated successfully');
-      setShowEditDialog(false);
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(createForm),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create user');
+      }
+
+      toast.success('User created successfully');
+      setShowCreateDialog(false);
       loadAllUsers(); // Reload users
     } catch (error) {
-      console.error('Failed to update user:', error);
-      toast.error('Failed to update user');
+      console.error('Failed to create user:', error);
+      toast.error('Failed to create user');
     } finally {
-      setUpdating(false);
+      setCreating(false);
     }
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
-      case 'admin': return 'bg-red-500/20 text-red-400 border-red-500/30';
-      case 'coordinator': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-      case 'participant': return 'bg-green-500/20 text-green-400 border-green-500/30';
-      default: return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user?')) return;
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete user');
+      }
+
+      toast.success('User deleted successfully');
+      loadAllUsers(); // Reload users
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error('Failed to delete user');
     }
   };
 
@@ -159,269 +160,266 @@ export default function UserManagementPage() {
       title="User Management"
       subtitle="Manage users, roles, and permissions"
       showRefresh={true}
-      onRefresh={loadAllUsers}
-      refreshing={loading}
+      onRefresh={handleRefresh}
+      refreshing={refreshing}
     >
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-              <Users className="h-8 w-8 text-blue-400" />
+            <h1 className="text-2xl sm:text-3xl font-bold text-white flex items-center gap-3">
+              <Users className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400" />
               User Management
             </h1>
-            <p className="text-gray-400 mt-2">
-              Manage all registered users and their details
+            <p className="text-gray-400 mt-2 text-sm sm:text-base">
+              Manage all registered users with advanced table features
             </p>
           </div>
-
-        </div>
-
-        {/* Search and Filter */}
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-lg p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                <Input
-                  placeholder="Search users by name, email, college, or department..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-gray-400" />
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-40 bg-gray-700/50 border-gray-600 text-white">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-gray-800 border-gray-700">
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="coordinator">Coordinator</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-700"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+            <Button
+              onClick={handleCreateUser}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
           </div>
         </div>
 
-        {/* Users Table */}
-        <Card className="bg-gray-800/50 backdrop-blur-sm border-gray-700 overflow-hidden">
-          <CardHeader className="border-b border-gray-700">
-            <CardTitle className="text-xl text-white">
-              Users ({filteredUsers.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader className="bg-gray-700/50">
-                <TableRow>
-                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    User
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Role
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    College & Department
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Year & Track
-                  </TableHead>
-                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="divide-y divide-gray-700">
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-gray-700/30 transition-colors">
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-white">
-                          {user.full_name}
-                        </div>
-                        <div className="text-sm text-gray-400">
-                          {user.email}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <Badge className={getRoleBadgeColor(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white">{user.college}</div>
-                      <div className="text-sm text-gray-400">{user.dept}</div>
-                    </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-white">{user.year}</div>
-                      <div className="text-sm text-gray-400">{user.track}</div>
-                    </TableCell>
-                    <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditUser(user)}
-                          className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
-                        >
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
+        {/* User Management Table */}
+        <UserManagementTable
+          users={users}
+          loading={loading}
+          onDeleteUser={handleDeleteUser}
+          onCreateUser={handleCreateUser}
+          onRefresh={loadAllUsers}
+        />
 
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            {filteredUsers.length === 0 && (
-              <div className="text-center py-12">
-                <UserCheck className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-400">No users found matching your criteria</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Edit User Dialog */}
-        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-          <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-2xl">
+        {/* Create User Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Edit User: {editingUser?.full_name}</DialogTitle>
+              <DialogTitle>Create New User</DialogTitle>
             </DialogHeader>
             
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
+              {/* Basic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="full_name">Full Name</Label>
+                  <Label htmlFor="create_full_name">Full Name *</Label>
                   <Input
-                    id="full_name"
-                    value={editForm.full_name || ''}
-                    onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_full_name"
+                    value={createForm.full_name || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, full_name: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter full name"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="create_email">Email *</Label>
                   <Input
-                    id="email"
+                    id="create_email"
                     type="email"
-                    value={editForm.email || ''}
-                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    value={createForm.email || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, email: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter email address"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="role">Role</Label>
-                  <Select value={editForm.role} onValueChange={(value) => setEditForm({...editForm, role: value as 'admin' | 'coordinator'})}>
-                    <SelectTrigger className="bg-gray-700 border-gray-600">
+                  <Label htmlFor="create_password">Password *</Label>
+                  <Input
+                    id="create_password"
+                    type="password"
+                    value={createForm.password || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, password: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter password"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="create_role">Role</Label>
+                  <Select
+                    value={createForm.role || 'participant'}
+                    onValueChange={(value: 'admin' | 'coordinator' | 'participant') => setCreateForm(prev => ({...prev, role: value}))}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-gray-800 border-gray-700">
                       <SelectItem value="admin">Admin</SelectItem>
                       <SelectItem value="coordinator">Coordinator</SelectItem>
+                      <SelectItem value="volunteer">Volunteer</SelectItem>
+                      <SelectItem value="participant">Participant</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              {/* Contact Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="college">College</Label>
+                  <Label htmlFor="create_phone">Phone</Label>
                   <Input
-                    id="college"
-                    value={editForm.college || ''}
-                    onChange={(e) => setEditForm({...editForm, college: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_phone"
+                    value={createForm.phone || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, phone: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter phone number"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="create_whatsapp">WhatsApp</Label>
+                  <Input
+                    id="create_whatsapp"
+                    value={createForm.whatsapp || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, whatsapp: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter WhatsApp number"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              {/* Academic Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="dept">Department</Label>
+                  <Label htmlFor="create_dept">Department</Label>
                   <Input
-                    id="dept"
-                    value={editForm.dept || ''}
-                    onChange={(e) => setEditForm({...editForm, dept: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_dept"
+                    value={createForm.dept || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, dept: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter department"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="year">Year</Label>
+                  <Label htmlFor="create_year">Year</Label>
+                  <Select
+                    value={createForm.year || ''}
+                    onValueChange={(value) => setCreateForm(prev => ({...prev, year: value}))}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder="Select year" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="1st">1st Year</SelectItem>
+                      <SelectItem value="2nd">2nd Year</SelectItem>
+                      <SelectItem value="3rd">3rd Year</SelectItem>
+                      <SelectItem value="4th">4th Year</SelectItem>
+                      <SelectItem value="postgraduate">Postgraduate</SelectItem>
+                      <SelectItem value="faculty">Faculty</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Professional Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="create_designation">Designation</Label>
                   <Input
-                    id="year"
-                    value={editForm.year || ''}
-                    onChange={(e) => setEditForm({...editForm, year: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_designation"
+                    value={createForm.designation || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, designation: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter designation"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="create_committee">Committee</Label>
+                  <Input
+                    id="create_committee"
+                    value={createForm.committee || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, committee: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter committee"
                   />
                 </div>
               </div>
 
+              {/* Track Selection */}
               <div>
-                <Label htmlFor="track">Track</Label>
-                <Input
-                  id="track"
-                  value={editForm.track || ''}
-                  onChange={(e) => setEditForm({...editForm, track: e.target.value})}
-                  className="bg-gray-700 border-gray-600"
-                />
+                <Label htmlFor="create_track">Track</Label>
+                <Select
+                  value={createForm.track || ''}
+                  onValueChange={(value) => setCreateForm(prev => ({...prev, track: value}))}
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Select track" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700">
+                    <SelectItem value="cloud">Cloud Computing</SelectItem>
+                    <SelectItem value="ai">Artificial Intelligence</SelectItem>
+                    <SelectItem value="both">Both Tracks</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              {/* Social Links */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Label htmlFor="create_linkedin">LinkedIn</Label>
                   <Input
-                    id="linkedin"
-                    value={editForm.linkedin || ''}
-                    onChange={(e) => setEditForm({...editForm, linkedin: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_linkedin"
+                    value={createForm.linkedin || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, linkedin: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="LinkedIn URL"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="instagram">Instagram</Label>
+                  <Label htmlFor="create_instagram">Instagram</Label>
                   <Input
-                    id="instagram"
-                    value={editForm.instagram || ''}
-                    onChange={(e) => setEditForm({...editForm, instagram: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_instagram"
+                    value={createForm.instagram || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, instagram: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Instagram handle"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="portfolio">Portfolio</Label>
+                  <Label htmlFor="create_portfolio">Portfolio</Label>
                   <Input
-                    id="portfolio"
-                    value={editForm.portfolio || ''}
-                    onChange={(e) => setEditForm({...editForm, portfolio: e.target.value})}
-                    className="bg-gray-700 border-gray-600"
+                    id="create_portfolio"
+                    value={createForm.portfolio || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, portfolio: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Portfolio URL"
                   />
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-end gap-3 pt-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowEditDialog(false)}
-                className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSaveUser}
-                disabled={updating}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {updating ? 'Saving...' : 'Save Changes'}
-              </Button>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreateDialog(false)}
+                  className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveNewUser}
+                  disabled={creating || !createForm.full_name || !createForm.email || !createForm.password}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  {creating ? 'Creating...' : 'Create User'}
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>

@@ -26,7 +26,10 @@ interface TeamMemberDocument {
 
 export async function POST(request: NextRequest) {
   try {
-    const { memberId, memberEmail } = await request.json();
+    const body = await request.json();
+    const { memberId, memberEmail, teamId } = body;
+
+    console.log('Resend member confirmation request:', { memberId, memberEmail, teamId });
 
     // Check admin authentication
     const currentUser = await User.me();
@@ -41,9 +44,15 @@ export async function POST(request: NextRequest) {
     const db = await getDbPromise();
 
     // Get member details
-    const member = await db.collection('team_members').findOne({
-      _id: new ObjectId(memberId)
-    }) as TeamMemberDocument | null;
+    let member: TeamMemberDocument | null;
+    try {
+      member = await db.collection('team_members').findOne({
+        _id: new ObjectId(memberId)
+      }) as TeamMemberDocument | null;
+    } catch (mongoError) {
+      console.error('Error finding member:', mongoError);
+      return NextResponse.json({ error: 'Invalid member ID format' }, { status: 400 });
+    }
 
     if (!member) {
       return NextResponse.json({ error: 'Member not found' }, { status: 404 });
@@ -75,7 +84,9 @@ export async function POST(request: NextRequest) {
     };
 
     // Send email
-    const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/email/registration`, {
+    console.log('Sending email with data:', emailData);
+    
+    const emailResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/email/registration`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -84,7 +95,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (!emailResponse.ok) {
-      throw new Error('Failed to send email');
+      const errorText = await emailResponse.text();
+      console.error('Email API error:', errorText);
+      throw new Error(`Failed to send email: ${errorText}`);
     }
 
     // Update member's passkey if it was generated

@@ -473,8 +473,16 @@ export default function Register() {
           if (formData.tickets.combo && !memberTrack?.competitionTrack) {
             newErrors[`member${index}Competition`] = "Competition track required for combo pass";
           }
-          if (memberTrack?.competitionTrack === "Startup Pitch" && !formData.startupPitchData[index]) {
-            newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
+          if (memberTrack?.competitionTrack === "Startup Pitch") {
+            // In shared mode (or team size 1), check if pitch data exists for member 0 (team lead)
+            // In individual mode, check for specific member's pitch data
+            const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1) 
+              ? formData.startupPitchData[0] 
+              : formData.startupPitchData[index];
+            
+            if (!pitchDataExists) {
+              newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
+            }
           }
         });
         break;

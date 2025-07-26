@@ -9,8 +9,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedCh
 
 interface RegistrationData {
   date: string;
-  count: number;
-  cumulative: number;
+  teams: number;
+  members: number;
+  cumulativeTeams: number;
+  cumulativeMembers: number;
 }
 
 interface RegistrationChartProps {
@@ -19,18 +21,26 @@ interface RegistrationChartProps {
 }
 
 const chartConfig = {
-  daily: {
-    label: "Daily Registrations",
+  teams: {
+    label: "Teams",
     color: "#3B82F6", // Blue
   },
-  cumulative: {
-    label: "Cumulative Total",
+  members: {
+    label: "Members",
     color: "#10B981", // Green
+  },
+  cumulativeTeams: {
+    label: "Cumulative Teams",
+    color: "#8B5CF6", // Purple
+  },
+  cumulativeMembers: {
+    label: "Cumulative Members",
+    color: "#F59E0B", // Orange
   },
 } as const;
 
 export function RegistrationChart({ data, loading }: RegistrationChartProps) {
-  const [viewType, setViewType] = useState<'daily' | 'cumulative' | 'combined'>('combined');
+  const [viewType, setViewType] = useState<'teams' | 'members' | 'combined' | 'cumulative'>('combined');
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'all'>('30d');
 
   const chartData = useMemo(() => {
@@ -45,14 +55,17 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
 
     return filteredData.map(item => ({
       date: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      daily: item.count,
-      cumulative: item.cumulative,
+      teams: item.teams,
+      members: item.members,
+      cumulativeTeams: item.cumulativeTeams,
+      cumulativeMembers: item.cumulativeMembers,
       fullDate: item.date,
     }));
   }, [data, timeRange]);
 
-  const totalRegistrations = data[data.length - 1]?.cumulative || 0;
-  const weeklyGrowth = data.slice(-7).reduce((sum, d) => sum + d.count, 0);
+  const totalTeams = data[data.length - 1]?.cumulativeTeams || 0;
+  const totalMembers = data[data.length - 1]?.cumulativeMembers || 0;
+  const weeklyMemberGrowth = data.slice(-7).reduce((sum, d) => sum + d.members, 0);
 
   if (loading) {
     return (
@@ -79,14 +92,15 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
             Registration Trends
           </CardTitle>
           <div className="flex gap-2">
-            <Select value={viewType} onValueChange={(value: 'daily' | 'cumulative' | 'combined') => setViewType(value)}>
+            <Select value={viewType} onValueChange={(value: 'teams' | 'members' | 'combined' | 'cumulative') => setViewType(value)}>
               <SelectTrigger className="w-36 bg-gray-700 border-gray-600 text-white">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="daily">Daily</SelectItem>
+                <SelectItem value="teams">Teams Only</SelectItem>
+                <SelectItem value="members">Members Only</SelectItem>
+                <SelectItem value="combined">Daily Combined</SelectItem>
                 <SelectItem value="cumulative">Cumulative</SelectItem>
-                <SelectItem value="combined">Combined</SelectItem>
               </SelectContent>
             </Select>
             <Select value={timeRange} onValueChange={(value: '7d' | '30d' | 'all') => setTimeRange(value)}>
@@ -104,7 +118,11 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
         <div className="flex items-center gap-4 text-sm text-gray-400">
           <div className="flex items-center gap-1">
             <Users className="h-4 w-4" />
-            Total: {totalRegistrations.toLocaleString()}
+            Teams: {totalTeams.toLocaleString()}
+          </div>
+          <div className="flex items-center gap-1">
+            <Users className="h-4 w-4" />
+            Members: {totalMembers.toLocaleString()}
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
@@ -112,12 +130,12 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
           </div>
           <div className="flex items-center gap-1">
             <TrendingUp className="h-4 w-4" />
-            +{weeklyGrowth} this week
+            +{weeklyMemberGrowth} members this week
           </div>
         </div>
       </CardHeader>
       <CardContent>
-        {viewType === 'daily' && (
+        {viewType === 'teams' && (
           <ChartContainer config={chartConfig} className="h-80">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
@@ -137,8 +155,73 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
                 labelFormatter={(value) => `Date: ${value}`}
               />
               <Bar 
-                dataKey="daily" 
+                dataKey="teams" 
                 fill="#3B82F6"
+                radius={[4, 4, 0, 0]}
+                className="hover:opacity-80 transition-opacity"
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+
+        {viewType === 'members' && (
+          <ChartContainer config={chartConfig} className="h-80">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <ChartTooltip 
+                content={<ChartTooltipContent />}
+                labelFormatter={(value) => `Date: ${value}`}
+              />
+              <Bar 
+                dataKey="members" 
+                fill="#10B981"
+                radius={[4, 4, 0, 0]}
+                className="hover:opacity-80 transition-opacity"
+              />
+            </BarChart>
+          </ChartContainer>
+        )}
+
+        {viewType === 'combined' && (
+          <ChartContainer config={chartConfig} className="h-80">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+              <XAxis 
+                dataKey="date" 
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <YAxis 
+                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tickLine={false}
+                axisLine={false}
+              />
+              <ChartTooltip 
+                content={<ChartTooltipContent />}
+                labelFormatter={(value) => `Date: ${value}`}
+              />
+              <ChartLegend content={<ChartLegendContent />} />
+              <Bar 
+                dataKey="teams" 
+                fill="#3B82F6"
+                radius={[4, 4, 0, 0]}
+                className="hover:opacity-80 transition-opacity"
+              />
+              <Bar 
+                dataKey="members" 
+                fill="#10B981"
                 radius={[4, 4, 0, 0]}
                 className="hover:opacity-80 transition-opacity"
               />
@@ -165,13 +248,22 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
                 content={<ChartTooltipContent />}
                 labelFormatter={(value) => `Date: ${value}`}
               />
+              <ChartLegend content={<ChartLegendContent />} />
               <Line 
                 type="monotone" 
-                dataKey="cumulative" 
-                stroke="#10B981"
+                dataKey="cumulativeTeams" 
+                stroke="#8B5CF6"
                 strokeWidth={3}
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
+                dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2 }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="cumulativeMembers" 
+                stroke="#F59E0B"
+                strokeWidth={3}
+                dot={{ fill: "#F59E0B", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, stroke: "#F59E0B", strokeWidth: 2 }}
               />
             </LineChart>
           </ChartContainer>

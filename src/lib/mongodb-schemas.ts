@@ -11,6 +11,8 @@ export interface UserSchema {
   track?: string;
   year?: string;
   dept?: string;
+  designation?: string;
+  committee?: string;
   linkedin?: string;
   instagram?: string;
   portfolio?: string;

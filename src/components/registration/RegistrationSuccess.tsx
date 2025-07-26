@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { CompletedRegistrationData } from '@/lib/types';
 import { useNavigation } from '@/hooks/useClientSide';
+import Link from 'next/link';
 
 interface RegistrationSuccessProps {
   registration: CompletedRegistrationData;
@@ -244,13 +245,13 @@ export default function RegistrationSuccess({ registration, onDashboard }: Regis
             <div className="text-yellow-400 font-medium mb-2">Need Help?</div>
             <div className="text-gray-300 text-sm">
               Contact us at{' '}
-              <a href="mailto:support@samyukta.anits.edu.in" className="text-yellow-400 hover:underline">
-                support@samyukta.anits.edu.in
-              </a>
+              <Link href="mailto:samyukta.summit@gmail.com" className="text-yellow-400 hover:underline">
+                samyukta.summit@gmail.com
+              </Link>
               {' '}or join our{' '}
-              <a href="https://wa.me/919876543210" className="text-green-400 hover:underline">
+              <Link href="https://wa.me/918897892720" className="text-green-400 hover:underline">
                 WhatsApp group
-              </a>
+              </Link>
             </div>
           </div>
         </CardContent>

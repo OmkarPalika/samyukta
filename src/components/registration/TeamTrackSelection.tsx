@@ -54,6 +54,7 @@ interface TeamTrackSelectionProps {
 export default function TeamTrackSelection({
   members,
   memberTracks,
+  startupPitchData,
   isComboTicket,
   slots,
   onTrackChange,
@@ -62,9 +63,13 @@ export default function TeamTrackSelection({
   const [sharedTracks, setSharedTracks] = useState<{
     workshopTrack: string;
     competitionTrack: string;
-  }>({
-    workshopTrack: "",
-    competitionTrack: ""
+  }>(() => {
+    // Initialize with existing track data if available
+    const firstMemberTrack = memberTracks[0];
+    return {
+      workshopTrack: firstMemberTrack?.workshopTrack || "",
+      competitionTrack: firstMemberTrack?.competitionTrack || ""
+    };
   });
 
   // Ensure memberTracks array is properly initialized
@@ -162,16 +167,44 @@ export default function TeamTrackSelection({
               </Select>
 
               {sharedTracks.competitionTrack === "Startup Pitch" && (
-                <div className="mt-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onOpenPitchDialog(0)} // Open pitch dialog for team lead
-                    className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
-                  >
-                    Add Pitch Details for Team
-                  </Button>
+                <div className="mt-2 space-y-2">
+                  {startupPitchData[0] ? (
+                    <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h4 className="text-purple-400 font-medium text-sm mb-1">Pitch Details Added</h4>
+                          <p className="text-gray-300 text-sm">
+                            <strong>Startup:</strong> {startupPitchData[0].startupName}
+                          </p>
+                          <p className="text-gray-300 text-sm">
+                            <strong>Category:</strong> {startupPitchData[0].pitchCategory}
+                          </p>
+                          <p className="text-gray-300 text-sm">
+                            <strong>Team Size:</strong> {startupPitchData[0].teamSize} members
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onOpenPitchDialog(0)}
+                          className="text-purple-400 border-purple-400 hover:bg-purple-400/10 ml-2"
+                        >
+                          Edit
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onOpenPitchDialog(0)} // Open pitch dialog for team lead
+                      className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
+                    >
+                      Add Pitch Details for Team
+                    </Button>
+                  )}
                 </div>
               )}
             </div>
@@ -232,16 +265,44 @@ export default function TeamTrackSelection({
                   </div>
                   
                   {sharedTracks.competitionTrack === "Startup Pitch" && (
-                    <div className="mt-2 ml-6">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onOpenPitchDialog(0)} // Open pitch dialog for team lead
-                        className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
-                      >
-                        Add Pitch Details for Team
-                      </Button>
+                    <div className="mt-2 ml-6 space-y-2">
+                      {startupPitchData[0] ? (
+                        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h4 className="text-purple-400 font-medium text-sm mb-1">Pitch Details Added</h4>
+                              <p className="text-gray-300 text-sm">
+                                <strong>Startup:</strong> {startupPitchData[0].startupName}
+                              </p>
+                              <p className="text-gray-300 text-sm">
+                                <strong>Category:</strong> {startupPitchData[0].pitchCategory}
+                              </p>
+                              <p className="text-gray-300 text-sm">
+                                <strong>Team Size:</strong> {startupPitchData[0].teamSize} members
+                              </p>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => onOpenPitchDialog(0)}
+                              className="text-purple-400 border-purple-400 hover:bg-purple-400/10 ml-2"
+                            >
+                              Edit
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onOpenPitchDialog(0)} // Open pitch dialog for team lead
+                          className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
+                        >
+                          Add Pitch Details for Team
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

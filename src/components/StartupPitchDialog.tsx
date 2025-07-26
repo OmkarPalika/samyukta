@@ -420,7 +420,7 @@ export default function StartupPitchDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-gray-300">Pitch Deck Upload (Optional, PDF/PPT max 10MB)</Label>
+            <Label className="text-gray-300">Pitch Deck Upload (Optional, PDF/PPT max 50MB)</Label>
             <div className="border-2 border-dashed border-gray-600 rounded-lg p-4">
               {data.pitchDeck ? (
                 <div className="flex items-center justify-between">
@@ -434,18 +434,60 @@ export default function StartupPitchDialog({
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
+              ) : data.pitchDeckUrl ? (
+                <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                  <div className="flex items-center space-x-2">
+                    <Upload className="w-4 h-4 text-green-400" />
+                    <span className="text-green-400 text-sm">Pitch deck uploaded</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => window.open(data.pitchDeckUrl, '_blank')}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      View
+                    </Button>
+                    <label className="cursor-pointer">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-gray-300"
+                        asChild
+                      >
+                        <span>Replace</span>
+                      </Button>
+                      <input
+                        type="file"
+                        accept=".pdf,.ppt,.pptx"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file && file.size <= 50 * 1024 * 1024) {
+                            setData({ ...data, pitchDeck: file, pitchDeckUrl: undefined });
+                          } else if (file && file.size > 50 * 1024 * 1024) {
+                            alert('File size must be less than 50MB');
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
               ) : (
                 <label className="flex flex-col items-center cursor-pointer">
                   <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-gray-400 text-sm">Upload PDF or PowerPoint file</span>
+                  <span className="text-gray-400 text-sm">Upload PDF or PowerPoint file (max 50MB)</span>
                   <input
                     type="file"
                     accept=".pdf,.ppt,.pptx"
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file && file.size <= 10 * 1024 * 1024) {
+                      if (file && file.size <= 50 * 1024 * 1024) {
                         setData({ ...data, pitchDeck: file });
+                      } else if (file && file.size > 50 * 1024 * 1024) {
+                        alert('File size must be less than 50MB');
                       }
                     }}
                   />

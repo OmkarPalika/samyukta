@@ -10,7 +10,7 @@ export const SPEAKERS_PAGE_DATA = {
   speakingOpportunities: {
     title: "Want to Speak at Samyukta?",
     description: "Join our community of expert speakers and share your knowledge with the next generation of innovators",
-    contactEmail: "speakers@samyukta.anits.edu.in"
+    contactEmail: "samyukta.summit@gmail.com"
   }
 } as const;
 

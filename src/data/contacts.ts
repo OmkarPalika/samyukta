@@ -55,7 +55,7 @@ export const CONTACTS_DATA = {
   },
   
   speakers: {
-    email: "speakers@samyukta.anits.edu.in"
+    email: "samyukta.summit@gmail.com"
   },
   
   // Venue Contact

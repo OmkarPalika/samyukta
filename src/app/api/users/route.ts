@@ -58,11 +58,13 @@ export async function GET(request: NextRequest) {
       track: user.track,
       year: user.year,
       dept: user.dept,
+      designation: user.designation,
+      committee: user.committee,
       linkedin: user.linkedin,
       instagram: user.instagram,
       portfolio: user.portfolio,
-      created_at: user.created_at.toISOString(),
-      updated_at: user.updated_at.toISOString()
+      created_at: user.created_at?.toISOString(),
+      updated_at: user.updated_at?.toISOString()
     }));
 
     return NextResponse.json({
