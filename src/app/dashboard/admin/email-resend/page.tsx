@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Registration } from '@/entities/Registration';
+
 
 export default function EmailResendPage() {
   const [teamId, setTeamId] = useState('');
@@ -48,8 +50,12 @@ export default function EmailResendPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 p-6">
-      <div className="max-w-2xl mx-auto">
+    <AdminLayout 
+      title="Email Tools"
+      subtitle="Send bulk emails and notifications"
+    >
+      <div className="p-6">
+        <div className="max-w-2xl mx-auto">
         <Card className="bg-gray-800/40 border-gray-700">
           <CardHeader>
             <CardTitle className="text-white text-2xl">Resend Registration Emails</CardTitle>
@@ -133,7 +139,8 @@ export default function EmailResendPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }
