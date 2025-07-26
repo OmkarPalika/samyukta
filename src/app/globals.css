@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../styles/charts.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -11,7 +12,6 @@
   --text-primary: #FFFFFF;
   --text-secondary: #B8BCC8;
   --radius: 0.625rem;
-  
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -129,7 +129,7 @@ body {
   .social-content {
     padding-top: 10rem;
   }
-  
+
   .social-header {
     min-height: 7rem;
   }
@@ -328,7 +328,6 @@ body {
   }
 }
 
-
 /* Spacing System */
 :root {
   /* Base spacing scale (4px base unit) */
@@ -345,14 +344,14 @@ body {
   --space-20: 5rem;     /* 80px */
   --space-24: 6rem;     /* 96px */
   --space-32: 8rem;     /* 128px */
-  
+
   /* Responsive spacing */
   --section-padding-y: clamp(3rem, 8vw, 6rem);
   --section-padding-x: clamp(1rem, 4vw, 2rem);
   --container-padding: clamp(1rem, 4vw, 2rem);
   --component-padding: clamp(1rem, 3vw, 1.5rem);
   --card-padding: clamp(1rem, 3vw, 2rem);
-  
+
   /* Gap system */
   --gap-xs: clamp(0.5rem, 2vw, 0.75rem);
   --gap-sm: clamp(0.75rem, 2.5vw, 1rem);
@@ -361,8 +360,6 @@ body {
   --gap-xl: clamp(2rem, 5vw, 3rem);
   --gap-2xl: clamp(3rem, 6vw, 4rem);
 }
-
-
 
 /* Layout Classes */
 .container-responsive {
@@ -443,7 +440,7 @@ body {
   .nav-height {
     height: 4rem;
   }
-  
+
   .nav-offset {
     padding-top: 4rem;
   }
@@ -455,11 +452,11 @@ body {
     height: 3rem;
     min-height: 3rem;
   }
-  
+
   .nav-offset {
     padding-top: 3rem;
   }
-  
+
   /* Ensure mobile navigation is properly spaced */
   nav {
     position: fixed;
@@ -468,7 +465,7 @@ body {
     right: 0;
     z-index: 50;
   }
-  
+
   /* Prevent horizontal scroll on mobile */
   body {
     overflow-x: hidden;

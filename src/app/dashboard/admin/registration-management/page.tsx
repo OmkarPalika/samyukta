@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { User } from '@/entities/User';
 import { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
@@ -14,12 +14,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Search, 
-  Edit, 
-  Mail, 
-  Save, 
-  X, 
+import {
+  Search,
+  Edit,
+  Mail,
+  Save,
+  X,
   Filter,
   Eye,
   CheckCircle,
@@ -71,16 +71,16 @@ export default function RegistrationManagementPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  
+
   // View registration modal
   const [selectedRegistration, setSelectedRegistration] = useState<Registration | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
-  
+
   // Edit member modal
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [editForm, setEditForm] = useState<Partial<TeamMember>>({});
   const [showEditDialog, setShowEditDialog] = useState(false);
-  
+
   // Status update
   const [updating, setUpdating] = useState(false);
   const [sendingEmail, setSendingEmail] = useState(false);
@@ -108,11 +108,11 @@ export default function RegistrationManagementPage() {
         },
         credentials: 'include',
       });
-      
+
       if (!response.ok) {
         throw new Error('Failed to fetch registrations');
       }
-      
+
       const data = await response.json();
       setRegistrations(data.registrations || []);
     } catch (error) {
@@ -127,10 +127,10 @@ export default function RegistrationManagementPage() {
     let filtered = registrations;
 
     if (searchTerm) {
-      filtered = filtered.filter(reg => 
+      filtered = filtered.filter(reg =>
         reg.team_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         reg.college.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        reg.members.some(member => 
+        reg.members.some(member =>
           member.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           member.email.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -179,7 +179,7 @@ export default function RegistrationManagementPage() {
 
   const handleSaveMember = async () => {
     if (!editingMember) return;
-    
+
     setUpdating(true);
     try {
       const response = await fetch(`/api/team-members/${editingMember._id}`, {
@@ -257,6 +257,35 @@ export default function RegistrationManagementPage() {
     }
   };
 
+  const handleResendMemberEmail = async (member: TeamMember) => {
+    setSendingEmail(true);
+    try {
+      const response = await fetch('/api/email/resend-member-confirmation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          memberId: member._id,
+          memberEmail: member.email,
+          teamId: selectedRegistration?.team_id
+        }),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to resend member confirmation');
+      }
+
+      toast.success(`Confirmation email sent to ${member.full_name} (${member.email})`);
+    } catch (error) {
+      console.error('Failed to resend member confirmation:', error);
+      toast.error('Failed to resend confirmation email to member');
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-500/20 text-green-400 border-green-500/30';
@@ -279,20 +308,29 @@ export default function RegistrationManagementPage() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <AdminLayout 
+        title="Registration Management"
+        subtitle="Manage event registrations and team details"
+      >
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
             <p className="text-gray-400">Loading registrations...</p>
           </div>
         </div>
-      </DashboardLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <AdminLayout 
+      title="Registration Management"
+      subtitle="Manage event registrations and team details"
+      showRefresh={true}
+      onRefresh={loadRegistrations}
+      refreshing={loading}
+    >
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -346,28 +384,28 @@ export default function RegistrationManagementPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-          
-          <Table>
-            <TableHeader className="bg-gray-700/50">
-              <TableRow>
-                <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Team Details
-                </TableHead>
-                <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Registration Info
-                </TableHead>
-                <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Status
-                </TableHead>
-                <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Amount
-                </TableHead>
-                <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-gray-700">
+
+            <Table>
+              <TableHeader className="bg-gray-700/50">
+                <TableRow>
+                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Team Details
+                  </TableHead>
+                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Registration Info
+                  </TableHead>
+                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Status
+                  </TableHead>
+                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Amount
+                  </TableHead>
+                  <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="divide-y divide-gray-700">
                 {filteredRegistrations.map((registration) => (
                   <TableRow key={registration._id} className="hover:bg-gray-700/30 transition-colors">
                     <TableCell className="px-6 py-4 whitespace-nowrap">
@@ -414,7 +452,7 @@ export default function RegistrationManagementPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleViewRegistration(registration)}
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                          className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
                         >
                           <Eye className="h-3 w-3 mr-1" />
                           View
@@ -438,17 +476,17 @@ export default function RegistrationManagementPage() {
                           variant="outline"
                           onClick={() => handleResendConfirmation(registration)}
                           disabled={sendingEmail}
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                          className="border-green-500 text-green-400 hover:bg-green-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <Mail className="h-3 w-3 mr-1" />
-                          Resend
+                          {sendingEmail ? 'Sending...' : 'Resend'}
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ))}
-            </TableBody>
-          </Table>
+              </TableBody>
+            </Table>
 
             {filteredRegistrations.length === 0 && (
               <div className="text-center py-12">
@@ -465,32 +503,32 @@ export default function RegistrationManagementPage() {
             <DialogHeader>
               <DialogTitle>Registration Details: {selectedRegistration?.team_id}</DialogTitle>
             </DialogHeader>
-            
+
             {selectedRegistration && (
               <div className="space-y-6">
                 {/* Registration Info */}
                 <div className="grid grid-cols-2 gap-4 p-4 bg-gray-700/30 rounded-lg">
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">Team ID</Label>
                     <p className="text-white font-medium">{selectedRegistration.team_id}</p>
                   </div>
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">College</Label>
                     <p className="text-white">{selectedRegistration.college}</p>
                   </div>
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">Ticket Type</Label>
                     <p className="text-white">{selectedRegistration.ticket_type}</p>
                   </div>
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">Total Amount</Label>
                     <p className="text-white">₹{selectedRegistration.total_amount}</p>
                   </div>
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">Workshop Track</Label>
                     <p className="text-white">{selectedRegistration.workshop_track}</p>
                   </div>
-                  <div>
+                  <div className='space-y-1'>
                     <Label className="text-gray-300">Competition Track</Label>
                     <p className="text-white">{selectedRegistration.competition_track}</p>
                   </div>
@@ -502,12 +540,12 @@ export default function RegistrationManagementPage() {
                   <div className="space-y-3">
                     {selectedRegistration.members.map((member) => (
                       <div key={member._id} className="p-4 bg-gray-700/30 rounded-lg">
-                        <div className="flex justify-between items-start">
+                        <div className="flex flex-col space-y-4 justify-between items-start">
                           <div className="flex-1 space-y-4">
                             {/* First Row - Name and Email (Email gets more space) */}
                             <div className="grid grid-cols-5 gap-4">
                               <div className="col-span-2">
-                                <Label className="text-gray-300">Name</Label>
+                                <Label className="text-gray-300 mb-1">Name</Label>
                                 <p className="text-white font-medium">{member.full_name}</p>
                                 {member.is_club_lead && (
                                   <Badge className="mt-1 bg-purple-500/20 text-purple-400 border-purple-500/30">
@@ -516,48 +554,62 @@ export default function RegistrationManagementPage() {
                                 )}
                               </div>
                               <div className="col-span-3">
-                                <Label className="text-gray-300">Email</Label>
+                                <Label className="text-gray-300 mb-1">Email</Label>
                                 <p className="text-white break-all text-sm leading-relaxed bg-gray-800/30 p-2 rounded border border-gray-600/30">{member.email}</p>
                               </div>
                             </div>
-                            
+
                             {/* Second Row - Contact and Academic */}
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label className="text-gray-300">Contact</Label>
+                                <Label className="text-gray-300 mb-1">Contact</Label>
                                 <p className="text-white">{member.whatsapp}</p>
                                 {member.phone && <p className="text-gray-400 text-sm">{member.phone}</p>}
                               </div>
                               <div>
-                                <Label className="text-gray-300">Academic</Label>
+                                <Label className="text-gray-300 mb-1">Academic</Label>
                                 <p className="text-white">{member.year} - {member.department}</p>
                               </div>
                             </div>
-                            
+
                             {/* Third Row - Preferences and Gender */}
                             <div className="grid grid-cols-2 gap-4">
                               <div>
-                                <Label className="text-gray-300">Preferences</Label>
-                                <p className="text-white">{member.food_preference}</p>
+                                <Label className="text-gray-300 mb-1">Preferences</Label>
+                                <p className="text-gray-400 text-sm">
+                                  Food: {member.food_preference}
+                                </p>
                                 <p className="text-gray-400 text-sm">
                                   Accommodation: {member.accommodation ? 'Yes' : 'No'}
                                 </p>
                               </div>
                               <div>
-                                <Label className="text-gray-300">Gender</Label>
+                                <Label className="text-gray-300 mb-1">Gender</Label>
                                 <p className="text-white">{member.gender || 'Not specified'}</p>
                               </div>
                             </div>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditMember(member)}
-                            className="border-gray-600 text-gray-300 hover:bg-gray-700 ml-4"
-                          >
-                            <Edit className="h-3 w-3 mr-1" />
-                            Edit
-                          </Button>
+                          <div className="flex gap-2 w-full">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditMember(member)}
+                              className="w-1/2 border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
+                            >
+                              <Edit className="h-3 w-3 mr-1" />
+                              Edit
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleResendMemberEmail(member)}
+                              disabled={sendingEmail}
+                              className="w-1/2 border-green-500 text-green-400 hover:bg-green-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Mail className="h-3 w-3 mr-1" />
+                              {sendingEmail ? 'Sending...' : 'Resend'}
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -574,7 +626,7 @@ export default function RegistrationManagementPage() {
             <DialogHeader>
               <DialogTitle>Edit Member: {editingMember?.full_name}</DialogTitle>
             </DialogHeader>
-            
+
             <div className="space-y-4 max-h-96 overflow-y-auto">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -582,7 +634,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="full_name"
                     value={editForm.full_name || ''}
-                    onChange={(e) => setEditForm({...editForm, full_name: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -592,7 +644,7 @@ export default function RegistrationManagementPage() {
                     id="email"
                     type="email"
                     value={editForm.email || ''}
-                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                     className="bg-gray-700 border-gray-600 text-sm"
                     placeholder="Enter email address"
                   />
@@ -605,7 +657,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="phone"
                     value={editForm.phone || ''}
-                    onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -614,7 +666,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="whatsapp"
                     value={editForm.whatsapp || ''}
-                    onChange={(e) => setEditForm({...editForm, whatsapp: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, whatsapp: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -626,7 +678,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="year"
                     value={editForm.year || ''}
-                    onChange={(e) => setEditForm({...editForm, year: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, year: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -635,7 +687,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="department"
                     value={editForm.department || ''}
-                    onChange={(e) => setEditForm({...editForm, department: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -646,7 +698,7 @@ export default function RegistrationManagementPage() {
                 <Input
                   id="college"
                   value={editForm.college || ''}
-                  onChange={(e) => setEditForm({...editForm, college: e.target.value})}
+                  onChange={(e) => setEditForm({ ...editForm, college: e.target.value })}
                   className="bg-gray-700 border-gray-600"
                 />
               </div>
@@ -654,7 +706,7 @@ export default function RegistrationManagementPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="gender">Gender</Label>
-                  <Select value={editForm.gender} onValueChange={(value) => setEditForm({...editForm, gender: value})}>
+                  <Select value={editForm.gender} onValueChange={(value) => setEditForm({ ...editForm, gender: value })}>
                     <SelectTrigger className="bg-gray-700 border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
@@ -667,7 +719,7 @@ export default function RegistrationManagementPage() {
                 </div>
                 <div>
                   <Label htmlFor="food_preference">Food Preference</Label>
-                  <Select value={editForm.food_preference} onValueChange={(value) => setEditForm({...editForm, food_preference: value as 'veg' | 'non-veg'})}>
+                  <Select value={editForm.food_preference} onValueChange={(value) => setEditForm({ ...editForm, food_preference: value as 'veg' | 'non-veg' })}>
                     <SelectTrigger className="bg-gray-700 border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
@@ -682,7 +734,7 @@ export default function RegistrationManagementPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="accommodation">Accommodation Required</Label>
-                  <Select value={editForm.accommodation?.toString()} onValueChange={(value) => setEditForm({...editForm, accommodation: value === 'true'})}>
+                  <Select value={editForm.accommodation?.toString()} onValueChange={(value) => setEditForm({ ...editForm, accommodation: value === 'true' })}>
                     <SelectTrigger className="bg-gray-700 border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
@@ -694,7 +746,7 @@ export default function RegistrationManagementPage() {
                 </div>
                 <div>
                   <Label htmlFor="is_club_lead">Club Lead</Label>
-                  <Select value={editForm.is_club_lead?.toString()} onValueChange={(value) => setEditForm({...editForm, is_club_lead: value === 'true'})}>
+                  <Select value={editForm.is_club_lead?.toString()} onValueChange={(value) => setEditForm({ ...editForm, is_club_lead: value === 'true' })}>
                     <SelectTrigger className="bg-gray-700 border-gray-600">
                       <SelectValue />
                     </SelectTrigger>
@@ -712,7 +764,7 @@ export default function RegistrationManagementPage() {
                   <Input
                     id="club_name"
                     value={editForm.club_name || ''}
-                    onChange={(e) => setEditForm({...editForm, club_name: e.target.value})}
+                    onChange={(e) => setEditForm({ ...editForm, club_name: e.target.value })}
                     className="bg-gray-700 border-gray-600"
                   />
                 </div>
@@ -723,7 +775,7 @@ export default function RegistrationManagementPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
@@ -740,6 +792,6 @@ export default function RegistrationManagementPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

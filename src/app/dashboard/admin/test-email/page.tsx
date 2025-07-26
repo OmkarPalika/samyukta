@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Mail, Send } from 'lucide-react';
 
 export default function TestEmailPage() {
   const [email, setEmail] = useState('');
@@ -69,12 +71,17 @@ export default function TestEmailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F0F23] to-[#1A1B3A] p-8">
-      <div className="max-w-md mx-auto">
-        <Card className="bg-[#1A1B3A] border-[#00D4FF]/20">
+    <AdminLayout
+      title="Email Testing"
+      subtitle="Test email system with different ticket types"
+    >
+      <div className="p-6">
+        <div className="max-w-md mx-auto">
+        <Card className="bg-gray-800/50 border-gray-700/50">
           <CardHeader>
-            <CardTitle className="text-center text-white">
-              📧 Test Email System
+            <CardTitle className="text-center text-white flex items-center justify-center gap-2">
+              <Mail className="h-5 w-5" />
+              Test Email System
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -83,14 +90,14 @@ export default function TestEmailPage() {
               placeholder="Enter test email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-[#0F0F23] border-[#00D4FF]/30 text-white"
+              className="bg-gray-900/50 border-gray-600 text-white"
             />
             
             <div className="grid grid-cols-2 gap-2">
               <Button
                 onClick={() => sendEmailTest('entry-workshop-cloud')}
                 disabled={!email || loading}
-                className="bg-gradient-to-r from-[#00D4FF] to-[#0EA5E9] text-xs"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-xs"
               >
                 ☁️ Entry+Workshop (Cloud)
               </Button>
@@ -106,7 +113,7 @@ export default function TestEmailPage() {
               <Button
                 onClick={() => sendEmailTest('entry-workshop-hackathon')}
                 disabled={!email || loading}
-                className="bg-gradient-to-r from-[#10B981] to-[#059669] text-xs"
+                className="bg-gradient-to-r from-green-500 to-green-600 text-xs"
               >
                 💻 Entry+Workshop+Hackathon
               </Button>
@@ -114,7 +121,7 @@ export default function TestEmailPage() {
               <Button
                 onClick={() => sendEmailTest('entry-workshop-pitch')}
                 disabled={!email || loading}
-                className="bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-xs"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 text-xs"
               >
                 🚀 Entry+Workshop+Pitch
               </Button>
@@ -130,7 +137,7 @@ export default function TestEmailPage() {
               <Button
                 onClick={() => sendEmailTest('combo-pitch')}
                 disabled={!email || loading}
-                className="bg-gradient-to-r from-[#8B5CF6] to-[#7C3AED] text-xs"
+                className="bg-gradient-to-r from-purple-500 to-purple-600 text-xs"
               >
                 🎫 Combo (Pitch)
               </Button>
@@ -139,9 +146,10 @@ export default function TestEmailPage() {
                 onClick={() => sendSimpleTest()}
                 disabled={!email || loading}
                 variant="outline"
-                className="border-[#00D4FF] text-[#00D4FF] text-xs col-span-2"
+                className="border-blue-500 text-blue-400 text-xs col-span-2"
               >
-                🧪 Simple SMTP Test
+                <Send className="h-3 w-3 mr-1" />
+                Simple SMTP Test
               </Button>
             </div>
 
@@ -159,7 +167,8 @@ export default function TestEmailPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

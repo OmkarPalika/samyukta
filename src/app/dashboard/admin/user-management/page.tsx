@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import AdminLayout from '@/components/layout/AdminLayout';
 import { User } from '@/entities/User';
 import { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
@@ -140,20 +140,29 @@ export default function UserManagementPage() {
 
   if (loading) {
     return (
-      <DashboardLayout>
+      <AdminLayout 
+        title="User Management"
+        subtitle="Manage users, roles, and permissions"
+      >
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
             <p className="text-gray-400">Loading users...</p>
           </div>
         </div>
-      </DashboardLayout>
+      </AdminLayout>
     );
   }
 
   return (
-    <DashboardLayout>
-      <div className="space-y-6">
+    <AdminLayout 
+      title="User Management"
+      subtitle="Manage users, roles, and permissions"
+      showRefresh={true}
+      onRefresh={loadAllUsers}
+      refreshing={loading}
+    >
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -258,7 +267,7 @@ export default function UserManagementPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditUser(user)}
-                          className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                          className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white transition-colors"
                         >
                           <Edit className="h-3 w-3 mr-1" />
                           Edit
@@ -400,7 +409,7 @@ export default function UserManagementPage() {
               <Button
                 variant="outline"
                 onClick={() => setShowEditDialog(false)}
-                className="border-gray-600 text-gray-300 hover:bg-gray-700"
+                className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-colors"
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel
@@ -417,6 +426,6 @@ export default function UserManagementPage() {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </AdminLayout>
   );
 }

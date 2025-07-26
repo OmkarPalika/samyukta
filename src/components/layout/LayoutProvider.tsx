@@ -15,25 +15,43 @@ interface LayoutProviderProps {
 export default function LayoutProvider({ children }: LayoutProviderProps) {
   const pathname = usePathname();
 
+  // Admin pages handle their own layout (AdminLayout), so don't wrap them with DashboardLayout
+  // Coordinator and participant pages use DashboardLayout
+  const isAdminRoute = pathname?.startsWith('/dashboard/admin');
+  const isDashboardRoute = pathname?.startsWith('/dashboard') && !isAdminRoute;
+
   return (
     <AuthProvider>
-      <BaseLayout>
-        {pathname?.startsWith('/dashboard') ? (
-          <DashboardLayout>
-            {children}
-          </DashboardLayout>
-        ) : (
-          <PublicLayout>
-            {children}
-          </PublicLayout>
-        )}
-      </BaseLayout>
-      <Toaster 
-        position="top-right" 
-        theme="dark"
-        richColors
-        closeButton
-      />
+      {isAdminRoute ? (
+        // Admin routes are completely independent - no BaseLayout wrapper
+        <>
+          {children}
+          <Toaster 
+            position="top-right" 
+            theme="dark"
+            richColors
+            closeButton
+          />
+        </>
+      ) : (
+        <BaseLayout>
+          {isDashboardRoute ? (
+            <DashboardLayout>
+              {children}
+            </DashboardLayout>
+          ) : (
+            <PublicLayout>
+              {children}
+            </PublicLayout>
+          )}
+          <Toaster 
+            position="top-right" 
+            theme="dark"
+            richColors
+            closeButton
+          />
+        </BaseLayout>
+      )}
     </AuthProvider>
   );
 }
