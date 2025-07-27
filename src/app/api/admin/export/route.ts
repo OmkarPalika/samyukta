@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getDbPromise } from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/server-auth';
 import { Db } from 'mongodb';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -198,7 +198,7 @@ export async function POST(request: NextRequest) {
       case 'csv':
         return generateCSV(data, headers, exportType);
       case 'excel':
-        return generateExcel(data, headers, exportType);
+        return await generateExcel(data, headers, exportType);
       case 'pdf':
         return generatePDF(data, headers, exportType);
       default:
@@ -850,34 +850,37 @@ function generateCSV(data: Record<string, unknown>[], headers: string[], exportT
   });
 }
 
-function generateExcel(data: Record<string, unknown>[], headers: string[], exportType: string) {
+async function generateExcel(data: Record<string, unknown>[], headers: string[], exportType: string) {
   try {
     // Create a new workbook
-    const workbook = XLSX.utils.book_new();
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Data');
     
-    // Convert data to array format for XLSX
-    const worksheetData = [
-      headers,
-      ...data.map(row => headers.map(header => row[header] || ''))
-    ];
+    // Add headers with styling
+    worksheet.addRow(headers);
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    };
     
-    // Create worksheet
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+    // Add data rows
+    data.forEach(row => {
+      const rowData = headers.map(header => row[header] || '');
+      worksheet.addRow(rowData);
+    });
     
-    // Add some basic styling
-    // const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    // Auto-fit columns
+    worksheet.columns.forEach(column => {
+      column.width = 20;
+    });
     
-    // Set column widths
-    const colWidths = headers.map(() => ({ wch: 20 }));
-    worksheet['!cols'] = colWidths;
+    // Generate Excel buffer
+    const buffer = await workbook.xlsx.writeBuffer();
     
-    // Add worksheet to workbook
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
-    
-    // Generate Excel file
-    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
-    
-    return new NextResponse(excelBuffer, {
+    return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'Content-Disposition': `attachment; filename="samyukta_${exportType}_${new Date().toISOString().split('T')[0]}.xlsx"`

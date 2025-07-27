@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import LayoutProvider from "@/components/layout/LayoutProvider";
 import { GoogleAnalytics, HotjarTracking } from "@/components/shared/Analytics";
+import { PWAManager } from "@/components/shared/PWAComponents";
 import { Analytics } from "@vercel/analytics/next"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
@@ -163,6 +164,8 @@ export default function RootLayout({
         <HotjarTracking />
         <Analytics />
         <SpeedInsights />
+        {/* PWA Components */}
+        <PWAManager />
       </body>
     </html>
   );
