@@ -285,23 +285,23 @@ export default function AnalyticsPage() {
       refreshing={refreshing}
     >
       <div className="h-full overflow-auto">
-        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
         {/* Header - Mobile First */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
-                <BarChart3 className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0" />
+              <h1 className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold text-white flex items-center gap-2 sm:gap-3">
+                <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-400 flex-shrink-0" />
                 <span className="truncate">Analytics & Reports</span>
               </h1>
-              <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base">
+              <p className="text-gray-400 mt-1 sm:mt-2 text-xs sm:text-sm lg:text-base">
                 Comprehensive insights and data analysis for Samyukta 2025
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
               <Select value={dateRange} onValueChange={(value: '7d' | '30d' | '90d' | 'all') => setDateRange(value)}>
-                <SelectTrigger className="w-full sm:w-40 bg-gray-700 border-gray-600 text-white">
+                <SelectTrigger className="w-full sm:w-36 lg:w-40 bg-gray-700 border-gray-600 text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -316,84 +316,85 @@ export default function AnalyticsPage() {
                 onClick={handleRefresh}
                 disabled={refreshing}
                 variant="outline"
-                className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full sm:w-auto"
+                size="sm"
+                className="border-gray-600 text-gray-300 hover:bg-gray-700 w-full sm:w-auto text-sm"
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
+                <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Refresh</span>
+                <span className="sm:hidden">Refresh</span>
               </Button>
             </div>
           </div>
         </div>
 
         {/* Quick Stats - Mobile First */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
           <Card className="bg-gray-800/40 border-gray-700">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Members</p>
-                  <p className="text-xl sm:text-2xl font-bold text-white truncate">
+                  <p className="text-gray-400 text-xs">Total Members</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                     {analyticsData?.registrationTrends?.data?.slice(-1)[0]?.cumulativeMembers || 0}
                   </p>
-                  <p className="text-green-400 text-xs sm:text-sm">
+                  <p className="text-green-400 text-xs">
                     +{analyticsData?.registrationTrends?.data?.slice(-7).reduce((sum: number, d: { members: number }) => sum + d.members, 0) || 0} this week
                   </p>
                 </div>
-                <TrendingUp className="h-6 w-6 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0" />
+                <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800/40 border-gray-700">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Revenue</p>
-                  <p className="text-xl sm:text-2xl font-bold text-white truncate">
+                  <p className="text-gray-400 text-xs">Total Revenue</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                     ₹{(analyticsData?.revenueData?.totalRevenue || 0).toLocaleString()}
                   </p>
-                  <p className="text-green-400 text-xs sm:text-sm">
+                  <p className="text-green-400 text-xs">
                     ₹{(analyticsData?.revenueData?.pendingRevenue || 0).toLocaleString()} pending
                   </p>
                 </div>
-                <DollarSign className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 flex-shrink-0" />
+                <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800/40 border-gray-700">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs sm:text-sm">Total Participants</p>
-                  <p className="text-xl sm:text-2xl font-bold text-white truncate">
+                  <p className="text-gray-400 text-xs">Total Participants</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
                     {analyticsData?.demographics?.totalUsers || 0}
                   </p>
-                  <p className="text-blue-400 text-xs sm:text-sm">
+                  <p className="text-blue-400 text-xs">
                     {analyticsData?.demographics?.colleges?.length || 0} colleges
                   </p>
                 </div>
-                <Users className="h-6 w-6 sm:h-8 sm:w-8 text-purple-400 flex-shrink-0" />
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800/40 border-gray-700">
-            <CardContent className="p-4 sm:p-6">
+            <CardContent className="p-3 sm:p-4 lg:p-6">
               <div className="flex items-center justify-between">
                 <div className="min-w-0 flex-1">
-                  <p className="text-gray-400 text-xs sm:text-sm">Event Participation</p>
-                  <p className="text-xl sm:text-2xl font-bold text-white truncate">
-                    {analyticsData?.participation?.overall?.members?.total_members || 0} members
+                  <p className="text-gray-400 text-xs">Event Participation</p>
+                  <p className="text-lg sm:text-xl lg:text-2xl font-bold text-white truncate">
+                    {analyticsData?.participation?.overall?.members?.total_members || 0}
                   </p>
-                  <p className="text-xs text-gray-400">
-                    {analyticsData?.participation?.overall?.teams?.total_teams || 0} teams
-                  </p>
-                  <p className="text-yellow-400 text-xs sm:text-sm">
-                    {analyticsData?.participation?.overall?.members?.combo_members || 0} combo participants
-                  </p>
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <span>{analyticsData?.participation?.overall?.teams?.total_teams || 0} teams</span>
+                    <span>•</span>
+                    <span className="text-yellow-400">{analyticsData?.participation?.overall?.members?.combo_members || 0} combo</span>
+                  </div>
                 </div>
-                <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 flex-shrink-0" />
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 flex-shrink-0" />
               </div>
             </CardContent>
           </Card>
@@ -401,47 +402,49 @@ export default function AnalyticsPage() {
 
         {/* Analytics Tabs - Mobile First */}
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 bg-gray-800/40 mb-4 sm:mb-6 h-auto">
-            <TabsTrigger 
-              value="overview" 
-              className="text-gray-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger 
-              value="registrations" 
-              className="text-gray-400 data-[state=active]:bg-green-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Registrations
-            </TabsTrigger>
-            <TabsTrigger 
-              value="revenue" 
-              className="text-gray-400 data-[state=active]:bg-purple-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Revenue
-            </TabsTrigger>
-            <TabsTrigger 
-              value="demographics" 
-              className="text-gray-400 data-[state=active]:bg-orange-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Demographics
-            </TabsTrigger>
-            <TabsTrigger 
-              value="team-analysis" 
-              className="text-gray-400 data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Team Analysis
-            </TabsTrigger>
-            <TabsTrigger 
-              value="export" 
-              className="text-gray-400 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs sm:text-sm py-2"
-            >
-              Export
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto">
+            <TabsList className="grid w-full min-w-max grid-cols-6 bg-gray-800/40 mb-4 sm:mb-6 h-auto">
+              <TabsTrigger 
+                value="overview" 
+                className="text-gray-400 data-[state=active]:bg-blue-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger 
+                value="registrations" 
+                className="text-gray-400 data-[state=active]:bg-green-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Registrations
+              </TabsTrigger>
+              <TabsTrigger 
+                value="revenue" 
+                className="text-gray-400 data-[state=active]:bg-purple-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Revenue
+              </TabsTrigger>
+              <TabsTrigger 
+                value="demographics" 
+                className="text-gray-400 data-[state=active]:bg-orange-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Demographics
+              </TabsTrigger>
+              <TabsTrigger 
+                value="team-analysis" 
+                className="text-gray-400 data-[state=active]:bg-indigo-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Teams
+              </TabsTrigger>
+              <TabsTrigger 
+                value="export" 
+                className="text-gray-400 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Export
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <TabsContent value="overview" className="space-y-3 sm:space-y-4 lg:space-y-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
               <RegistrationChart 
                 data={analyticsData?.registrationTrends?.data || []} 
                 loading={loading}
@@ -453,7 +456,7 @@ export default function AnalyticsPage() {
                 loading={loading}
               />
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
               <DemographicsChart 
                 data={analyticsData?.demographics || { colleges: [], departments: [], years: [], tracks: [], totalUsers: 0 }}
                 loading={loading}

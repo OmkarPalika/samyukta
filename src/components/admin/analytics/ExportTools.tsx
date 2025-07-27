@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Download, FileText, Table, BarChart3, Calendar } from 'lucide-react';
+import { Download, FileText, Table, BarChart3, Calendar, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ExportFilters {
@@ -19,7 +19,7 @@ interface ExportToolsProps {
 }
 
 export function ExportTools({ onExport }: ExportToolsProps) {
-  const [exportType, setExportType] = useState<'users' | 'registrations' | 'analytics' | 'revenue'>('users');
+  const [exportType, setExportType] = useState<'users' | 'registrations' | 'detailed-members' | 'analytics' | 'revenue'>('users');
   const [exportFormat, setExportFormat] = useState<'csv' | 'excel' | 'pdf'>('csv');
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
   const [includeFields, setIncludeFields] = useState({
@@ -56,6 +56,18 @@ export function ExportTools({ onExport }: ExportToolsProps) {
         { key: 'payment', label: 'Payment & Transaction Details', default: true },
         { key: 'preferences', label: 'Food & Accommodation Preferences', default: true },
         { key: 'tracks', label: 'Workshop & Competition Tracks', default: true },
+        { key: 'timestamps', label: 'Registration Timeline', default: false }
+      ]
+    },
+    'detailed-members': {
+      title: 'Detailed Member Data Export',
+      icon: <Users className="h-5 w-5 text-cyan-400" />,
+      description: 'Export complete member details - one row per member with full information',
+      fields: [
+        { key: 'team', label: 'Team Information', default: true },
+        { key: 'members', label: 'Complete Member Details', default: true },
+        { key: 'preferences', label: 'Food & Accommodation Preferences', default: true },
+        { key: 'payment', label: 'Payment Information', default: true },
         { key: 'timestamps', label: 'Registration Timeline', default: false }
       ]
     },
@@ -153,13 +165,14 @@ export function ExportTools({ onExport }: ExportToolsProps) {
         {/* Export Type Selection */}
         <div className="space-y-3">
           <Label className="text-gray-300">Export Type</Label>
-          <Select value={exportType} onValueChange={(value: 'users' | 'registrations' | 'analytics' | 'revenue') => setExportType(value)}>
+          <Select value={exportType} onValueChange={(value: 'users' | 'registrations' | 'detailed-members' | 'analytics' | 'revenue') => setExportType(value)}>
             <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
               <SelectItem value="users">User Data</SelectItem>
               <SelectItem value="registrations">Registration Data</SelectItem>
+              <SelectItem value="detailed-members">Detailed Member Data</SelectItem>
               <SelectItem value="analytics">Analytics Report</SelectItem>
               <SelectItem value="revenue">Financial Report</SelectItem>
             </SelectContent>

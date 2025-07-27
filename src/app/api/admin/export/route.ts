@@ -42,10 +42,31 @@ interface RegistrationDocument {
 }
 
 interface TeamMemberDocument {
+  participant_id?: string;
+  passkey?: string;
   full_name: string;
   email: string;
-  food_preference?: string;
+  whatsapp?: string;
+  gender?: string;
+  role?: string;
+  custom_role?: string;
+  organization?: string;
+  custom_organization?: string;
+  college?: string;
+  degree?: string;
+  custom_degree?: string;
+  year?: string;
+  department?: string;
+  stream?: string;
   accommodation?: boolean;
+  food_preference?: string;
+  workshop_track?: string;
+  competition_track?: string;
+  is_club_lead?: boolean;
+  club_name?: string;
+  club_designation?: string;
+  present?: boolean;
+  created_at?: Date;
 }
 
 interface IncludeFields {
@@ -103,6 +124,22 @@ interface DailyRegistrations {
   count: number;
 }
 
+interface MemberRecord {
+  _id: string;
+  team_id?: string;
+  college?: string;
+  team_size?: number;
+  total_amount?: number;
+  transaction_id?: string;
+  status?: string;
+  workshop_track?: string;
+  competition_track?: string;
+  payment_method?: string;
+  created_at?: Date;
+  updated_at?: Date;
+  members: TeamMemberDocument;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { exportType, exportFormat, dateRange, includeFields } = await request.json();
@@ -142,6 +179,9 @@ export async function POST(request: NextRequest) {
         break;
       case 'registrations':
         ({ data, headers } = await exportRegistrations(db, includeFields, startDate, now));
+        break;
+      case 'detailed-members':
+        ({ data, headers } = await exportDetailedMembers(db, includeFields, startDate, now));
         break;
       case 'analytics':
         ({ data, headers } = await exportAnalytics(db, includeFields, startDate, now));
@@ -233,7 +273,7 @@ async function exportRegistrations(db: Db, includeFields: IncludeFields, startDa
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -244,7 +284,13 @@ async function exportRegistrations(db: Db, includeFields: IncludeFields, startDa
   
   const headers: string[] = [];
   if (includeFields.team) headers.push('Team ID', 'College', 'Team Size');
-  if (includeFields.members) headers.push('Member Names', 'Member Emails');
+  if (includeFields.members) {
+    headers.push(
+      'Member Names', 'Member Emails', 'Member WhatsApp', 'Member Genders', 
+      'Member Roles', 'Member Colleges', 'Member Departments', 'Member Years',
+      'Member Degrees', 'Member Streams', 'Participant IDs', 'Passkeys'
+    );
+  }
   if (includeFields.payment) headers.push('Total Amount', 'Transaction ID', 'Payment Status');
   if (includeFields.preferences) headers.push('Food Preferences', 'Accommodation Required');
   if (includeFields.tracks) headers.push('Workshop Track', 'Competition Track');
@@ -260,6 +306,16 @@ async function exportRegistrations(db: Db, includeFields: IncludeFields, startDa
     if (includeFields.members) {
       row['Member Names'] = reg.members.map((m: TeamMemberDocument) => m.full_name).join(', ');
       row['Member Emails'] = reg.members.map((m: TeamMemberDocument) => m.email).join(', ');
+      row['Member WhatsApp'] = reg.members.map((m: TeamMemberDocument) => m.whatsapp || '').join(', ');
+      row['Member Genders'] = reg.members.map((m: TeamMemberDocument) => m.gender || '').join(', ');
+      row['Member Roles'] = reg.members.map((m: TeamMemberDocument) => m.role || '').join(', ');
+      row['Member Colleges'] = reg.members.map((m: TeamMemberDocument) => m.college || '').join(', ');
+      row['Member Departments'] = reg.members.map((m: TeamMemberDocument) => m.department || '').join(', ');
+      row['Member Years'] = reg.members.map((m: TeamMemberDocument) => m.year || '').join(', ');
+      row['Member Degrees'] = reg.members.map((m: TeamMemberDocument) => m.degree || '').join(', ');
+      row['Member Streams'] = reg.members.map((m: TeamMemberDocument) => m.stream || '').join(', ');
+      row['Participant IDs'] = reg.members.map((m: TeamMemberDocument) => m.participant_id || '').join(', ');
+      row['Passkeys'] = reg.members.map((m: TeamMemberDocument) => m.passkey || '').join(', ');
     }
     if (includeFields.payment) {
       row['Total Amount'] = reg.total_amount || 0;
@@ -282,6 +338,118 @@ async function exportRegistrations(db: Db, includeFields: IncludeFields, startDa
       row['Registration Date'] = reg.created_at ? new Date(reg.created_at).toISOString() : '';
       row['Last Updated'] = reg.updated_at ? new Date(reg.updated_at).toISOString() : '';
     }
+    return row;
+  });
+
+  return { data, headers };
+}
+
+async function exportDetailedMembers(db: Db, includeFields: IncludeFields, startDate: Date, endDate: Date) {
+  const pipeline: Record<string, unknown>[] = [
+    {
+      $match: {
+        created_at: { $gte: startDate, $lte: endDate }
+      }
+    },
+    {
+      $lookup: {
+        from: 'team_members',
+        localField: 'team_id',
+        foreignField: 'registration_id',
+        as: 'members'
+      }
+    },
+    {
+      $unwind: '$members'  // This creates one row per member
+    }
+  ];
+
+  const memberRecords = await db.collection('registrations').aggregate(pipeline).toArray() as MemberRecord[];
+  
+  const headers: string[] = [];
+  
+  // Team information
+  if (includeFields.team) {
+    headers.push('Team ID', 'Team College', 'Team Size', 'Team Workshop Track', 'Team Competition Track');
+  }
+  
+  // Member details
+  if (includeFields.members) {
+    headers.push(
+      'Participant ID', 'Passkey', 'Full Name', 'Email', 'WhatsApp', 'Gender', 
+      'Role', 'Custom Role', 'Organization', 'Custom Organization', 'College', 
+      'Degree', 'Custom Degree', 'Year', 'Department', 'Stream', 'Is Club Lead',
+      'Club Name', 'Club Designation', 'Present Status'
+    );
+  }
+  
+  // Preferences
+  if (includeFields.preferences) {
+    headers.push('Food Preference', 'Accommodation Required');
+  }
+  
+  // Payment info (from team)
+  if (includeFields.payment) {
+    headers.push('Team Total Amount', 'Transaction ID', 'Payment Status');
+  }
+  
+  // Timestamps
+  if (includeFields.timestamps) {
+    headers.push('Member Created At', 'Team Registration Date');
+  }
+
+  const data = memberRecords.map((record: MemberRecord) => {
+    const reg = record;
+    const member = record.members;
+    const row: Record<string, unknown> = {};
+    
+    if (includeFields.team) {
+      row['Team ID'] = reg.team_id || '';
+      row['Team College'] = reg.college || '';
+      row['Team Size'] = reg.team_size || 0;
+      row['Team Workshop Track'] = reg.workshop_track || 'None';
+      row['Team Competition Track'] = reg.competition_track || 'None';
+    }
+    
+    if (includeFields.members) {
+      row['Participant ID'] = member.participant_id || '';
+      row['Passkey'] = member.passkey || '';
+      row['Full Name'] = member.full_name || '';
+      row['Email'] = member.email || '';
+      row['WhatsApp'] = member.whatsapp || '';
+      row['Gender'] = member.gender || '';
+      row['Role'] = member.role || '';
+      row['Custom Role'] = member.custom_role || '';
+      row['Organization'] = member.organization || '';
+      row['Custom Organization'] = member.custom_organization || '';
+      row['College'] = member.college || '';
+      row['Degree'] = member.degree || '';
+      row['Custom Degree'] = member.custom_degree || '';
+      row['Year'] = member.year || '';
+      row['Department'] = member.department || '';
+      row['Stream'] = member.stream || '';
+      row['Is Club Lead'] = member.is_club_lead ? 'Yes' : 'No';
+      row['Club Name'] = member.club_name || '';
+      row['Club Designation'] = member.club_designation || '';
+      row['Present Status'] = member.present ? 'Present' : 'Absent';
+    }
+    
+    if (includeFields.preferences) {
+      row['Food Preference'] = member.food_preference || '';
+      row['Accommodation Required'] = member.accommodation ? 'Yes' : 'No';
+    }
+    
+    if (includeFields.payment) {
+      row['Team Total Amount'] = reg.total_amount || 0;
+      row['Transaction ID'] = reg.transaction_id || '';
+      row['Payment Status'] = reg.status || 'pending';
+    }
+    
+    if (includeFields.timestamps) {
+      row['Member Created At'] = member.created_at ? new Date(member.created_at).toISOString() : '';
+      row['Team Registration Date'] = reg.created_at ? new Date(reg.created_at).toISOString() : '';
+    }
+    
     return row;
   });
 

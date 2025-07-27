@@ -1,6 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { Users, DollarSign, Target, TrendingUp } from 'lucide-react';
 
@@ -41,6 +42,21 @@ interface TeamSizeAnalysisProps {
 }
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316', '#06B6D4', '#84CC16'];
+
+const chartConfig = {
+  revenue: {
+    label: "Revenue",
+    color: "#10B981", // Green for revenue
+  },
+  teams: {
+    label: "Teams", 
+    color: "#3B82F6", // Blue for teams
+  },
+  members: {
+    label: "Members",
+    color: "#8B5CF6", // Purple for members
+  },
+} as const;
 
 export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
   if (loading) {
@@ -288,34 +304,41 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
             <CardTitle className="text-white">Revenue by Ticket Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={ticketTypeChartData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                  <XAxis type="number" stroke="#9CA3AF" fontSize={12} />
-                  <YAxis 
-                    dataKey="name" 
-                    type="category" 
-                    stroke="#9CA3AF" 
-                    fontSize={10}
-                    width={120}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      backgroundColor: '#1F2937', 
-                      border: '1px solid #374151',
-                      borderRadius: '8px',
-                      color: '#F3F4F6'
-                    }}
-                    formatter={(value, name) => [
-                      name === 'revenue' ? `₹${value.toLocaleString()}` : `${value} teams`,
-                      name === 'revenue' ? 'Revenue' : 'Teams'
-                    ]}
-                  />
-                  <Bar dataKey="revenue" fill="#EF4444" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <ChartContainer config={chartConfig} className="h-80">
+              <BarChart data={ticketTypeChartData} layout="horizontal">
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <XAxis 
+                  type="number" 
+                  stroke="#9CA3AF" 
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  stroke="#9CA3AF" 
+                  fontSize={10}
+                  width={120}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  formatter={(value, name) => [
+                    name === 'revenue' ? `₹${value.toLocaleString()}` : `${value} teams`,
+                    name === 'revenue' ? 'Revenue' : 'Teams'
+                  ]}
+                />
+                <Bar 
+                  dataKey="revenue" 
+                  fill="var(--color-revenue)"
+                  radius={[0, 4, 4, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
+              </BarChart>
+            </ChartContainer>
           </CardContent>
         </Card>
       </div>

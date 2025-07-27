@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { TrendingUp, Calendar, Users } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line, ComposedChart } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line } from 'recharts';
 
 interface RegistrationData {
   date: string;
@@ -41,7 +41,7 @@ const chartConfig = {
 
 export function RegistrationChart({ data, loading }: RegistrationChartProps) {
   const [viewType, setViewType] = useState<'teams' | 'members' | 'combined' | 'cumulative'>('combined');
-  const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'all'>('30d');
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | 'all'>('7d');
 
   const chartData = useMemo(() => {
     if (!data.length) return [];
@@ -85,15 +85,15 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
 
   return (
     <Card className="bg-gray-800/40 border-gray-700">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <TrendingUp className="h-5 w-5 text-blue-400" />
-            Registration Trends
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400 flex-shrink-0" />
+            <span className="truncate">Registration Trends</span>
           </CardTitle>
           <div className="flex gap-2">
             <Select value={viewType} onValueChange={(value: 'teams' | 'members' | 'combined' | 'cumulative') => setViewType(value)}>
-              <SelectTrigger className="w-36 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-full sm:w-36 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
@@ -104,7 +104,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
               </SelectContent>
             </Select>
             <Select value={timeRange} onValueChange={(value: '7d' | '30d' | 'all') => setTimeRange(value)}>
-              <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-20 sm:w-24 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
@@ -115,28 +115,30 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
             </Select>
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-gray-400">
+        <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400">
           <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            Teams: {totalTeams.toLocaleString()}
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span>Teams: {totalTeams.toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Users className="h-4 w-4" />
-            Members: {totalMembers.toLocaleString()}
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span>Members: {totalMembers.toLocaleString()}</span>
           </div>
           <div className="flex items-center gap-1">
-            <Calendar className="h-4 w-4" />
-            {data.length} days tracked
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">{data.length} days tracked</span>
+            <span className="sm:hidden">{data.length} days</span>
           </div>
           <div className="flex items-center gap-1">
-            <TrendingUp className="h-4 w-4" />
-            +{weeklyMemberGrowth} members this week
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">+{weeklyMemberGrowth} members this week</span>
+            <span className="sm:hidden">+{weeklyMemberGrowth} weekly</span>
           </div>
         </div>
       </CardHeader>
       <CardContent>
         {viewType === 'teams' && (
-          <ChartContainer config={chartConfig} className="h-80">
+          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
@@ -165,7 +167,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
         )}
 
         {viewType === 'members' && (
-          <ChartContainer config={chartConfig} className="h-80">
+          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
@@ -194,7 +196,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
         )}
 
         {viewType === 'combined' && (
-          <ChartContainer config={chartConfig} className="h-80">
+          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
@@ -230,7 +232,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
         )}
         
         {viewType === 'cumulative' && (
-          <ChartContainer config={chartConfig} className="h-80">
+          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
             <LineChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
@@ -269,53 +271,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
           </ChartContainer>
         )}
 
-        {viewType === 'combined' && (
-          <ChartContainer config={chartConfig} className="h-80">
-            <ComposedChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                yAxisId="left"
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                yAxisId="right" 
-                orientation="right"
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `Date: ${value}`}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Bar 
-                yAxisId="left"
-                dataKey="daily" 
-                fill="#3B82F6"
-                radius={[4, 4, 0, 0]}
-                opacity={0.8}
-              />
-              <Line 
-                yAxisId="right"
-                type="monotone" 
-                dataKey="cumulative" 
-                stroke="#10B981"
-                strokeWidth={3}
-                dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, stroke: "#10B981", strokeWidth: 2 }}
-              />
-            </ComposedChart>
-          </ChartContainer>
-        )}
+
       </CardContent>
     </Card>
   );

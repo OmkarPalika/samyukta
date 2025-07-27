@@ -16,12 +16,13 @@ interface DailyMemberData {
 
 interface TicketTypeStat {
   _id: {
+    team_size: number;
     workshop_track: string;
     competition_track: string;
   };
   teams: number;
   revenue: number;
-  team_sizes: Record<string, number>;
+  team_sizes: number;
 }
 
 interface TicketTypeAccumulator {
@@ -165,7 +166,7 @@ async function getRegistrationTrends(db: Db, startDate: Date, endDate: Date) {
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -223,12 +224,13 @@ async function getRegistrationTrends(db: Db, startDate: Date, endDate: Date) {
 }
 
 async function getTeamSizeAnalysis(db: Db) {
-  // Get team size statistics
-  const teamSizePipeline = [
+  try {
+    // Get team size statistics
+    const teamSizePipeline = [
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -245,17 +247,21 @@ async function getTeamSizeAnalysis(db: Db) {
         total_members: { $sum: "$team_size" },
         total_revenue: { $sum: "$total_amount" },
         workshop_teams: {
-          $sum: { $cond: [{ $ne: ["$workshop_track", "None"] }, 1, 0] }
+          $sum: { $cond: [{ $and: [{ $ne: ["$workshop_track", null] }, { $ne: ["$workshop_track", ""] }, { $ne: ["$workshop_track", "None"] }] }, 1, 0] }
         },
         competition_teams: {
-          $sum: { $cond: [{ $ne: ["$competition_track", "None"] }, 1, 0] }
+          $sum: { $cond: [{ $and: [{ $ne: ["$competition_track", null] }, { $ne: ["$competition_track", ""] }, { $ne: ["$competition_track", "None"] }] }, 1, 0] }
         },
         combo_teams: {
           $sum: {
             $cond: [
               {
                 $and: [
+                  { $ne: ["$workshop_track", null] },
+                  { $ne: ["$workshop_track", ""] },
                   { $ne: ["$workshop_track", "None"] },
+                  { $ne: ["$competition_track", null] },
+                  { $ne: ["$competition_track", ""] },
                   { $ne: ["$competition_track", "None"] }
                 ]
               },
@@ -274,7 +280,7 @@ async function getTeamSizeAnalysis(db: Db) {
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -291,12 +297,35 @@ async function getTeamSizeAnalysis(db: Db) {
           workshop_track: "$workshop_track",
           competition_track: "$competition_track"
         },
-        count: { $sum: 1 },
-        revenue: { $sum: "$total_amount" }
+        teams: { $sum: 1 },
+        revenue: { $sum: "$total_amount" },
+        team_sizes: { $sum: 1 }
       }
     },
     { $sort: { "_id.team_size": 1 } }
   ];
+
+  // Check if there are any registrations first
+  const registrationCount = await db.collection('registrations').countDocuments();
+  
+  if (registrationCount === 0) {
+    return NextResponse.json({
+      teamSizeDistribution: [],
+      ticketTypeAnalysis: [],
+      summary: {
+        totalTeams: 0,
+        totalMembers: 0,
+        avgTeamSize: 0,
+        totalRevenue: 0,
+        revenuePerTeam: 0,
+        revenuePerMember: 0
+      }
+    });
+  }
+
+  // Check if there are team_members entries
+  const teamMemberCount = await db.collection('team_members').countDocuments();
+  console.log(`Registration count: ${registrationCount}, Team member count: ${teamMemberCount}`);
 
   const [teamSizeStatsResult, ticketTypeStats] = await Promise.all([
     db.collection('registrations').aggregate(teamSizePipeline).toArray(),
@@ -305,10 +334,10 @@ async function getTeamSizeAnalysis(db: Db) {
   
   const teamSizeStats = teamSizeStatsResult as TeamSizeStats[];
 
-  // Calculate totals
-  const totalTeams = teamSizeStats.reduce((sum, stat) => sum + stat.count, 0);
-  const totalMembers = teamSizeStats.reduce((sum, stat) => sum + stat.total_members, 0);
-  const totalRevenue = teamSizeStats.reduce((sum, stat) => sum + stat.total_revenue, 0);
+  // Calculate totals with null checks
+  const totalTeams = teamSizeStats.reduce((sum, stat) => sum + (stat.count || 0), 0);
+  const totalMembers = teamSizeStats.reduce((sum, stat) => sum + (stat.total_members || 0), 0);
+  const totalRevenue = teamSizeStats.reduce((sum, stat) => sum + (stat.total_revenue || 0), 0);
   const avgTeamSize = totalTeams > 0 ? totalMembers / totalTeams : 0;
 
   // Process ticket type data
@@ -326,9 +355,8 @@ async function getTeamSizeAnalysis(db: Db) {
     }
     acc[key].teams += typedItem.teams;
     acc[key].revenue += typedItem.revenue;
-    Object.keys(typedItem.team_sizes).forEach(size => {
-      acc[key].team_sizes[size] = typedItem.team_sizes[size];
-    });
+    const teamSize = typedItem._id.team_size.toString();
+    acc[key].team_sizes[teamSize] = (acc[key].team_sizes[teamSize] || 0) + typedItem.teams;
     return acc;
   }, {});
 
@@ -344,6 +372,13 @@ async function getTeamSizeAnalysis(db: Db) {
       revenuePerMember: totalMembers > 0 ? Math.round((totalRevenue / totalMembers) * 100) / 100 : 0
     }
   });
+  } catch (error) {
+    console.error('Team size analysis error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to analyze team size data',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
 }
 
 async function getRevenueData(db: Db, startDate: Date, endDate: Date) {
@@ -587,7 +622,7 @@ async function getParticipationData(db: Db) {
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -625,7 +660,7 @@ async function getParticipationData(db: Db) {
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
@@ -682,7 +717,7 @@ async function getParticipationData(db: Db) {
     {
       $lookup: {
         from: 'team_members',
-        localField: '_id',
+        localField: 'team_id',
         foreignField: 'registration_id',
         as: 'members'
       }
