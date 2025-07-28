@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,7 +10,56 @@ import Link from "next/link";
 import { MOCK_EVENT_STATS, SPONSORS_PAGE_DATA, SPONSORS_DATA } from "@/lib";
 import Image from "next/image";
 
+interface Sponsor {
+  logo: string;
+  name: string;
+  website: string;
+  description: string;
+}
+
+interface SponsorTier {
+  tier: string;
+  color: string;
+  bg_color: string;
+  text_color: string;
+  border_color: string;
+  amount: string;
+  sponsors: readonly Sponsor[];
+}
+
 export default function Sponsors() {
+  const [sponsors, setSponsors] = useState<readonly SponsorTier[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [, setUseDatabase] = useState(false);
+
+  useEffect(() => {
+    const loadSponsors = async () => {
+      try {
+        const response = await fetch('/api/public/webpage-content?type=sponsor&status=published');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.contents && data.contents.length > 0) {
+            setSponsors(data.contents);
+            setUseDatabase(true);
+          } else {
+            setSponsors(SPONSORS_DATA);
+            setUseDatabase(false);
+          }
+        } else {
+          setSponsors(SPONSORS_DATA);
+          setUseDatabase(false);
+        }
+      } catch (error) {
+        console.error('Failed to load sponsors:', error);
+        setSponsors(SPONSORS_DATA);
+        setUseDatabase(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSponsors();
+  }, []);
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
@@ -61,9 +111,17 @@ export default function Sponsors() {
             ))}
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </div>
+          )}
+
           {/* Sponsors by Tier */}
-          <div className="space-y-12">
-            {SPONSORS_DATA.map((tier, tierIndex) => (
+          {!loading && (
+            <div className="space-y-12">
+              {sponsors.map((tier, tierIndex) => (
               <motion.div
                 key={tier.tier}
                 initial={{ opacity: 0, y: 30 }}
@@ -82,7 +140,9 @@ export default function Sponsors() {
                       {tier.tier === "Games Sponsors" && <Target className="w-8 h-8 text-white" />}
                     </div>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{tier.tier}</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                    {tier.tier}
+                  </h2>
                   <Badge className={`${tier.bg_color} ${tier.text_color} ${tier.border_color} px-4 py-2`}>
                     {tier.amount}
                   </Badge>
@@ -127,8 +187,9 @@ export default function Sponsors() {
                   ))}
                 </div>
               </motion.div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { 
   Users,
@@ -77,16 +78,13 @@ export default function UserManagementPage() {
       email: '',
       password: '',
       phone: '',
-      whatsapp: '',
       role: 'participant',
-      dept: '',
-      year: '',
-      designation: '',
-      committee: '',
-      track: '',
-      linkedin: '',
-      instagram: '',
-      portfolio: ''
+      academic: {
+        year: '',
+        department: ''
+      },
+      position: '',
+      committee: ''
     });
     setShowCreateDialog(true);
   };
@@ -212,10 +210,10 @@ export default function UserManagementPage() {
             </DialogHeader>
             
             <div className="space-y-4">
-              {/* Basic Information */}
+              {/* Name and Role */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="create_full_name">Full Name *</Label>
+                  <Label htmlFor="create_full_name">Name *</Label>
                   <Input
                     id="create_full_name"
                     value={createForm.full_name || ''}
@@ -225,35 +223,10 @@ export default function UserManagementPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="create_email">Email *</Label>
-                  <Input
-                    id="create_email"
-                    type="email"
-                    value={createForm.email || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, email: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter email address"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create_password">Password *</Label>
-                  <Input
-                    id="create_password"
-                    type="password"
-                    value={createForm.password || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, password: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter password"
-                  />
-                </div>
-                <div>
                   <Label htmlFor="create_role">Role</Label>
                   <Select
                     value={createForm.role || 'participant'}
-                    onValueChange={(value: 'admin' | 'coordinator' | 'participant') => setCreateForm(prev => ({...prev, role: value}))}
+                    onValueChange={(value: 'admin' | 'coordinator' | 'participant' | 'volunteer') => setCreateForm(prev => ({...prev, role: value}))}
                   >
                     <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                       <SelectValue />
@@ -268,10 +241,21 @@ export default function UserManagementPage() {
                 </div>
               </div>
 
-              {/* Contact Information */}
+              {/* Contact */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="create_phone">Phone</Label>
+                  <Label htmlFor="create_email">Email *</Label>
+                  <Input
+                    id="create_email"
+                    type="email"
+                    value={createForm.email || ''}
+                    onChange={(e) => setCreateForm(prev => ({...prev, email: e.target.value}))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter email address"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="create_phone">Contact</Label>
                   <Input
                     id="create_phone"
                     value={createForm.phone || ''}
@@ -280,125 +264,94 @@ export default function UserManagementPage() {
                     placeholder="Enter phone number"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="create_whatsapp">WhatsApp</Label>
-                  <Input
-                    id="create_whatsapp"
-                    value={createForm.whatsapp || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, whatsapp: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter WhatsApp number"
-                  />
-                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <Label htmlFor="create_password">Password *</Label>
+                <Input
+                  id="create_password"
+                  type="password"
+                  value={createForm.password || ''}
+                  onChange={(e) => setCreateForm(prev => ({...prev, password: e.target.value}))}
+                  className="bg-gray-700 border-gray-600 text-white"
+                  placeholder="Enter password"
+                />
               </div>
 
               {/* Academic Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create_dept">Department</Label>
-                  <Input
-                    id="create_dept"
-                    value={createForm.dept || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, dept: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter department"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="create_year">Year</Label>
-                  <Select
-                    value={createForm.year || ''}
-                    onValueChange={(value) => setCreateForm(prev => ({...prev, year: value}))}
-                  >
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                      <SelectValue placeholder="Select year" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
-                      <SelectItem value="1st">1st Year</SelectItem>
-                      <SelectItem value="2nd">2nd Year</SelectItem>
-                      <SelectItem value="3rd">3rd Year</SelectItem>
-                      <SelectItem value="4th">4th Year</SelectItem>
-                      <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                      <SelectItem value="faculty">Faculty</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Professional Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="create_designation">Designation</Label>
-                  <Input
-                    id="create_designation"
-                    value={createForm.designation || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, designation: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter designation"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="create_committee">Committee</Label>
-                  <Input
-                    id="create_committee"
-                    value={createForm.committee || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, committee: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Enter committee"
-                  />
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Academic</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="create_academic_year">Year</Label>
+                    <Select
+                      value={createForm.academic?.year || ''}
+                      onValueChange={(value) => setCreateForm(prev => ({
+                        ...prev, 
+                        academic: { 
+                          year: value,
+                          department: prev.academic?.department || ''
+                        }
+                      }))}
+                    >
+                      <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                        <SelectValue placeholder="Select academic year" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-gray-800 border-gray-700">
+                        <SelectItem value="1st">1st Year</SelectItem>
+                        <SelectItem value="2nd">2nd Year</SelectItem>
+                        <SelectItem value="3rd">3rd Year</SelectItem>
+                        <SelectItem value="4th">4th Year</SelectItem>
+                        <SelectItem value="postgraduate">Postgraduate</SelectItem>
+                        <SelectItem value="faculty">Faculty</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="create_academic_department">Department</Label>
+                    <Input
+                      id="create_academic_department"
+                      value={createForm.academic?.department || ''}
+                      onChange={(e) => setCreateForm(prev => ({
+                        ...prev, 
+                        academic: { 
+                          year: prev.academic?.year || '',
+                          department: e.target.value
+                        }
+                      }))}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="Enter department"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Track Selection */}
-              <div>
-                <Label htmlFor="create_track">Track</Label>
-                <Select
-                  value={createForm.track || ''}
-                  onValueChange={(value) => setCreateForm(prev => ({...prev, track: value}))}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Select track" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="cloud">Cloud Computing</SelectItem>
-                    <SelectItem value="ai">Artificial Intelligence</SelectItem>
-                    <SelectItem value="both">Both Tracks</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Social Links */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="create_linkedin">LinkedIn</Label>
-                  <Input
-                    id="create_linkedin"
-                    value={createForm.linkedin || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, linkedin: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="LinkedIn URL"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="create_instagram">Instagram</Label>
-                  <Input
-                    id="create_instagram"
-                    value={createForm.instagram || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, instagram: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Instagram handle"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="create_portfolio">Portfolio</Label>
-                  <Input
-                    id="create_portfolio"
-                    value={createForm.portfolio || ''}
-                    onChange={(e) => setCreateForm(prev => ({...prev, portfolio: e.target.value}))}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="Portfolio URL"
-                  />
+              {/* Position Information */}
+              <div className="space-y-4">
+                <h4 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Position</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="create_position">Designation</Label>
+                    <Input
+                      id="create_position"
+                      value={createForm.position || ''}
+                      onChange={(e) => setCreateForm(prev => ({...prev, position: e.target.value}))}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="Enter designation"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="create_committee">Committee</Label>
+                    <Input
+                      id="create_committee"
+                      value={createForm.committee || ''}
+                      onChange={(e) => setCreateForm(prev => ({...prev, committee: e.target.value}))}
+                      className="bg-gray-700 border-gray-600 text-white"
+                      placeholder="Enter committee"
+                    />
+                  </div>
                 </div>
               </div>
 

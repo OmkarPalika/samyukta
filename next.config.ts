@@ -6,6 +6,17 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   generateEtags: true,
   
+  // Allow network access and cross-origin requests
+  async rewrites() {
+    return [];
+  },
+  
+  // Allow cross-origin requests from local network
+  experimental: {
+    optimizeCss: true,
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+  },
+  
   // Image Optimization
   images: {
     formats: ['image/webp', 'image/avif'],
@@ -84,11 +95,7 @@ const nextConfig: NextConfig = {
     ];
   },
   
-  // Experimental features for performance
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-  },
+
   
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {

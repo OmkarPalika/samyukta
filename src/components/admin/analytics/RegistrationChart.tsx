@@ -138,123 +138,138 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
       </CardHeader>
       <CardContent>
         {viewType === 'teams' && (
-          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `Date: ${value}`}
-              />
-              <Bar 
-                dataKey="teams" 
-                fill="#3B82F6"
-                radius={[4, 4, 0, 0]}
-                className="hover:opacity-80 transition-opacity"
-              />
-            </BarChart>
-          </ChartContainer>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `Date: ${value}`}
+                />
+                <Bar 
+                  dataKey="teams" 
+                  fill="#3B82F6"
+                  radius={[4, 4, 0, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
         )}
 
         {viewType === 'members' && (
-          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `Date: ${value}`}
-              />
-              <Bar 
-                dataKey="members" 
-                fill="#10B981"
-                radius={[4, 4, 0, 0]}
-                className="hover:opacity-80 transition-opacity"
-              />
-            </BarChart>
-          </ChartContainer>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `Date: ${value}`}
+                />
+                <Bar 
+                  dataKey="members" 
+                  fill="#10B981"
+                  radius={[4, 4, 0, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
         )}
 
         {viewType === 'combined' && (
-          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `Date: ${value}`}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Bar 
-                dataKey="teams" 
-                fill="#3B82F6"
-                radius={[4, 4, 0, 0]}
-                className="hover:opacity-80 transition-opacity"
-              />
-              <Bar 
-                dataKey="members" 
-                fill="#10B981"
-                radius={[4, 4, 0, 0]}
-                className="hover:opacity-80 transition-opacity"
-              />
-            </BarChart>
-          </ChartContainer>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `Date: ${value}`}
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Bar 
+                  dataKey="teams" 
+                  fill="#3B82F6"
+                  radius={[4, 4, 0, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
+                <Bar 
+                  dataKey="members" 
+                  fill="#10B981"
+                  radius={[4, 4, 0, 0]}
+                  className="hover:opacity-80 transition-opacity"
+                />
+              </BarChart>
+            </ChartContainer>
+          </div>
         )}
         
         {viewType === 'cumulative' && (
-          <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-              <XAxis 
-                dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                tickLine={false}
-                axisLine={false}
-              />
-              <ChartTooltip 
-                content={<ChartTooltipContent />}
-                labelFormatter={(value) => `Date: ${value}`}
-              />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Line 
-                type="monotone" 
-                dataKey="cumulativeTeams" 
-                stroke="#8B5CF6"
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+              <LineChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                <XAxis 
+                  dataKey="date" 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  interval="preserveStartEnd"
+                />
+                <YAxis 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                  tickLine={false}
+                  axisLine={false}
+                  width={40}
+                />
+                <ChartTooltip 
+                  content={<ChartTooltipContent />}
+                  labelFormatter={(value) => `Date: ${value}`}
+                />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Line 
+                  type="monotone" 
+                  dataKey="cumulativeTeams" 
+                  stroke="#8B5CF6"
                 strokeWidth={3}
                 dot={{ fill: "#8B5CF6", strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: "#8B5CF6", strokeWidth: 2 }}
@@ -269,6 +284,7 @@ export function RegistrationChart({ data, loading }: RegistrationChartProps) {
               />
             </LineChart>
           </ChartContainer>
+          </div>
         )}
 
 

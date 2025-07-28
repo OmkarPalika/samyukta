@@ -1,14 +1,69 @@
 'use client';
 
-import { Suspense } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Calendar, Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { SPEAKERS_PAGE_DATA, SPEAKERS_STATUS } from "@/lib";
+import { SPEAKERS_PAGE_DATA, SPEAKERS_STATUS, SPEAKERS_DATA } from "@/lib";
+
+interface Speaker {
+  id: number;
+  name: string;
+  designation: string;
+  company: string;
+  session: string;
+  track: string;
+  day: string;
+  time: string;
+  bio: string;
+  expertise: readonly string[];
+  social: {
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+}
 
 function SpeakersContent() {
+  const [speakers, setSpeakers] = useState<readonly Speaker[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [useDatabase, setUseDatabase] = useState(false);
+
+  useEffect(() => {
+    const loadSpeakers = async () => {
+      try {
+        // Try to fetch from database first
+        const response = await fetch('/api/public/webpage-content?type=speaker&status=published');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.contents && data.contents.length > 0) {
+            setSpeakers(data.contents);
+            setUseDatabase(true);
+          } else {
+            // Fallback to static data
+            setSpeakers(SPEAKERS_DATA);
+            setUseDatabase(false);
+          }
+        } else {
+          // Fallback to static data
+          setSpeakers(SPEAKERS_DATA);
+          setUseDatabase(false);
+        }
+      } catch (error) {
+        console.error('Failed to load speakers:', error);
+        // Fallback to static data
+        setSpeakers(SPEAKERS_DATA);
+        setUseDatabase(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSpeakers();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
       {/* Hero Section */}
@@ -68,39 +123,101 @@ function SpeakersContent() {
             ))}
           </motion.div> */}
 
-          {/* Speakers Coming Soon Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl mx-auto"
-          >
-            <Card className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-gray-700 hover:border-blue-500/50 transition-all duration-500 overflow-hidden">
-              <CardContent className="p-8 sm:p-10 text-center">
-                <div className="flex flex-col items-center gap-6">
-                  <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center">
-                    <AlertCircle className="w-10 h-10 text-blue-400" />
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-white">
-                      Speakers Will Be Updated Soon
-                    </h3>
-                    <p className="text-gray-300 max-w-xl mx-auto">
-                      {SPEAKERS_STATUS.message}. We&apos;re finalizing our lineup of industry experts and thought leaders who will share their insights at Samyukta 2025.
-                    </p>
-                    
-                    <div className="pt-4">
-                      <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-4 py-2">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        Expected by {new Date(SPEAKERS_STATUS.expectedUpdateDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      </Badge>
-                    </div>
-                  </div>
+          {/* Loading State */}
+          {loading && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center justify-center min-h-[400px]"
+            >
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+            </motion.div>
+          )}
+
+          {/* Speakers Grid or Coming Soon */}
+          {!loading && (
+            <>
+              {speakers.length > 0 && useDatabase ? (
+                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+                  {speakers.map((speaker, index) => (
+                    <motion.div
+                      key={speaker.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -10 }}
+                      className="group"
+                    >
+                      <Card className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-gray-700 hover:border-blue-500/50 transition-all duration-500 overflow-hidden h-full">
+                        <CardContent className="p-6">
+                          <div className="space-y-4">
+                            <div className="text-center">
+                              <h3 className="text-xl font-bold text-white mb-2">
+                                {speaker.name}
+                              </h3>
+                              <p className="text-blue-400 font-medium">
+                                {speaker.designation}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {speaker.company}
+                              </p>
+                            </div>
+                            
+                            {speaker.session && (
+                              <div className="bg-gray-700/50 rounded-lg p-3">
+                                <p className="text-sm text-gray-300 font-medium">
+                                  {speaker.session}
+                                </p>
+                              </div>
+                            )}
+                            
+                            {speaker.bio && (
+                              <p className="text-gray-400 text-sm line-clamp-3">
+                                {speaker.bio}
+                              </p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+              ) : (
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="max-w-3xl mx-auto"
+                >
+                  <Card className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 backdrop-blur-sm border-gray-700 hover:border-blue-500/50 transition-all duration-500 overflow-hidden">
+                    <CardContent className="p-8 sm:p-10 text-center">
+                      <div className="flex flex-col items-center gap-6">
+                        <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center">
+                          <AlertCircle className="w-10 h-10 text-blue-400" />
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <h3 className="text-2xl sm:text-3xl font-bold text-white">
+                            Speakers Will Be Updated Soon
+                          </h3>
+                          <p className="text-gray-300 max-w-xl mx-auto">
+                            {SPEAKERS_STATUS.message}. We&apos;re finalizing our lineup of industry experts and thought leaders who will share their insights at Samyukta 2025.
+                          </p>
+                          
+                          <div className="pt-4">
+                            <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 px-4 py-2">
+                              <Calendar className="w-4 h-4 mr-2" />
+                              Expected by {new Date(SPEAKERS_STATUS.expectedUpdateDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+            </>
+          )}
           
           {/* Original Speakers Grid - Commented out */}
           {/* <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">

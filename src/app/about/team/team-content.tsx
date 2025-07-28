@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Linkedin, Instagram, AlertCircle, Calendar } from "lucide-react";
@@ -44,9 +45,63 @@ type TeamContentProps = {
 };
 
 export default function TeamContent({ teamData }: TeamContentProps) {
+  const [dynamicTeamData, setDynamicTeamData] = useState<TeamData>(teamData);
+  const [loading, setLoading] = useState(true);
+  const [, setUseDatabase] = useState(false);
+
+  useEffect(() => {
+    const loadTeamData = async () => {
+      try {
+        // Try to fetch team data from database first
+        const response = await fetch('/api/public/webpage-content?type=team&status=published');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.contents && data.contents.length > 0) {
+            // Transform database content to match expected format
+            try {
+              const transformedData = JSON.parse(data.contents[0].content);
+              setDynamicTeamData(transformedData);
+              setUseDatabase(true);
+            } catch {
+              // If parsing fails, use static data
+              setDynamicTeamData(teamData);
+              setUseDatabase(false);
+            }
+          } else {
+            // Fallback to static data
+            setDynamicTeamData(teamData);
+            setUseDatabase(false);
+          }
+        } else {
+          // Fallback to static data
+          setDynamicTeamData(teamData);
+          setUseDatabase(false);
+        }
+      } catch (error) {
+        console.error('Failed to load team data:', error);
+        // Fallback to static data
+        setDynamicTeamData(teamData);
+        setUseDatabase(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTeamData();
+  }, [teamData]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto"></div>
+        <p className="text-gray-400 mt-4">Loading team data...</p>
+      </div>
+    );
+  }
+
   return (
     <>
-      {teamData.categories.map((category: TeamCategory, index: number) => (
+      {dynamicTeamData.categories.map((category: TeamCategory, index: number) => (
         <motion.div 
           key={index} 
           initial={{ opacity: 0, y: 30 }}

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { User as UserType } from '@/lib/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 import {
   Sidebar,
   SidebarContent,
@@ -41,10 +49,12 @@ import {
   FileText,
   Mail,
   Home,
+  Globe,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { PageLoading } from '@/components/shared/Loading';
+import { NotificationPopover } from '@/components/shared/NotificationPopover';
 import { toast } from 'sonner';
 
 interface AdminLayoutProps {
@@ -78,9 +88,19 @@ const navigationItems = [
     route: '/dashboard/admin/registration-management',
   },
   {
-    title: 'Email Tools',
+    title: 'Webpage Management',
+    icon: Globe,
+    route: '/dashboard/admin/webpage-management',
+  },
+  {
+    title: 'Email Management',
     icon: Mail,
-    route: '/dashboard/admin/email-resend',
+    route: '/dashboard/admin/email-management',
+  },
+  {
+    title: 'Notifications',
+    icon: Bell,
+    route: '/dashboard/admin/notifications',
   },
 ];
 
@@ -180,6 +200,14 @@ export default function AdminLayout({
   const { user: authUser, loading: authLoading, logout: authLogout } = useAuth();
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Array<{
+    title: string;
+    description: string;
+    route: string;
+    type: string;
+  }>>([]);
 
   const loadUserData = useCallback(async () => {
     try {
@@ -228,6 +256,48 @@ export default function AdminLayout({
       onRefresh();
       toast.success('Page refreshed');
     }
+  };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    const searchableItems = [
+      { title: 'Dashboard', description: 'Admin dashboard overview', route: '/dashboard/admin', type: 'page' },
+      { title: 'Analytics', description: 'View analytics and reports', route: '/dashboard/admin/analytics', type: 'page' },
+      { title: 'User Management', description: 'Manage users and permissions', route: '/dashboard/admin/user-management', type: 'page' },
+      { title: 'Registration Management', description: 'Manage event registrations', route: '/dashboard/admin/registration-management', type: 'page' },
+      { title: 'Webpage Management', description: 'Manage website content', route: '/dashboard/admin/webpage-management', type: 'page' },
+      { title: 'Email Management', description: 'Manage email campaigns and templates', route: '/dashboard/admin/email-management', type: 'page' },
+      { title: 'Notification Management', description: 'Send and manage notifications', route: '/dashboard/admin/notifications', type: 'page' },
+      { title: 'Users', description: 'View and manage all users', route: '/dashboard/admin/user-management', type: 'feature' },
+      { title: 'Registrations', description: 'View and manage registrations', route: '/dashboard/admin/registration-management', type: 'feature' },
+      { title: 'Email Templates', description: 'Create and edit email templates', route: '/dashboard/admin/email-management', type: 'feature' },
+      { title: 'Email Campaigns', description: 'Create and send email campaigns', route: '/dashboard/admin/email-management', type: 'feature' },
+      { title: 'Notifications', description: 'Send notifications to users', route: '/dashboard/admin/notifications', type: 'feature' },
+      { title: 'Speakers', description: 'Manage speaker information', route: '/dashboard/admin/webpage-management', type: 'content' },
+      { title: 'Sponsors', description: 'Manage sponsor information', route: '/dashboard/admin/webpage-management', type: 'content' },
+      { title: 'Team Members', description: 'Manage team member information', route: '/dashboard/admin/webpage-management', type: 'content' },
+      { title: 'Events', description: 'Manage event information', route: '/dashboard/admin/webpage-management', type: 'content' },
+    ];
+
+    const filtered = searchableItems.filter(item =>
+      item.title.toLowerCase().includes(query.toLowerCase()) ||
+      item.description.toLowerCase().includes(query.toLowerCase())
+    );
+
+    setSearchResults(filtered);
+  };
+
+  const handleSearchSelect = (route: string) => {
+    router.push(route);
+    setShowSearch(false);
+    setSearchQuery('');
+    setSearchResults([]);
   };
 
   if (loading || authLoading) {
@@ -302,16 +372,18 @@ export default function AdminLayout({
                 {/* Actions */}
                 <div className="flex items-center gap-2 ml-auto">
                   {/* Search - Hidden on mobile */}
-                  <Button variant="ghost" size="sm" className="hidden sm:flex h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-gray-800">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowSearch(true)}
+                    className="hidden sm:flex h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-gray-800"
+                  >
                     <Search className="h-4 w-4" />
                     <span className="sr-only">Search</span>
                   </Button>
 
                   {/* Notifications */}
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-300 hover:text-white hover:bg-gray-800">
-                    <Bell className="h-4 w-4" />
-                    <span className="sr-only">Notifications</span>
-                  </Button>
+                  <NotificationPopover />
 
                   {/* Refresh */}
                   {showRefresh && (
@@ -381,6 +453,66 @@ export default function AdminLayout({
           </SidebarInset>
         </div>
       </SidebarProvider>
+
+      {/* Search Dialog */}
+      <Dialog open={showSearch} onOpenChange={setShowSearch}>
+        <DialogContent className="bg-gray-800 border-gray-700 text-white max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Search Admin Panel</DialogTitle>
+            <DialogDescription>
+              Search for pages, features, and content management options.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <Input
+              placeholder="Search for pages, features, or content..."
+              value={searchQuery}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="bg-gray-700 border-gray-600 text-white"
+              autoFocus
+            />
+            
+            {searchResults.length > 0 && (
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {searchResults.map((result, index) => (
+                  <div
+                    key={index}
+                    onClick={() => handleSearchSelect(result.route)}
+                    className="p-3 rounded-lg bg-gray-700 hover:bg-gray-600 cursor-pointer transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-white">{result.title}</h4>
+                        <p className="text-sm text-gray-400">{result.description}</p>
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize bg-gray-600 px-2 py-1 rounded">
+                        {result.type}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            {searchQuery && searchResults.length === 0 && (
+              <div className="text-center py-8 text-gray-400">
+                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>No results found for &quot;{searchQuery}&quot;</p>
+                <p className="text-sm">Try searching for pages, features, or content types.</p>
+              </div>
+            )}
+            
+            {!searchQuery && (
+              <div className="text-center py-8 text-gray-400">
+                <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p>Start typing to search the admin panel</p>
+                <p className="text-sm">Search for pages, features, users, registrations, and more.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

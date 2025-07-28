@@ -108,78 +108,79 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Teams</p>
-                <p className="text-2xl font-bold text-white">{summary.totalTeams}</p>
-                <p className="text-xs text-gray-400">Registered teams</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-gray-400 text-xs sm:text-sm">Total Teams</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{summary.totalTeams}</p>
+                <p className="text-xs text-gray-400 hidden sm:block">Registered teams</p>
               </div>
-              <Users className="h-8 w-8 text-blue-400" />
+              <Users className="h-5 w-5 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Members</p>
-                <p className="text-2xl font-bold text-white">{summary.totalMembers}</p>
-                <p className="text-xs text-gray-400">All participants</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-gray-400 text-xs sm:text-sm">Total Members</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{summary.totalMembers}</p>
+                <p className="text-xs text-gray-400 hidden sm:block">All participants</p>
               </div>
-              <Target className="h-8 w-8 text-green-400" />
+              <Target className="h-5 w-5 sm:h-8 sm:w-8 text-green-400 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Avg Team Size</p>
-                <p className="text-2xl font-bold text-white">{summary.avgTeamSize}</p>
-                <p className="text-xs text-gray-400">Members per team</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-gray-400 text-xs sm:text-sm">Avg Team Size</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">{summary.avgTeamSize}</p>
+                <p className="text-xs text-gray-400 hidden sm:block">Members per team</p>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-400" />
+              <TrendingUp className="h-5 w-5 sm:h-8 sm:w-8 text-purple-400 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">Total Revenue</p>
-                <p className="text-2xl font-bold text-white">₹{summary.totalRevenue.toLocaleString()}</p>
-                <p className="text-xs text-gray-400">All registrations</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-gray-400 text-xs sm:text-sm">Total Revenue</p>
+                <p className="text-lg sm:text-2xl font-bold text-white">₹{summary.totalRevenue.toLocaleString()}</p>
+                <p className="text-xs text-gray-400 hidden sm:block">All registrations</p>
               </div>
-              <DollarSign className="h-8 w-8 text-yellow-400" />
+              <DollarSign className="h-5 w-5 sm:h-8 sm:w-8 text-yellow-400 flex-shrink-0" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         {/* Team Size Distribution */}
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Team Size Distribution</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-white text-base sm:text-lg">Team Size Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={teamSizeChartData}>
+                <BarChart data={teamSizeChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="teamSize" 
                     stroke="#9CA3AF"
-                    fontSize={12}
+                    fontSize={10}
+                    interval="preserveStartEnd"
                   />
-                  <YAxis stroke="#9CA3AF" fontSize={12} />
+                  <YAxis stroke="#9CA3AF" fontSize={10} width={40} />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: '#1F2937', 
@@ -207,21 +208,22 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
 
         {/* Revenue by Team Size */}
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Revenue by Team Size</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-white text-base sm:text-lg">Revenue by Team Size</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueByTeamSizeData}>
+                <LineChart data={revenueByTeamSizeData} margin={{ top: 5, right: 10, left: 10, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                   <XAxis 
                     dataKey="teamSize" 
                     stroke="#9CA3AF"
-                    fontSize={12}
+                    fontSize={10}
+                    interval="preserveStartEnd"
                     label={{ value: 'Team Size', position: 'insideBottom', offset: -5, fill: '#9CA3AF' }}
                   />
-                  <YAxis stroke="#9CA3AF" fontSize={12} />
+                  <YAxis stroke="#9CA3AF" fontSize={10} width={50} />
                   <Tooltip 
                     contentStyle={{ 
                       backgroundColor: '#1F2937', 
@@ -258,22 +260,22 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
       </div>
 
       {/* Ticket Type Analysis */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Ticket Type Distribution</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-white text-base sm:text-lg">Ticket Type Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-80">
+            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
+                <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <Pie
                     data={ticketTypeChartData}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
                     label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
-                    outerRadius={80}
+                    outerRadius="75%"
                     fill="#8884d8"
                     dataKey="teams"
                   >
@@ -300,30 +302,31 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
         </Card>
 
         <Card className="bg-gray-800/40 border-gray-700">
-          <CardHeader>
-            <CardTitle className="text-white">Revenue by Ticket Type</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-white text-base sm:text-lg">Revenue by Ticket Type</CardTitle>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig} className="h-80">
-              <BarChart data={ticketTypeChartData} layout="horizontal">
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  type="number" 
-                  stroke="#9CA3AF" 
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
-                />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  stroke="#9CA3AF" 
-                  fontSize={10}
-                  width={120}
-                  tickLine={false}
-                  axisLine={false}
-                />
+            <div className="w-full overflow-hidden">
+              <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
+                <BarChart data={ticketTypeChartData} layout="horizontal" margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis 
+                    type="number" 
+                    stroke="#9CA3AF" 
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
+                  />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    stroke="#9CA3AF" 
+                    fontSize={9}
+                    width={100}
+                    tickLine={false}
+                    axisLine={false}
+                  />
                 <ChartTooltip 
                   content={<ChartTooltipContent />}
                   formatter={(value, name) => [
@@ -339,6 +342,7 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
                 />
               </BarChart>
             </ChartContainer>
+            </div>
           </CardContent>
         </Card>
       </div>

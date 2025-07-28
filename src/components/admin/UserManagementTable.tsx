@@ -34,7 +34,8 @@ import {
   ArrowDown,
   UserPlus,
   Save,
-  X
+  X,
+  Key
 } from 'lucide-react';
 import { User as UserType } from '@/lib/types';
 import { toast } from 'sonner';
@@ -86,19 +87,35 @@ export function UserManagementTable({
     setEditForm({
       full_name: user.full_name,
       email: user.email,
-      phone: user.phone,
-      whatsapp: user.whatsapp,
+      phone: user.phone || user.mobile_number,
       role: user.role,
-      dept: user.dept,
-      year: user.year,
+      academic: user.academic || { year: user.year || '', department: user.dept || '' },
+      position: user.position,
       designation: user.designation,
-      committee: user.committee,
-      track: user.track,
-      linkedin: user.linkedin,
-      instagram: user.instagram,
-      portfolio: user.portfolio
+      committee: user.committee
     });
     setShowEditDialog(true);
+  };
+
+  const handleResetPassword = async (userId: string, userEmail: string) => {
+    if (!confirm(`Are you sure you want to reset password for ${userEmail}?`)) return;
+
+    try {
+      const response = await fetch(`/api/users/${userId}/reset-password`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to reset password');
+      }
+
+      const data = await response.json();
+      toast.success(`Password reset successfully. New password: ${data.newPassword}`);
+    } catch (error) {
+      console.error('Failed to reset password:', error);
+      toast.error('Failed to reset password');
+    }
   };
 
   const handleSaveUser = async () => {
@@ -182,31 +199,30 @@ export function UserManagementTable({
       filterFn: 'equals',
     },
     {
-      accessorKey: 'phone',
+      accessorKey: 'contact',
       header: 'Contact',
       cell: ({ row }) => (
         <div className="text-sm">
-          <div className="text-white">{row.original.phone || 'N/A'}</div>
-          <div className="text-gray-400">{row.original.whatsapp || 'N/A'}</div>
+          <div className="text-white">{row.original.phone || row.original.mobile_number || 'N/A'}</div>
         </div>
       ),
     },
     {
-      accessorKey: 'dept',
+      accessorKey: 'academic',
       header: 'Academic',
       cell: ({ row }) => (
         <div className="text-sm">
-          <div className="text-white">{row.original.dept || 'N/A'}</div>
-          <div className="text-gray-400">{row.original.year || 'N/A'}</div>
+          <div className="text-white">{row.original.academic?.year || row.original.year || 'N/A'}</div>
+          <div className="text-gray-400">{row.original.academic?.department || row.original.dept || 'N/A'}</div>
         </div>
       ),
     },
     {
-      accessorKey: 'designation',
+      accessorKey: 'position',
       header: 'Position',
       cell: ({ row }) => (
         <div className="text-sm">
-          <div className="text-white">{row.original.designation || 'N/A'}</div>
+          <div className="text-white">{row.original.position || row.original.designation || 'N/A'}</div>
           <div className="text-gray-400">{row.original.committee || 'N/A'}</div>
         </div>
       ),
@@ -215,20 +231,31 @@ export function UserManagementTable({
       id: 'actions',
       header: 'Actions',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <Button
             size="sm"
             variant="outline"
             onClick={() => handleEditClick(row.original)}
-            className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white"
+            className="border-blue-500 text-blue-400 hover:bg-blue-500 hover:text-white h-8 w-8 p-0"
+            title="Edit User"
           >
             <Edit className="h-3 w-3" />
           </Button>
           <Button
             size="sm"
             variant="outline"
+            onClick={() => handleResetPassword(row.original.id, row.original.email)}
+            className="border-yellow-500 text-yellow-400 hover:bg-yellow-500 hover:text-white h-8 w-8 p-0"
+            title="Reset Password"
+          >
+            <Key className="h-3 w-3" />
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
             onClick={() => onDeleteUser(row.original.id)}
-            className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white"
+            className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white h-8 w-8 p-0"
+            title="Delete User"
           >
             <Trash2 className="h-3 w-3" />
           </Button>
@@ -425,6 +452,7 @@ export function UserManagementTable({
           </DialogHeader>
           
           <div className="space-y-4">
+            {/* Name and Role */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="full_name">Full Name *</Label>
@@ -437,47 +465,10 @@ export function UserManagementTable({
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={editForm.email || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter email"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={editForm.phone || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter phone number"
-                />
-              </div>
-              <div>
-                <Label htmlFor="whatsapp">WhatsApp</Label>
-                <Input
-                  id="whatsapp"
-                  value={editForm.whatsapp || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, whatsapp: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter WhatsApp number"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={editForm.role || 'participant'}
-                  onValueChange={(value: 'admin' | 'coordinator' | 'participant') => setEditForm(prev => ({ ...prev, role: value }))}
+                  onValueChange={(value: 'admin' | 'coordinator' | 'participant' | 'volunteer') => setEditForm(prev => ({ ...prev, role: value }))}
                 >
                   <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue />
@@ -490,110 +481,112 @@ export function UserManagementTable({
                   </SelectContent>
                 </Select>
               </div>
-              <div>
-                <Label htmlFor="track">Track</Label>
-                <Select
-                  value={editForm.track || ''}
-                  onValueChange={(value) => setEditForm(prev => ({ ...prev, track: value }))}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Select track" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="cloud">Cloud Computing</SelectItem>
-                    <SelectItem value="ai">Artificial Intelligence</SelectItem>
-                    <SelectItem value="both">Both Tracks</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
+            {/* Contact */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="dept">Department</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
-                  id="dept"
-                  value={editForm.dept || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, dept: e.target.value }))}
+                  id="email"
+                  type="email"
+                  value={editForm.email || ''}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                   className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter department"
+                  placeholder="Enter email"
                 />
               </div>
               <div>
-                <Label htmlFor="year">Year</Label>
-                <Select
-                  value={editForm.year || ''}
-                  onValueChange={(value) => setEditForm(prev => ({ ...prev, year: value }))}
-                >
-                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700">
-                    <SelectItem value="1st">1st Year</SelectItem>
-                    <SelectItem value="2nd">2nd Year</SelectItem>
-                    <SelectItem value="3rd">3rd Year</SelectItem>
-                    <SelectItem value="4th">4th Year</SelectItem>
-                    <SelectItem value="postgraduate">Postgraduate</SelectItem>
-                    <SelectItem value="faculty">Faculty</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="designation">Designation</Label>
+                <Label htmlFor="phone">Contact</Label>
                 <Input
-                  id="designation"
-                  value={editForm.designation || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, designation: e.target.value }))}
+                  id="phone"
+                  value={editForm.phone || ''}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
                   className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter designation"
-                />
-              </div>
-              <div>
-                <Label htmlFor="committee">Committee</Label>
-                <Input
-                  id="committee"
-                  value={editForm.committee || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, committee: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter committee"
+                  placeholder="Enter phone number"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="linkedin">LinkedIn</Label>
-                <Input
-                  id="linkedin"
-                  value={editForm.linkedin || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, linkedin: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="LinkedIn URL"
-                />
+            {/* Academic Information */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Academic</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="academic_year">Year</Label>
+                  <Select
+                    value={editForm.academic?.year || ''}
+                    onValueChange={(value) => setEditForm(prev => ({ 
+                      ...prev, 
+                      academic: { 
+                        ...prev.academic, 
+                        year: value,
+                        department: prev.academic?.department || ''
+                      }
+                    }))}
+                  >
+                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                      <SelectValue placeholder="Select academic year" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-gray-800 border-gray-700">
+                      <SelectItem value="1st">1st Year</SelectItem>
+                      <SelectItem value="2nd">2nd Year</SelectItem>
+                      <SelectItem value="3rd">3rd Year</SelectItem>
+                      <SelectItem value="4th">4th Year</SelectItem>
+                      <SelectItem value="postgraduate">Postgraduate</SelectItem>
+                      <SelectItem value="faculty">Faculty</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="academic_department">Department</Label>
+                  <Input
+                    id="academic_department"
+                    value={editForm.academic?.department || ''}
+                    onChange={(e) => setEditForm(prev => ({ 
+                      ...prev, 
+                      academic: { 
+                        ...prev.academic, 
+                        year: prev.academic?.year || '',
+                        department: e.target.value
+                      }
+                    }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter department"
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="instagram">Instagram</Label>
-                <Input
-                  id="instagram"
-                  value={editForm.instagram || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, instagram: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Instagram handle"
-                />
-              </div>
-              <div>
-                <Label htmlFor="portfolio">Portfolio</Label>
-                <Input
-                  id="portfolio"
-                  value={editForm.portfolio || ''}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, portfolio: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Portfolio URL"
-                />
+            </div>
+
+            {/* Position Information */}
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white border-b border-gray-600 pb-2">Position</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="position">Designation</Label>
+                  <Input
+                    id="position"
+                    value={editForm.position || editForm.designation || ''}
+                    onChange={(e) => setEditForm(prev => ({ 
+                      ...prev, 
+                      position: e.target.value,
+                      designation: e.target.value // Keep for backward compatibility
+                    }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter designation"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="committee">Committee</Label>
+                  <Input
+                    id="committee"
+                    value={editForm.committee || ''}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, committee: e.target.value }))}
+                    className="bg-gray-700 border-gray-600 text-white"
+                    placeholder="Enter committee"
+                  />
+                </div>
               </div>
             </div>
 

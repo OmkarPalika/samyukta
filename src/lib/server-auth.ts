@@ -1,10 +1,20 @@
 import { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
+import jwt from 'jsonwebtoken';
+import { getDbPromise, getCollections } from '@/lib/mongodb';
+import { ObjectId } from 'mongodb';
 
 export interface AuthUser {
   id: string;
   email: string;
   role: 'admin' | 'coordinator' | 'participant';
   full_name?: string;
+}
+
+interface JWTPayload {
+  userId: string;
+  email: string;
+  role: string;
 }
 
 /**
@@ -57,4 +67,74 @@ export async function requireAdmin(request: NextRequest): Promise<{ authorized: 
   
   // For now, allow all requests
   return { authorized: true };
+}
+
+export async function verifyAuth() {
+  try {
+    // Get token from cookies
+    const cookieStore = cookies();
+    const token = (await cookieStore).get('auth-token')?.value;
+
+    if (!token) {
+      // In development mode, return a mock admin user for testing
+      if (process.env.NODE_ENV === 'development') {
+        return {
+          id: '6885f51385b463891d59d5ab',
+          email: 'admin@samyukta.com',
+          full_name: 'Admin User',
+          role: 'admin' as const,
+          phone: '9999999999',
+          mobile_number: '9999999999',
+          whatsapp: '9999999999',
+          academic: {
+            year: '4',
+            department: 'CSE'
+          },
+          position: 'Administrator',
+          committee: 'Core',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+      }
+      return null;
+    }
+
+    // Verify JWT token
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+
+    const decoded = jwt.verify(token, jwtSecret) as JWTPayload;
+
+    // Get user from database
+    const db = await getDbPromise();
+    const { users } = getCollections(db);
+
+    const user = await users.findOne({
+      _id: new ObjectId(decoded.userId)
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      id: user._id?.toString(),
+      email: user.email,
+      full_name: user.full_name,
+      role: user.role,
+      phone: user.phone,
+      mobile_number: user.mobile_number,
+      whatsapp: user.whatsapp,
+      academic: user.academic,
+      position: user.position,
+      committee: user.committee,
+      created_at: user.created_at,
+      updated_at: user.updated_at
+    };
+  } catch (error) {
+    console.error('Auth verification failed:', error);
+    return null;
+  }
 }

@@ -65,4 +65,8 @@ export function getDbPromise() {
   return dbPromise
 }
 
+export async function getDb() {
+  return await getDbPromise()
+}
+
 export { getCollections }

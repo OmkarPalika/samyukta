@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTypedCollections } from '@/lib/db-utils';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 export async function POST(request: NextRequest) {
   try {
@@ -44,15 +45,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
     
-    // Create session
-    const sessionToken = `session_${Date.now()}_${Math.random().toString(36).substring(2)}`;
-    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    // Create JWT token
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not configured');
+    }
+
+    const token = jwt.sign(
+      {
+        userId: userId,
+        email: user.email,
+        role: user.role || 'participant'
+      },
+      jwtSecret,
+      { expiresIn: '7d' }
+    );
+    
+    // Create session in database
+    const sessionExpiry = new Date();
+    sessionExpiry.setDate(sessionExpiry.getDate() + 7); // 7 days
     
     await collections.sessions.insertOne({
+      session_token: token,
       user_id: userId,
-      session_token: sessionToken,
-      expires_at: expiresAt,
-      created_at: new Date()
+      expires_at: sessionExpiry,
+      created_at: new Date(),
+      user_agent: request.headers.get('user-agent') || '',
+      ip_address: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     });
     
     // Set cookie
@@ -64,7 +83,7 @@ export async function POST(request: NextRequest) {
       college: user.college
     });
     
-    response.cookies.set('auth_token', sessionToken, {
+    response.cookies.set('auth_token', token, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',

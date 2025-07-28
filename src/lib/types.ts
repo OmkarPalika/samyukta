@@ -4,14 +4,22 @@ export interface User {
   email: string;
   full_name: string;
   phone?: string;
+  mobile_number?: string; // New field for mobile number
   whatsapp?: string;
-  role: 'admin' | 'coordinator' | 'participant';
+  role: 'admin' | 'coordinator' | 'participant' | 'volunteer';
   college?: string;
   track?: string;
-  year?: string;
-  dept?: string;
-  designation?: string;
+  // Academic Information
+  academic?: {
+    year: string;
+    department: string;
+  };
+  year?: string; // Keep for backward compatibility
+  dept?: string; // Keep for backward compatibility
+  // Position and Committee
+  position?: string;
   committee?: string;
+  designation?: string; // Keep for backward compatibility
   linkedin?: string;
   instagram?: string;
   portfolio?: string;
@@ -190,6 +198,49 @@ export interface SocialItem {
   comments?: number;
   shares?: number;
   tags?: string[];
+}
+
+// Notification Types
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'announcement';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  channels: string[];
+  recipients: {
+    type: 'all' | 'role' | 'custom';
+    count?: number;
+    criteria?: Record<string, unknown>;
+    filters?: {
+      roles?: string[];
+      colleges?: string[];
+      departments?: string[];
+      user_ids?: string[];
+    };
+  };
+  scheduled_at?: string;
+  sent_at?: string;
+  expires_at?: string;
+  action_url?: string;
+  action_text?: string;
+  created_at: string;
+  created_by: string;
+}
+
+export interface NotificationStats {
+  total_sent: number;
+  total_delivered: number;
+  total_read: number;
+  total_clicked: number;
+  delivery_rate: number;
+  read_rate: number;
+  click_rate: number;
+  sent_change?: number;
+  delivered_change?: number;
+  read_rate_change?: number;
+  click_rate_change?: number;
 }
 
 // Game Types
@@ -489,4 +540,135 @@ export interface CompletedRegistrationData {
   total_amount: number;
   transaction_id: string;
   payment_screenshot_url: string;
+}
+
+// Webpage Management Types
+export interface WebpageContent {
+  id: string;
+  type: 'speaker' | 'sponsor' | 'team' | 'event' | 'general';
+  title: string;
+  content: Record<string, unknown>; // JSON content based on type
+  status: 'draft' | 'published' | 'archived';
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SpeakerContent {
+  name: string;
+  designation: string;
+  company: string;
+  bio: string;
+  image_url?: string;
+  track: string;
+  session: string;
+  day: string;
+  time: string;
+  expertise: string[];
+  social: {
+    linkedin?: string;
+    twitter?: string;
+    website?: string;
+  };
+}
+
+export interface SponsorContent {
+  name: string;
+  logo_url: string;
+  website?: string;
+  tier: 'title' | 'platinum' | 'gold' | 'silver' | 'bronze' | 'partner';
+  description?: string;
+  benefits?: string[];
+}
+
+export interface TeamMemberContent {
+  name: string;
+  role: string;
+  department?: string;
+  image_url?: string;
+  bio?: string;
+  social?: {
+    linkedin?: string;
+    instagram?: string;
+    email?: string;
+  };
+}
+
+export interface EventContent {
+  name: string;
+  description: string;
+  date: string;
+  time: string;
+  venue: string;
+  category: string;
+  image_url?: string;
+  registration_required: boolean;
+  max_participants?: number;
+  current_participants?: number;
+}
+
+
+
+
+// Email Management Types
+export interface EmailTemplate {
+  id: string;
+  name: string;
+  type: 'announcement' | 'alert' | 'reminder' | 'confirmation' | 'welcome';
+  subject: string;
+  html_content: string;
+  text_content?: string;
+  variables?: string[];
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailCampaign {
+  id: string;
+  name: string;
+  template_id: string;
+  recipients: {
+    type: 'role' | 'custom' | 'all';
+    filters?: {
+      roles?: string[];
+      custom_emails?: string[];
+    };
+  };
+  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+  stats?: {
+    total_recipients: number;
+    sent: number;
+    delivered: number;
+    opened: number;
+    clicked: number;
+    failed: number;
+  };
+  sent_at?: string;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+
+export interface UserNotification {
+  id: string;
+  notification_id: string;
+  user_id: string;
+  read: boolean;
+  read_at?: string;
+  clicked: boolean;
+  clicked_at?: string;
+  created_at: string;
+}
+
+export interface NotificationStats {
+  total_sent: number;
+  total_delivered: number;
+  total_read: number;
+  total_clicked: number;
+  delivery_rate: number;
+  read_rate: number;
+  click_rate: number;
 }

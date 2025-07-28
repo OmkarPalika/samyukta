@@ -498,5 +498,7 @@ export { EVENT_STATS as MOCK_EVENT_STATS } from '@/data';
 // Re-export centralized contact data
 export const MOCK_CONTACTS = CONTACTS_DATA.team;
 
+
+
 // Re-export centralized FAQ data
 export { FAQ_DATA as MOCK_FAQS, FAQ_CATEGORIES as MOCK_FAQ_CATEGORIES } from '@/data';

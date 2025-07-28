@@ -6,16 +6,32 @@ export interface UserSchema {
   email: string;
   full_name: string;
   password: string;
-  role: 'admin' | 'coordinator' | 'participant';
+  role: 'admin' | 'coordinator' | 'participant' | 'volunteer';
+  phone?: string;
+  mobile_number?: string; // New field for mobile number
+  whatsapp?: string;
   college?: string;
   track?: string;
-  year?: string;
-  dept?: string;
-  designation?: string;
+  // Academic Information
+  academic?: {
+    year: string;
+    department: string;
+  };
+  year?: string; // Keep for backward compatibility
+  dept?: string; // Keep for backward compatibility
+  // Position and Committee
+  position?: string;
   committee?: string;
+  designation?: string; // Keep for backward compatibility
   linkedin?: string;
   instagram?: string;
   portfolio?: string;
+  notification_preferences?: {
+    email: boolean;
+    push: boolean;
+    sms: boolean;
+    in_app: boolean;
+  };
   created_at: Date;
   updated_at: Date;
 }
@@ -61,6 +77,7 @@ export interface TeamMemberSchema {
   qr_code?: string;
   qr_code_url?: string;
   created_at: Date;
+  updated_at: Date;
 }
 
 export interface WorkshopSchema {
@@ -190,6 +207,8 @@ export interface SessionSchema {
   session_token: string;
   expires_at: Date;
   created_at: Date;
+  user_agent?: string;
+  ip_address?: string;
 }
 
 export interface MealSchema {
@@ -222,6 +241,128 @@ export interface AccommodationLogSchema {
   room_number?: string;
   timestamp: Date;
   date: string;
+}
+
+// New schemas for webpage management, email templates, and notifications
+export interface WebpageContentSchema {
+  _id?: ObjectId;
+  type: 'speaker' | 'sponsor' | 'team' | 'event' | 'general';
+  title: string;
+  content: Record<string, unknown>; // JSON content based on type
+  status: 'draft' | 'published' | 'archived';
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface EmailTemplateSchema {
+  _id?: ObjectId;
+  name: string;
+  type: 'announcement' | 'alert' | 'reminder' | 'welcome' | 'confirmation' | 'custom';
+  subject: string;
+  html_content: string;
+  text_content?: string;
+  variables: string[]; // List of template variables like {{name}}, {{event_date}}
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+  is_active: boolean;
+}
+
+export interface EmailCampaignSchema {
+  _id?: ObjectId;
+  name: string;
+  template_id: string;
+  recipients: {
+    type: 'all' | 'role' | 'custom';
+    filters?: {
+      roles?: string[];
+      colleges?: string[];
+      tracks?: string[];
+      custom_emails?: string[];
+    };
+  };
+  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
+  scheduled_at?: Date;
+  sent_at?: Date;
+  stats?: {
+    total_recipients: number;
+    sent: number;
+    delivered: number;
+    opened: number;
+    clicked: number;
+    failed: number;
+  };
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface NotificationSchema {
+  _id?: ObjectId;
+  title: string;
+  message: string;
+  type: 'info' | 'success' | 'warning' | 'error' | 'announcement';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  recipients: {
+    type: 'all' | 'role' | 'custom';
+    filters?: {
+      roles?: string[];
+      colleges?: string[];
+      tracks?: string[];
+      user_ids?: string[];
+    };
+  };
+  channels: ('in_app' | 'email' | 'sms' | 'push')[];
+  status: 'draft' | 'scheduled' | 'sent' | 'failed';
+  scheduled_at?: Date;
+  sent_at?: Date;
+  expires_at?: Date;
+  action_url?: string;
+  action_text?: string;
+  created_by: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface UserNotificationSchema {
+  _id?: ObjectId;
+  notification_id: string;
+  user_id: string;
+  read: boolean;
+  read_at?: Date;
+  clicked: boolean;
+  clicked_at?: Date;
+  created_at: Date;
+}
+
+export interface EmailTrackingSchema {
+  _id?: ObjectId;
+  notification_id?: string;
+  campaign_id?: string;
+  user_id: string;
+  email: string;
+  event_type: 'sent' | 'delivered' | 'opened' | 'clicked' | 'bounced' | 'failed';
+  timestamp: Date;
+  user_agent?: string;
+  ip_address?: string;
+  click_url?: string;
+  created_at: Date;
+}
+
+export interface PushSubscriptionSchema {
+  _id?: ObjectId;
+  user_id: string;
+  subscription: {
+    endpoint: string;
+    keys: {
+      p256dh: string;
+      auth: string;
+    };
+  };
+  user_agent?: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
 // Database initialization
@@ -350,6 +491,64 @@ export async function initializeDatabase(db: Db) {
       { key: { participant_id: 1, action: 1, date: 1 } },
       { key: { room_number: 1 } },
       { key: { timestamp: -1 } }
+    ]),
+
+    // Webpage content collection
+    db.collection('webpage_content').createIndexes([
+      { key: { type: 1 } },
+      { key: { status: 1 } },
+      { key: { created_by: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // Email templates collection
+    db.collection('email_templates').createIndexes([
+      { key: { type: 1 } },
+      { key: { is_active: 1 } },
+      { key: { created_by: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // Email campaigns collection
+    db.collection('email_campaigns').createIndexes([
+      { key: { template_id: 1 } },
+      { key: { status: 1 } },
+      { key: { created_by: 1 } },
+      { key: { scheduled_at: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // Notifications collection
+    db.collection('notifications').createIndexes([
+      { key: { type: 1 } },
+      { key: { priority: 1 } },
+      { key: { status: 1 } },
+      { key: { created_by: 1 } },
+      { key: { scheduled_at: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // User notifications collection
+    db.collection('user_notifications').createIndexes([
+      { key: { notification_id: 1, user_id: 1 }, unique: true },
+      { key: { user_id: 1, read: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // Email tracking collection
+    db.collection('email_tracking').createIndexes([
+      { key: { notification_id: 1 } },
+      { key: { campaign_id: 1 } },
+      { key: { user_id: 1 } },
+      { key: { event_type: 1 } },
+      { key: { timestamp: -1 } }
+    ]),
+
+    // Push subscriptions collection
+    db.collection('push_subscriptions').createIndexes([
+      { key: { user_id: 1 } },
+      { key: { 'subscription.endpoint': 1 }, unique: true },
+      { key: { created_at: -1 } }
     ])
   ]);
 
@@ -382,6 +581,13 @@ export function getCollections(db: Db) {
     sessions: db.collection<SessionSchema>('sessions'),
     meals: db.collection<MealSchema>('meals'),
     workshopAttendanceLogs: db.collection<WorkshopAttendanceLogSchema>('workshop_attendance_logs'),
-    accommodationLogs: db.collection<AccommodationLogSchema>('accommodation_logs')
+    accommodationLogs: db.collection<AccommodationLogSchema>('accommodation_logs'),
+    webpageContent: db.collection<WebpageContentSchema>('webpage_content'),
+    emailTemplates: db.collection<EmailTemplateSchema>('email_templates'),
+    emailCampaigns: db.collection<EmailCampaignSchema>('email_campaigns'),
+    notifications: db.collection<NotificationSchema>('notifications'),
+    userNotifications: db.collection<UserNotificationSchema>('user_notifications'),
+    emailTracking: db.collection<EmailTrackingSchema>('email_tracking'),
+    pushSubscriptions: db.collection<PushSubscriptionSchema>('push_subscriptions')
   };
 }

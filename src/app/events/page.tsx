@@ -1,15 +1,94 @@
 'use client';
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Script from "next/script";
 import { Calendar, MapPin, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import EventTimeline from "@/components/shared/EventTimeline";
-import { MOCK_EVENT_DAYS, MOCK_EVENT_BENEFITS } from "@/lib/mock-data";
+import { EVENT_SCHEDULE as MOCK_EVENT_DAYS } from "@/data";
 import { generateEventStructuredData } from "@/lib/seo";
 
+const MOCK_EVENT_BENEFITS = [
+  { title: "Networking", description: "Connect with industry professionals" },
+  { title: "Learning", description: "Gain new skills and knowledge" }
+];
+
+interface TimelineEvent {
+  readonly time: string;
+  readonly duration: number;
+  readonly track_a?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
+  };
+  readonly track_b?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
+  };
+  readonly unified?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
+  };
+}
+
+interface EventDay {
+  readonly id: string;
+  readonly title: string;
+  readonly date: string;
+  readonly dress_code: string;
+  readonly color: string;
+  readonly events: readonly TimelineEvent[];
+}
+
 export default function Events() {
+  const [eventDays, setEventDays] = useState<readonly EventDay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [, setUseDatabase] = useState(false);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        // Try to fetch events from database first
+        const response = await fetch('/api/public/webpage-content?type=event&status=published');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.contents && data.contents.length > 0) {
+            // Transform database content to match expected format
+            const transformedEvents = data.contents.map((content: { content: string }) => {
+              try {
+                return JSON.parse(content.content);
+              } catch {
+                return content;
+              }
+            });
+            setEventDays(transformedEvents);
+            setUseDatabase(true);
+          } else {
+            // Fallback to static data
+            setEventDays(MOCK_EVENT_DAYS);
+            setUseDatabase(false);
+          }
+        } else {
+          // Fallback to static data
+          setEventDays(MOCK_EVENT_DAYS);
+          setUseDatabase(false);
+        }
+      } catch (error) {
+        console.error('Failed to load events:', error);
+        // Fallback to static data
+        setEventDays(MOCK_EVENT_DAYS);
+        setUseDatabase(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://samyukta..vercel.app';
   
   const eventData = generateEventStructuredData({
@@ -51,8 +130,8 @@ export default function Events() {
       />
       
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-900 to-gray-800">
-      {/* Hero Section */}
-      <section className="section-padding">
+        {/* Hero Section */}
+        <section className="section-padding">
         <div className="container-responsive">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -88,9 +167,15 @@ export default function Events() {
           </motion.div>
 
           {/* Timeline Tabs */}
-          <Tabs defaultValue="day1" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-gray-800/40 mb-8 sm:mb-10 lg:mb-12 h-30 lg:h-20">
-              {MOCK_EVENT_DAYS.map((day) => (
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400 mx-auto"></div>
+              <p className="text-gray-400 mt-4">Loading events...</p>
+            </div>
+          ) : (
+            <Tabs defaultValue={eventDays[0]?.id || "day1"} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 bg-gray-800/40 mb-8 sm:mb-10 lg:mb-12 h-30 lg:h-20">
+                {eventDays.map((day) => (
                 <TabsTrigger
                   key={day.id}
                   value={day.id}
@@ -104,34 +189,35 @@ export default function Events() {
               ))}
             </TabsList>
 
-            {MOCK_EVENT_DAYS.map((day) => (
-              <TabsContent key={day.id} value={day.id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Day Header */}
-                  <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-                    <div className="text-spacing-lg">
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
-                        {day.title}
-                      </h2>
-                      <p className="text-lg sm:text-xl text-gray-300">{day.date}</p>
-                      <div className="flex justify-center items-center">
-                        <Badge className={`bg-gradient-to-r ${day.color} text-white px-3 sm:px-4 py-2 text-sm sm:text-base`}>
-                          {day.dress_code} Dress Code
-                        </Badge>
+              {eventDays.map((day) => (
+                <TabsContent key={day.id} value={day.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {/* Day Header */}
+                    <div className="text-center mb-8 sm:mb-10 lg:mb-12">
+                      <div className="text-spacing-lg">
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
+                          {day.title}
+                        </h2>
+                        <p className="text-lg sm:text-xl text-gray-300">{day.date}</p>
+                        <div className="flex justify-center items-center">
+                          <Badge className={`bg-gradient-to-r ${day.color} text-white px-3 sm:px-4 py-2 text-sm sm:text-base`}>
+                            {day.dress_code} Dress Code
+                          </Badge>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Timeline */}
-                  <EventTimeline day={day} />
-                </motion.div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                    {/* Timeline */}
+                    <EventTimeline day={day} />
+                  </motion.div>
+                </TabsContent>
+              ))}
+            </Tabs>
+          )}
         </div>
       </section>
 
@@ -155,7 +241,7 @@ export default function Events() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-3 sm:gap-4 max-w-4xl mx-auto">
-            {MOCK_EVENT_BENEFITS.map((benefit: string, index: number) => (
+            {MOCK_EVENT_BENEFITS.map((benefit, index: number) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -165,7 +251,10 @@ export default function Events() {
                 className="flex items-center space-x-2 sm:space-x-3 bg-gray-800/40 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-gray-700"
               >
                 <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-violet-400 flex-shrink-0"></div>
-                <span className="text-sm sm:text-base text-gray-300">{benefit}</span>
+                <div>
+                  <span className="text-sm sm:text-base text-white font-medium">{benefit.title}</span>
+                  <p className="text-xs sm:text-sm text-gray-400">{benefit.description}</p>
+                </div>
               </motion.div>
             ))}
           </div>

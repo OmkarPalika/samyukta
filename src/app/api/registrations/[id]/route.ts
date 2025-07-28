@@ -74,6 +74,20 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  return updateRegistration(request, params);
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return updateRegistration(request, params);
+}
+
+async function updateRegistration(
+  request: NextRequest,
+  params: Promise<{ id: string }>
+) {
   try {
     const collections = await getTypedCollections();
     const { id: registrationId } = await params;

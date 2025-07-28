@@ -80,14 +80,14 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
 
   return (
     <Card className="bg-gray-800/40 border-gray-700">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-green-400" />
-            Revenue Analytics
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+            <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-green-400 flex-shrink-0" />
+            <span className="truncate">Revenue Analytics</span>
           </CardTitle>
           <Select value={viewType} onValueChange={(value: 'daily' | 'cumulative' | 'breakdown') => setViewType(value)}>
-            <SelectTrigger className="w-36 bg-gray-700 border-gray-600 text-white">
+            <SelectTrigger className="w-full sm:w-36 bg-gray-700 border-gray-600 text-white text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-gray-800 border-gray-700">
@@ -99,45 +99,46 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
         </div>
         
         {/* Revenue Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-          <div className="bg-gray-700/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <TrendingUp className="h-4 w-4 text-green-400" />
-              <span className="text-xs text-gray-400">Total Revenue</span>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mt-3 sm:mt-4">
+          <div className="bg-gray-700/30 rounded-lg p-2 sm:p-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-400 flex-shrink-0" />
+              <span className="text-xs text-gray-400 truncate">Total Revenue</span>
             </div>
-            <div className="text-lg font-bold text-white">₹{totalRevenue.toLocaleString()}</div>
+            <div className="text-sm sm:text-lg font-bold text-white">₹{totalRevenue.toLocaleString()}</div>
           </div>
           
-          <div className="bg-gray-700/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Clock className="h-4 w-4 text-yellow-400" />
-              <span className="text-xs text-gray-400">Pending</span>
+          <div className="bg-gray-700/30 rounded-lg p-2 sm:p-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-400 flex-shrink-0" />
+              <span className="text-xs text-gray-400 truncate">Pending</span>
             </div>
-            <div className="text-lg font-bold text-white">₹{pendingRevenue.toLocaleString()}</div>
+            <div className="text-sm sm:text-lg font-bold text-white">₹{pendingRevenue.toLocaleString()}</div>
           </div>
           
-          <div className="bg-gray-700/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <CreditCard className="h-4 w-4 text-blue-400" />
-              <span className="text-xs text-gray-400">Transactions</span>
+          <div className="bg-gray-700/30 rounded-lg p-2 sm:p-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400 flex-shrink-0" />
+              <span className="text-xs text-gray-400 truncate">Transactions</span>
             </div>
-            <div className="text-lg font-bold text-white">{totalTransactions}</div>
+            <div className="text-sm sm:text-lg font-bold text-white">{totalTransactions}</div>
           </div>
           
-          <div className="bg-gray-700/30 rounded-lg p-3">
-            <div className="flex items-center gap-2 mb-1">
-              <DollarSign className="h-4 w-4 text-purple-400" />
-              <span className="text-xs text-gray-400">Avg. Value</span>
+          <div className="bg-gray-700/30 rounded-lg p-2 sm:p-3">
+            <div className="flex items-center gap-1 sm:gap-2 mb-1">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-purple-400 flex-shrink-0" />
+              <span className="text-xs text-gray-400 truncate">Avg. Value</span>
             </div>
-            <div className="text-lg font-bold text-white">₹{Math.round(avgTransactionValue)}</div>
+            <div className="text-sm sm:text-lg font-bold text-white">₹{Math.round(avgTransactionValue)}</div>
           </div>
         </div>
       </CardHeader>
       
       <CardContent>
         {viewType === 'daily' && (
-          <ChartContainer config={chartConfig} className="h-80">
-            <AreaChart data={chartData}>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <defs>
                 <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#10B981" stopOpacity={0.4}/>
@@ -147,14 +148,16 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
                 dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                interval="preserveStartEnd"
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                width={50}
                 tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
               />
               <ChartTooltip 
@@ -173,11 +176,13 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
               />
             </AreaChart>
           </ChartContainer>
+          </div>
         )}
         
         {viewType === 'cumulative' && (
-          <ChartContainer config={chartConfig} className="h-80">
-            <AreaChart data={chartData}>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <defs>
                 <linearGradient id="cumulativeGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#8B5CF6" stopOpacity={0.4}/>
@@ -187,14 +192,16 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
                 dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                interval="preserveStartEnd"
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                width={50}
                 tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
               />
               <ChartTooltip 
@@ -213,22 +220,26 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
               />
             </AreaChart>
           </ChartContainer>
+          </div>
         )}
 
         {viewType === 'breakdown' && (
-          <ChartContainer config={chartConfig} className="h-80">
-            <ComposedChart data={chartData}>
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 
                 dataKey="date" 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                interval="preserveStartEnd"
               />
               <YAxis 
-                tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                tick={{ fontSize: 10, fill: '#9CA3AF' }}
                 tickLine={false}
                 axisLine={false}
+                width={50}
                 tickFormatter={(value) => `₹${(value / 1000).toFixed(0)}K`}
               />
               <ChartTooltip 
@@ -256,6 +267,7 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
               />
             </ComposedChart>
           </ChartContainer>
+          </div>
         )}
 
         {/* Payment Status Breakdown */}

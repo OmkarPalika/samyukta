@@ -178,15 +178,15 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
 
   return (
     <Card className="bg-gray-800/40 border-gray-700">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-yellow-400" />
-            Event Participation
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+            <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 flex-shrink-0" />
+            <span className="truncate">Event Participation</span>
           </CardTitle>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Select value={showMembers ? 'members' : 'teams'} onValueChange={(value) => setShowMembers(value === 'members')}>
-              <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-20 sm:w-24 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
@@ -196,7 +196,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
             </Select>
             {viewType === 'overview' && (
               <Select value={chartType} onValueChange={(value: 'pie' | 'bar') => setChartType(value)}>
-                <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
+                <SelectTrigger className="w-16 sm:w-20 bg-gray-700 border-gray-600 text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 border-gray-700">
@@ -206,7 +206,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
               </Select>
             )}
             <Select value={viewType} onValueChange={(value: 'workshops' | 'competitions' | 'overview') => setViewType(value)}>
-              <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-28 sm:w-36 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
@@ -223,60 +223,61 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
         {viewType === 'overview' && (
           <div className="space-y-6">
             {/* Overall Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
-                <Users className="h-8 w-8 text-blue-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.total_members : data.overall.teams.total_teams}</div>
-                <div className="text-sm text-gray-400">Total {showMembers ? 'Members' : 'Teams'}</div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+              <div className="bg-gray-700/30 rounded-lg p-2 sm:p-4 text-center">
+                <Users className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-blue-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-sm sm:text-lg lg:text-2xl font-bold text-white">{showMembers ? data.overall.members.total_members : data.overall.teams.total_teams}</div>
+                <div className="text-xs sm:text-sm text-gray-400">Total {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
-                <Code className="h-8 w-8 text-green-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.workshop_members : data.overall.teams.workshop_teams}</div>
-                <div className="text-sm text-gray-400">Workshop {showMembers ? 'Members' : 'Teams'}</div>
+              <div className="bg-gray-700/30 rounded-lg p-2 sm:p-4 text-center">
+                <Code className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-green-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-sm sm:text-lg lg:text-2xl font-bold text-white">{showMembers ? data.overall.members.workshop_members : data.overall.teams.workshop_teams}</div>
+                <div className="text-xs sm:text-sm text-gray-400">Workshop {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
-                <Trophy className="h-8 w-8 text-yellow-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.competition_members : data.overall.teams.competition_teams}</div>
-                <div className="text-sm text-gray-400">Competition {showMembers ? 'Members' : 'Teams'}</div>
+              <div className="bg-gray-700/30 rounded-lg p-2 sm:p-4 text-center">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-yellow-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-sm sm:text-lg lg:text-2xl font-bold text-white">{showMembers ? data.overall.members.competition_members : data.overall.teams.competition_teams}</div>
+                <div className="text-xs sm:text-sm text-gray-400">Competition {showMembers ? 'Members' : 'Teams'}</div>
               </div>
               
-              <div className="bg-gray-700/30 rounded-lg p-4 text-center">
-                <Target className="h-8 w-8 text-purple-400 mx-auto mb-2" />
-                <div className="text-2xl font-bold text-white">{showMembers ? data.overall.members.combo_members : data.overall.teams.combo_teams}</div>
-                <div className="text-sm text-gray-400">Combo {showMembers ? 'Members' : 'Teams'}</div>
+              <div className="bg-gray-700/30 rounded-lg p-2 sm:p-4 text-center">
+                <Target className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-400 mx-auto mb-1 sm:mb-2" />
+                <div className="text-sm sm:text-lg lg:text-2xl font-bold text-white">{showMembers ? data.overall.members.combo_members : data.overall.teams.combo_teams}</div>
+                <div className="text-xs sm:text-sm text-gray-400">Combo {showMembers ? 'Members' : 'Teams'}</div>
               </div>
             </div>
 
             {/* Chart Visualization */}
-            <div className="bg-gray-700/30 rounded-lg p-4">
-              <h4 className="text-white font-medium mb-4">Participation Distribution</h4>
-              <ChartContainer config={chartConfig} className="h-80">
-                {chartType === 'pie' ? (
-                  <PieChart>
-                    <ChartTooltip 
-                      content={<ChartTooltipContent />}
-                      formatter={(value: number, name: string) => {
-                        const total = showMembers ? data.overall.members.total_members : data.overall.teams.total_teams;
-                        return [
-                          `${value} ${showMembers ? 'members' : 'teams'} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
-                          name
-                        ];
-                      }}
-                    />
-                    <Pie
-                      data={chartData.overviewData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percentage }) => `${name}: ${percentage}%`}
-                      outerRadius={120}
-                      fill="#8884d8"
-                      dataKey="value"
-                      stroke="#1F2937"
-                      strokeWidth={2}
-                    >
+            <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4">
+              <h4 className="text-white font-medium mb-3 sm:mb-4 text-sm sm:text-base">Participation Distribution</h4>
+              <div className="w-full overflow-hidden">
+                <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
+                  {chartType === 'pie' ? (
+                    <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                      <ChartTooltip 
+                        content={<ChartTooltipContent />}
+                        formatter={(value: number, name: string) => {
+                          const total = showMembers ? data.overall.members.total_members : data.overall.teams.total_teams;
+                          return [
+                            `${value} ${showMembers ? 'members' : 'teams'} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
+                            name
+                          ];
+                        }}
+                      />
+                      <Pie
+                        data={chartData.overviewData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percentage }) => `${name}: ${percentage}%`}
+                        outerRadius="75%"
+                        fill="#8884d8"
+                        dataKey="value"
+                        stroke="#1F2937"
+                        strokeWidth={2}
+                      >
                       {chartData.overviewData.map((entry, index) => (
                         <Cell 
                           key={`cell-${index}`} 
@@ -287,18 +288,20 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                     </Pie>
                   </PieChart>
                 ) : (
-                  <BarChart data={chartData.overviewData}>
+                  <BarChart data={chartData.overviewData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                     <XAxis 
                       dataKey="name" 
-                      tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                      tick={{ fontSize: 10, fill: '#9CA3AF' }}
                       tickLine={false}
                       axisLine={false}
+                      interval="preserveStartEnd"
                     />
                     <YAxis 
-                      tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                      tick={{ fontSize: 10, fill: '#9CA3AF' }}
                       tickLine={false}
                       axisLine={false}
+                      width={40}
                     />
                     <ChartTooltip 
                       content={<ChartTooltipContent />}
@@ -313,25 +316,29 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                   </BarChart>
                 )}
               </ChartContainer>
+              </div>
             </div>
           </div>
         )}
 
         {viewType === 'workshops' && (
           <div className="space-y-6">
-            <ChartContainer config={chartConfig} className="h-80">
-              <ComposedChart data={chartData.workshopChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
+            <div className="w-full overflow-hidden">
+              <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
+                <ComposedChart data={chartData.workshopChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis 
+                    dataKey="name" 
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
                   tickLine={false}
                   axisLine={false}
+                  interval="preserveStartEnd"
                 />
                 <YAxis 
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
                   tickLine={false}
                   axisLine={false}
+                  width={40}
                 />
                 <ChartTooltip 
                   content={<ChartTooltipContent />}
@@ -357,6 +364,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                 />
               </ComposedChart>
             </ChartContainer>
+            </div>
 
             {/* Workshop Details */}
             <div className="space-y-4">
@@ -426,19 +434,22 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
 
         {viewType === 'competitions' && (
           <div className="space-y-6">
-            <ChartContainer config={chartConfig} className="h-80">
-              <ComposedChart data={chartData.competitionChartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
-                  tickLine={false}
-                  axisLine={false}
+            <div className="w-full overflow-hidden">
+              <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
+                <ComposedChart data={chartData.competitionChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
+                  <XAxis 
+                    dataKey="name" 
+                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={false}
+                    interval="preserveStartEnd"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 10, fill: '#9CA3AF' }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={40}
                 />
                 <ChartTooltip 
                   content={<ChartTooltipContent />}
@@ -471,6 +482,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
                 />
               </ComposedChart>
             </ChartContainer>
+            </div>
 
             {/* Competition Details */}
             <div className="space-y-4">

@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Logo from '@/components/shared/Logo';
 import UserMenu from '@/components/shared/UserMenu';
+import { NotificationPopover } from '@/components/shared/NotificationPopover';
 import {
   Menu, QrCode, Trophy, Users, Camera, Calendar, HelpCircle,
   LogOut, Home, Settings, Bell, Shield, FileText
@@ -45,7 +46,8 @@ export default function DashboardNavigation({ user, onLogout }: DashboardNavigat
     if (user?.role === 'admin') {
       baseItems.push(
         { path: '/dashboard/admin/registration-management', label: 'Registrations', icon: <FileText className="w-5 h-5 mr-3 text-cyan-400" /> },
-        { path: '/dashboard/admin/user-management', label: 'User Management', icon: <Shield className="w-5 h-5 mr-3 text-red-400" /> }
+        { path: '/dashboard/admin/user-management', label: 'User Management', icon: <Shield className="w-5 h-5 mr-3 text-red-400" /> },
+        { path: '/dashboard/admin/notifications', label: 'Send Notifications', icon: <Bell className="w-5 h-5 mr-3 text-purple-400" /> }
       );
     }
 
@@ -63,7 +65,8 @@ export default function DashboardNavigation({ user, onLogout }: DashboardNavigat
             {/* Desktop navigation removed as we're using tabs */}
           </div>
 
-          <div className="flex flex-shrink-0">
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <NotificationPopover />
             <UserMenu user={user} onLogout={onLogout} variant="dashboard" />
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>

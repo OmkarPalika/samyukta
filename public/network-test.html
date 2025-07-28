@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Test - Samyukta 2025</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #4CAF50, #2196F3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .test-button {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+        
+        .test-button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .test-button:active {
+            transform: translateY(0);
+        }
+        
+        .link {
+            color: #4CAF50;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .link:hover {
+            text-decoration: underline;
+        }
+        
+        .emoji {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Samyukta 2025</div>
+            <h2>Network Connectivity Test</h2>
+        </div>
+        
+        <div class="status">
+            <div class="emoji">🎉</div>
+            <h2>SUCCESS!</h2>
+            <p>Your mobile device can successfully connect to the server!</p>
+        </div>
+        
+        <div class="info-card">
+            <h3>📊 Connection Details</h3>
+            <p><strong>Server IP:</strong> 192.168.29.118</p>
+            <p><strong>Port:</strong> 3000</p>
+            <p><strong>Protocol:</strong> HTTP</p>
+            <p><strong>Time:</strong> <span id="current-time"></span></p>
+        </div>
+        
+        <div class="info-card">
+            <h3>🧪 Test Actions</h3>
+            <button class="test-button" onclick="testAPI()">Test API Connection</button>
+            <button class="test-button" onclick="testAuth()">Test Authentication</button>
+            <button class="test-button" onclick="goToApp()">Go to Main App</button>
+        </div>
+        
+        <div class="info-card">
+            <h3>🔗 Quick Links</h3>
+            <p><a href="/" class="link">🏠 Home Page</a></p>
+            <p><a href="/login" class="link">🔐 Login Page</a></p>
+            <p><a href="/test-auth" class="link">🧪 Auth Test Page</a></p>
+            <p><a href="/dashboard" class="link">📊 Dashboard</a></p>
+        </div>
+        
+        <div id="results" style="display: none;">
+            <h4>Test Results:</h4>
+            <div id="test-output"></div>
+        </div>
+        
+        <div class="info-card">
+            <h3>✅ Next Steps</h3>
+            <p>Since you can see this page, network connectivity is working!</p>
+            <p>If the main app still doesn't load, try:</p>
+            <ul style="text-align: left; margin-top: 10px;">
+                <li>Clear your mobile browser cache</li>
+                <li>Try a different browser (Chrome, Firefox, Safari)</li>
+                <li>Check if you have any VPN or proxy enabled</li>
+                <li>Restart your mobile device's WiFi connection</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        // Update current time
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Test functions
+        async function testAPI() {
+            showResults();
+            addResult('🔄 Testing API connection...');
+            
+            try {
+                const response = await fetch('/api/competitions');
+                const data = await response.json();
+                addResult(`✅ API test successful! Status: ${response.status}`);
+                addResult(`📊 Received ${Array.isArray(data) ? data.length : 'some'} competitions`);
+            } catch (error) {
+                addResult(`❌ API test failed: ${error.message}`);
+            }
+        }
+        
+        async function testAuth() {
+            showResults();
+            addResult('🔄 Testing authentication endpoint...');
+            
+            try {
+                const response = await fetch('/api/auth/me');
+                if (response.status === 401) {
+                    addResult('✅ Auth endpoint working (not logged in)');
+                } else {
+                    const data = await response.json();
+                    addResult(`✅ Auth test successful! User: ${data.email || 'Unknown'}`);
+                }
+            } catch (error) {
+                addResult(`❌ Auth test failed: ${error.message}`);
+            }
+        }
+        
+        function goToApp() {
+            addResult('🔄 Redirecting to main app...');
+            window.location.href = '/';
+        }
+        
+        function showResults() {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('test-output').innerHTML = '';
+        }
+        
+        function addResult(message) {
+            const output = document.getElementById('test-output');
+            const p = document.createElement('p');
+            p.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            output.appendChild(p);
+        }
+        
+        // Log successful load
+        console.log('✅ Network test page loaded successfully');
+        console.log('📱 Device info:', navigator.userAgent);
+        console.log('🌐 Connection info:', navigator.connection ? navigator.connection.effectiveType : 'Unknown');
+    </script>
+</body>
+</html>

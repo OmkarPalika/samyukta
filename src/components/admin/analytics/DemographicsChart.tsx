@@ -128,15 +128,15 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
 
   return (
     <Card className="bg-gray-800/40 border-gray-700">
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-white flex items-center gap-2">
-            {getIcon(viewType)}
-            Participant Demographics
+      <CardHeader className="pb-2 sm:pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <CardTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+            <span className="flex-shrink-0">{getIcon(viewType)}</span>
+            <span className="truncate">Participant Demographics</span>
           </CardTitle>
           <div className="flex gap-2">
             <Select value={chartType} onValueChange={(value: 'pie' | 'bar') => setChartType(value)}>
-              <SelectTrigger className="w-24 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-20 sm:w-24 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
@@ -145,12 +145,12 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
               </SelectContent>
             </Select>
             <Select value={viewType} onValueChange={(value: 'colleges' | 'departments' | 'years' | 'tracks') => setViewType(value)}>
-              <SelectTrigger className="w-40 bg-gray-700 border-gray-600 text-white">
+              <SelectTrigger className="w-32 sm:w-40 bg-gray-700 border-gray-600 text-white text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-gray-800 border-gray-700">
-                <SelectItem value="colleges">Colleges/Organizations</SelectItem>
-                <SelectItem value="departments">Departments/Degrees</SelectItem>
+                <SelectItem value="colleges">Colleges</SelectItem>
+                <SelectItem value="departments">Departments</SelectItem>
                 <SelectItem value="years">Roles</SelectItem>
                 <SelectItem value="tracks">Tracks</SelectItem>
               </SelectContent>
@@ -158,7 +158,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
           </div>
         </div>
 
-        <div className="text-sm text-gray-400">
+        <div className="text-xs sm:text-sm text-gray-400">
           Total Participants: {data.totalUsers} • Showing top {chartData.length} {viewType}
         </div>
       </CardHeader>
@@ -166,28 +166,29 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
       <CardContent>
         <div className="space-y-6">
           {/* Chart Visualization */}
-          <ChartContainer config={chartConfig} className="h-80 mx-auto w-full">
-            {chartType === 'pie' ? (
-              <PieChart>
-                <ChartTooltip
-                  content={<ChartTooltipContent />}
-                  formatter={(value: number, name: string) => [
-                    `${value} participants (${((value / data.totalUsers) * 100).toFixed(1)}%)`,
-                    name
-                  ]}
-                />
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, percentage }) => `${name}: ${percentage.toFixed(1)}%`}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  dataKey="count"
-                  stroke="#1F2937"
-                  strokeWidth={2}
-                >
+          <div className="w-full overflow-hidden">
+            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 mx-auto w-full">
+              {chartType === 'pie' ? (
+                <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
+                  <ChartTooltip
+                    content={<ChartTooltipContent />}
+                    formatter={(value: number, name: string) => [
+                      `${value} participants (${((value / data.totalUsers) * 100).toFixed(1)}%)`,
+                      name
+                    ]}
+                  />
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percentage }) => `${name}: ${percentage.toFixed(1)}%`}
+                    outerRadius="75%"
+                    fill="#8884d8"
+                    dataKey="count"
+                    stroke="#1F2937"
+                    strokeWidth={2}
+                  >
                   {chartData.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
@@ -199,21 +200,23 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
                 <ChartLegend content={<ChartLegendContent />} />
               </PieChart>
             ) : (
-              <BarChart data={chartData}>
+              <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 60 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
                 <XAxis
                   dataKey="name"
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
                   tickLine={false}
                   axisLine={false}
                   angle={-45}
                   textAnchor="end"
-                  height={80}
+                  height={60}
+                  interval={0}
                 />
                 <YAxis
-                  tick={{ fontSize: 12, fill: '#9CA3AF' }}
+                  tick={{ fontSize: 10, fill: '#9CA3AF' }}
                   tickLine={false}
                   axisLine={false}
+                  width={40}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}
@@ -232,6 +235,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
               </BarChart>
             )}
           </ChartContainer>
+          </div>
 
           {/* Summary Stats */}
           <div className="mt-6 p-4 bg-gray-700/30 rounded-lg">

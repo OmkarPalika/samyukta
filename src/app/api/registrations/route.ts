@@ -222,7 +222,8 @@ export async function POST(request: NextRequest) {
         club_name: member.club_name || undefined,
         club_designation: member.club_designation,
         present: false,
-        created_at: new Date()
+        created_at: new Date(),
+        updated_at: new Date()
       };
       
       // Insert team member

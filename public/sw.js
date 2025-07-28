@@ -237,47 +237,90 @@ async function handleBackgroundSync() {
 
 // Push notifications
 self.addEventListener('push', (event) => {
-  console.log('Service Worker: Push notification received');
+  console.log('Service Worker: Push notification received', event);
   
+  let notificationData = {};
+  
+  if (event.data) {
+    try {
+      notificationData = event.data.json();
+    } catch (e) {
+      notificationData = {
+        title: 'Samyukta 2025',
+        body: event.data.text() || 'New notification',
+        icon: '/logo.png',
+        badge: '/logo.png'
+      };
+    }
+  }
+
   const options = {
-    body: event.data ? event.data.text() : 'New update available!',
-    icon: '/logo.png',
-    badge: '/logo.png',
-    vibrate: [100, 50, 100],
-    data: {
-      dateOfArrival: Date.now(),
-      primaryKey: 1
-    },
-    actions: [
+    body: notificationData.body || 'New notification from Samyukta 2025',
+    icon: notificationData.icon || '/logo.png',
+    badge: notificationData.badge || '/logo.png',
+    tag: notificationData.tag || 'samyukta-notification',
+    data: notificationData.data || { url: '/dashboard/participant/notifications' },
+    actions: notificationData.actions || [
       {
-        action: 'explore',
-        title: 'View Details',
-        icon: '/icons/checkmark.png'
+        action: 'view',
+        title: 'View',
+        icon: '/icons/view-icon.png'
       },
       {
-        action: 'close',
-        title: 'Close',
-        icon: '/icons/xmark.png'
+        action: 'dismiss',
+        title: 'Dismiss',
+        icon: '/icons/dismiss-icon.png'
       }
-    ]
+    ],
+    requireInteraction: notificationData.requireInteraction || false,
+    silent: notificationData.silent || false,
+    vibrate: notificationData.vibrate || [200, 100, 200],
+    timestamp: Date.now()
   };
   
   event.waitUntil(
-    self.registration.showNotification('Samyukta 2025', options)
+    self.registration.showNotification(
+      notificationData.title || 'Samyukta 2025',
+      options
+    )
   );
 });
 
 // Handle notification clicks
 self.addEventListener('notificationclick', (event) => {
-  console.log('Service Worker: Notification clicked');
+  console.log('Service Worker: Notification clicked', event);
   
   event.notification.close();
   
-  if (event.action === 'explore') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+  const action = event.action;
+  const notificationData = event.notification.data;
+
+  if (action === 'dismiss') {
+    // Just close the notification
+    return;
   }
+
+  // Handle notification click
+  const urlToOpen = action === 'view' && notificationData.url 
+    ? notificationData.url 
+    : notificationData.url || '/dashboard/participant/notifications';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if there's already a window/tab open with the target URL
+        for (const client of clientList) {
+          if (client.url.includes(urlToOpen) && 'focus' in client) {
+            return client.focus();
+          }
+        }
+
+        // If no existing window/tab, open a new one
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
 });
 
 // Message handling from main thread
