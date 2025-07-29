@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Star, Calculator, ArrowRight, Clock, AlertTriangle } from "lucide-react";
+import { Check, Star, Calculator, ArrowRight, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +35,12 @@ export default function Tickets() {
         closed: boolean;
       };
       ai: {
+        remaining: number;
+        registered: number;
+        max: number;
+        closed: boolean;
+      };
+      cybersecurity: {
         remaining: number;
         registered: number;
         max: number;
@@ -91,6 +97,9 @@ export default function Tickets() {
     if (ticketChoice === 'combo') {
       basePrice = comboCompetition === 'hackathon' ? 950 : 900;
       breakdown.push({ item: `Combo Pass (${comboCompetition})`, price: basePrice });
+    } else if (ticketChoice === 'startup_only') {
+      basePrice = 200;
+      breakdown.push({ item: "Startup Pitch Only", price: 200 });
     } else {
       basePrice = 800;
       breakdown.push({ item: "Entry + Workshop Pass", price: 800 });
@@ -162,7 +171,7 @@ export default function Tickets() {
             >
               <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700">
                 <CardContent className="p-4 sm:p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-white mb-1">{slots.total.remaining}</div>
                       <div className="text-sm text-gray-400 mb-2">Total Slots Left</div>
@@ -178,63 +187,21 @@ export default function Tickets() {
                       <div className="text-sm text-gray-400 mb-2">AI Workshop</div>
                       <Progress value={(slots.workshops.ai.registered / slots.workshops.ai.max) * 100} className="h-2 bg-violet-900/20 [&>div]:bg-violet-500" />
                     </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-400 mb-1">{slots.workshops.cybersecurity.remaining}</div>
+                      <div className="text-sm text-gray-400 mb-2">Cybersecurity Workshop</div>
+                      <Progress value={(slots.workshops.cybersecurity.registered / slots.workshops.cybersecurity.max) * 100} className="h-2 bg-red-900/20 [&>div]:bg-red-500" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           )}
 
-          {/* Direct Join Option */}
-          {slots && slots.direct_join.available && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="max-w-4xl mx-auto mb-8 sm:mb-12"
-            >
-              <Card className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/20">
-                <CardHeader>
-                  <CardTitle className="text-orange-400 flex items-center">
-                    <AlertTriangle className="w-5 h-5 mr-2" />
-                    Direct Competition Entry Available!
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-gray-300 mb-4">Workshop slots are filling up fast! Join competitions directly with starter kit and certificates.</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700">
-                      <h4 className="text-white font-semibold mb-2">Hackathon Direct Entry</h4>
-                      <div className="text-2xl font-bold text-green-400 mb-2">₹{slots.direct_join.hackathon_price}</div>
-                      <ul className="text-sm text-gray-300 space-y-1">
-                        <li>• Hackathon participation</li>
-                        <li>• Lunch and Refreshments</li>
-                        <li>• Certificate of participation</li>
-                      </ul>
-                    </div>
-                    <div className="bg-gray-800/40 p-4 rounded-lg border border-gray-700">
-                      <h4 className="text-white font-semibold mb-2">Startup Pitch Direct Entry</h4>
-                      <div className="text-2xl font-bold text-green-400 mb-2">₹{slots.direct_join.pitch_price}</div>
-                      <ul className="text-sm text-gray-300 space-y-1">
-                        <li>• Startup pitch competition</li>
-                        <li>• Lunch and Refreshments</li>
-                        <li>• Certificate of participation</li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Link href="/direct-join">
-                      <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
-                        Register for Direct Entry
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+
 
           {/* Ticket Cards */}
-          <div className="grid lg:grid-cols-2 grid-gap mb-8 sm:mb-12 lg:mb-16 max-w-4xl mx-auto">
+          <div className="grid lg:grid-cols-3 grid-gap mb-8 sm:mb-12 lg:mb-16 max-w-6xl mx-auto">
             {/* Entry + Workshop Card */}
             <motion.div whileHover={{ y: -10 }}>
               <Card
@@ -279,6 +246,19 @@ export default function Tickets() {
                               {slots && (
                                 <Badge className={`text-xs ${slots.workshops.ai.remaining <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-violet-500/10 text-violet-400 border-violet-500/20'}`}>
                                   {slots.workshops.ai.remaining} left
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="cybersecurity" id="cybersecurity" disabled={slots?.workshops.cybersecurity.closed} />
+                                <Label htmlFor="cybersecurity" className={`text-xs sm:text-sm ${slots?.workshops.cybersecurity.closed ? 'text-gray-500' : 'text-gray-300'}`}>
+                                  Cybersecurity & Ethical Hacking
+                                </Label>
+                              </div>
+                              {slots && (
+                                <Badge className={`text-xs ${slots.workshops.cybersecurity.remaining <= 10 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-orange-500/10 text-orange-400 border-orange-500/20'}`}>
+                                  {slots.workshops.cybersecurity.remaining} left
                                 </Badge>
                               )}
                             </div>
@@ -332,6 +312,34 @@ export default function Tickets() {
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />One Workshop Track</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Networking & Game Access</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Meals & Refreshments</li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Startup Only Card */}
+            <motion.div whileHover={{ y: -10 }}>
+              <Card
+                onClick={() => setTicketChoice('startup_only')}
+                className={`cursor-pointer bg-gray-800/40 backdrop-blur-sm border-gray-700 h-full transition-all ${ticketChoice === 'startup_only' ? 'ring-2 ring-pink-500' : 'hover:border-gray-600'}`}
+              >
+                <CardHeader>
+                  <div className="text-spacing">
+                    <CardTitle className="text-white text-xl sm:text-2xl">Startup Pitch Only</CardTitle>
+                    <p className="text-2xl sm:text-3xl font-bold text-white">₹200 <span className="text-base sm:text-lg font-normal text-gray-400">/ person</span></p>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="card-gap flex flex-col">
+                    <p className="text-sm sm:text-base text-gray-400">Focused on startup pitch competition only.</p>
+
+                    <ul className="text-xs sm:text-sm text-gray-300 space-y-1 sm:space-y-2">
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Startup Pitch Competition</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Mentorship Sessions</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Networking Access</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Meals & Refreshments</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Certificate of Participation</li>
                     </ul>
                   </div>
                 </CardContent>

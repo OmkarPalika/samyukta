@@ -64,6 +64,7 @@ interface FormData {
   members: TeamMember[];
   tickets: {
     combo: boolean;
+    startupOnly?: boolean;
     workshop: string;
     competition: string;
   };
@@ -95,6 +96,7 @@ export default function Register() {
     workshops: {
       cloud: { remaining: number; closed: boolean };
       ai: { remaining: number; closed: boolean };
+      cybersecurity: { remaining: number; closed: boolean };
     };
     competitions: {
       hackathon: { remaining: number; closed: boolean };
@@ -144,7 +146,7 @@ export default function Register() {
       clubDesignation: "",
       sameAsLead: false
     }],
-    tickets: { combo: false, workshop: "", competition: "" },
+    tickets: { combo: false, startupOnly: false, workshop: "", competition: "" },
     memberTracks: [],
     startupPitchData: {},
     payment: { transactionId: "", screenshot: null }
@@ -523,7 +525,10 @@ export default function Register() {
   const calculatePrice = () => {
     let total = 0;
     
-    if (formData.tickets.combo) {
+    if (formData.tickets.startupOnly) {
+      // Startup-only ticket: ₹200 per person, only startup pitch competition
+      total = 200 * formData.teamSize;
+    } else if (formData.tickets.combo) {
       // Calculate combo pass price based on individual competition track selections
       // Ensure we calculate for all team members, even if memberTracks is shorter
       for (let i = 0; i < formData.teamSize; i++) {
@@ -846,9 +851,9 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${!formData.tickets.combo ? 'ring-2 ring-blue-500' : ''}`}
-                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false } })}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo === false && !formData.tickets.startupOnly ? 'ring-2 ring-blue-500' : ''}`}
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false } })}>
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <FileText className="w-5 h-5 mr-2" />
@@ -866,8 +871,28 @@ export default function Register() {
                 </CardContent>
               </Card>
 
+              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.startupOnly ? 'ring-2 ring-pink-500' : ''}`}
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: true } })}>
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Startup Pitch Only
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-pink-400">₹200</div>
+                  <ul className="space-y-2 text-gray-300 mt-4">
+                    <li>• Startup Pitch Competition</li>
+                    <li>• Mentorship Sessions</li>
+                    <li>• Networking Access</li>
+                    <li>• Meals & Refreshments</li>
+                    <li>• Certificate</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
               <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo ? 'ring-2 ring-violet-500' : ''}`}
-                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: true } })}>
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: true, startupOnly: false } })}>
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <Star className="w-5 h-5 mr-2" />
@@ -1116,6 +1141,7 @@ export default function Register() {
                 memberTracks={formData.memberTracks}
                 startupPitchData={formData.startupPitchData}
                 isComboTicket={formData.tickets.combo}
+                isStartupOnly={formData.tickets.startupOnly}
                 slots={slots}
                 errors={errors}
                 onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
@@ -1137,6 +1163,7 @@ export default function Register() {
                 memberTracks={formData.memberTracks}
                 startupPitchData={formData.startupPitchData}
                 isComboTicket={formData.tickets.combo}
+                isStartupOnly={formData.tickets.startupOnly}
                 slots={slots}
                 errors={errors}
                 onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
@@ -1154,6 +1181,7 @@ export default function Register() {
             {/* Using the PriceSummary component */}
             <PriceSummary
               isComboTicket={formData.tickets.combo}
+              isStartupOnly={formData.tickets.startupOnly}
               teamSize={formData.teamSize}
               memberTracks={formData.memberTracks}
               startupPitchData={formData.startupPitchData}

@@ -93,7 +93,7 @@ export default function Events() {
   
   const eventData = generateEventStructuredData({
     name: "Samyukta 2025 - 4-Day Tech Summit Schedule",
-    description: "Complete schedule of hackathons, AI/ML workshops, cloud computing sessions, pitch competitions, and networking events.",
+    description: "Complete schedule of hackathons, AI/ML workshops, cloud computing sessions, cybersecurity training, pitch competitions, and networking events.",
     startDate: "2025-08-06T09:00:00+05:30",
     endDate: "2025-08-09T18:00:00+05:30",
     location: {

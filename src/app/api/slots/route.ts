@@ -21,6 +21,11 @@ export async function GET() {
       { $group: { _id: null, total: { $sum: '$team_size' } } }
     ]).toArray().then(result => result[0]?.total || 0);
     
+    const cybersecurityCount = await collections.registrations.aggregate([
+      { $match: { workshop_track: 'Cybersecurity' } },
+      { $group: { _id: null, total: { $sum: '$team_size' } } }
+    ]).toArray().then(result => result[0]?.total || 0);
+    
     const hackathonCount = await collections.registrations.aggregate([
       { $match: { competition_track: 'Hackathon' } },
       { $group: { _id: null, total: { $sum: '$team_size' } } }
@@ -45,6 +50,7 @@ export async function GET() {
     const MAX_TOTAL = 400;
     const MAX_CLOUD = 200;
     const MAX_AI = 200;
+    const MAX_CYBERSECURITY = 100;
     const MAX_HACKATHON = 250;
     const MAX_PITCH = 250;
     const MAX_MALE_ACCOMMODATION = 50;
@@ -54,6 +60,7 @@ export async function GET() {
     const remaining_total = Math.max(0, MAX_TOTAL - totalCount);
     const remaining_cloud = Math.max(0, MAX_CLOUD - cloudCount);
     const remaining_ai = Math.max(0, MAX_AI - aiCount);
+    const remaining_cybersecurity = Math.max(0, MAX_CYBERSECURITY - cybersecurityCount);
     const remaining_hackathon = Math.max(0, MAX_HACKATHON - hackathonCount);
     const remaining_pitch = Math.max(0, MAX_PITCH - pitchCount);
     const remaining_male_accommodation = Math.max(0, MAX_MALE_ACCOMMODATION - maleAccommodationCount);
@@ -82,6 +89,12 @@ export async function GET() {
           max: MAX_AI,
           remaining: remaining_ai,
           closed: aiCount >= MAX_AI
+        },
+        cybersecurity: {
+          registered: cybersecurityCount,
+          max: MAX_CYBERSECURITY,
+          remaining: remaining_cybersecurity,
+          closed: cybersecurityCount >= MAX_CYBERSECURITY
         }
       },
       
@@ -123,9 +136,9 @@ export async function GET() {
         }
       },
       
-      // Direct join availability
+      // Direct join availability (disabled)
       direct_join: {
-        available: totalCount > 350,
+        available: false,
         hackathon_price: 400,
         pitch_price: 300
       },
@@ -137,24 +150,28 @@ export async function GET() {
       remaining_total,
       remaining_cloud,
       remaining_ai,
+      remaining_cybersecurity,
       remaining_hackathon,
       remaining_pitch,
       total_registrations: totalCount,
       cloud_workshop: cloudCount,
       ai_workshop: aiCount,
+      cybersecurity_workshop: cybersecurityCount,
       hackathon_competition: hackathonCount,
       pitch_competition: pitchCount,
       max_total: MAX_TOTAL,
       max_cloud: MAX_CLOUD,
       max_ai: MAX_AI,
+      max_cybersecurity: MAX_CYBERSECURITY,
       max_hackathon: MAX_HACKATHON,
       max_pitch: MAX_PITCH,
       event_closed: totalCount >= MAX_TOTAL,
       cloud_closed: cloudCount >= MAX_CLOUD,
       ai_closed: aiCount >= MAX_AI,
+      cybersecurity_closed: cybersecurityCount >= MAX_CYBERSECURITY,
       hackathon_closed: hackathonCount >= MAX_HACKATHON,
       pitch_closed: pitchCount >= MAX_PITCH,
-      direct_join_available: totalCount > 350,
+      direct_join_available: false,
       direct_join_hackathon_price: 400,
       direct_join_pitch_price: 300
     };

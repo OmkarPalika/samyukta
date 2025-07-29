@@ -46,7 +46,7 @@ export const userRegistrationSchema = z.object({
     .min(2, 'Department must be at least 2 characters')
     .max(50, 'Department must not exceed 50 characters')
     .transform(dept => dept.trim()),
-  track: z.enum(['Cloud', 'AI', 'None'], {
+  track: z.enum(['Cloud', 'AI', 'Cybersecurity', 'None'], {
     message: 'Please select a valid track'
   }).optional(),
   linkedin: urlSchema,
@@ -75,7 +75,7 @@ export const userUpdateSchema = z.object({
     .max(50, 'Department must not exceed 50 characters')
     .transform(dept => dept.trim())
     .optional(),
-  track: z.enum(['Cloud', 'AI', 'None']).optional(),
+  track: z.enum(['Cloud', 'AI', 'Cybersecurity', 'None']).optional(),
   linkedin: urlSchema,
   instagram: urlSchema,
   portfolio: urlSchema,
@@ -116,10 +116,10 @@ export const registrationSchema = z.object({
     .int('Team size must be a whole number')
     .min(1, 'Team must have at least 1 member')
     .max(4, 'Team cannot have more than 4 members'),
-  ticket_type: z.enum(['Combo', 'Custom'], {
+  ticket_type: z.enum(['Combo', 'Custom', 'startup_only'], {
     message: 'Please select a valid ticket type'
   }),
-  workshop_track: z.enum(['Cloud', 'AI', 'None'], {
+  workshop_track: z.enum(['Cloud', 'AI', 'Cybersecurity', 'None'], {
     message: 'Please select a valid workshop track'
   }),
   competition_track: z.enum(['Hackathon', 'Pitch', 'None'], {

@@ -111,7 +111,7 @@ export interface RegistrationData {
   team_size?: number;
   members: TeamMember[];
   ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount?: number;
   transaction_id?: string;
@@ -123,7 +123,7 @@ export interface RegistrationCreateRequest {
   college: string;
   members: TeamMember[];
   ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount?: number;
   transaction_id?: string;
@@ -134,7 +134,7 @@ export interface RegistrationUpdateRequest {
   college?: string;
   members?: TeamMember[];
   ticket_type?: 'Combo' | 'Custom';
-  workshop_track?: 'Cloud' | 'AI' | 'None';
+  workshop_track?: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
   competition_track?: 'Hackathon' | 'Pitch' | 'None';
   total_amount?: number;
   transaction_id?: string;
@@ -158,7 +158,7 @@ export interface RegistrationResponse extends Omit<RegistrationData, 'status'> {
 export interface RegistrationFilters {
   college?: string;
   ticket_type?: 'Combo' | 'Custom';
-  workshop_track?: 'Cloud' | 'AI' | 'None';
+  workshop_track?: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
   competition_track?: 'Hackathon' | 'Pitch' | 'None';
   status?: 'completed' | 'pending_review';
   date_from?: string;
@@ -168,7 +168,7 @@ export interface RegistrationFilters {
 
 // Legacy interface for backward compatibility
 export interface RegistrationRequest extends Omit<RegistrationCreateRequest, 'workshop_track' | 'competition_track'> {
-  workshop_track?: 'Cloud Computing' | 'AI & ML';
+  workshop_track?: 'Cloud Computing' | 'AI & ML' | 'Cybersecurity';
   competition_track?: 'Hackathon' | 'Startup Pitch';
 }
 

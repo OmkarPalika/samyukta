@@ -147,8 +147,8 @@ export async function POST(request: NextRequest) {
       college: registrationData.college,
       team_size: registrationData.members.length,
       ticket_type: registrationData.ticket_type,
-      workshop_track: registrationData.workshop_track,
-      competition_track: registrationData.competition_track,
+      workshop_track: registrationData.ticket_type === 'startup_only' ? null : registrationData.workshop_track,
+      competition_track: registrationData.ticket_type === 'startup_only' ? 'Pitch' : registrationData.competition_track,
       total_amount: registrationData.total_amount,
       transaction_id: registrationData.transaction_id,
       payment_screenshot_url: registrationData.payment_screenshot_url,
@@ -159,34 +159,46 @@ export async function POST(request: NextRequest) {
     
     // Check slot availability with participant counts (allow overflow for last team)
     const totalParticipants = await collections.teamMembers.countDocuments({});
-    const workshopParticipants = await collections.registrations.aggregate([
-      { $match: { workshop_track: registrationData.workshop_track } },
-      { $group: { _id: null, total: { $sum: '$team_size' } } }
-    ]).toArray().then(result => result[0]?.total || 0);
     
-    const competitionParticipants = await collections.registrations.aggregate([
-      { $match: { competition_track: registrationData.competition_track } },
+    // For startup_only tickets, skip workshop validation and use Pitch competition
+    const actualWorkshopTrack = registrationData.ticket_type === 'startup_only' ? null : registrationData.workshop_track;
+    const actualCompetitionTrack = registrationData.ticket_type === 'startup_only' ? 'Pitch' : registrationData.competition_track;
+    
+    const workshopParticipants = actualWorkshopTrack ? await collections.registrations.aggregate([
+      { $match: { workshop_track: actualWorkshopTrack } },
       { $group: { _id: null, total: { $sum: '$team_size' } } }
-    ]).toArray().then(result => result[0]?.total || 0);
+    ]).toArray().then(result => result[0]?.total || 0) : 0;
+    
+    const competitionParticipants = actualCompetitionTrack ? await collections.registrations.aggregate([
+      { $match: { competition_track: actualCompetitionTrack } },
+      { $group: { _id: null, total: { $sum: '$team_size' } } }
+    ]).toArray().then(result => result[0]?.total || 0) : 0;
     
     // Reject only if current count already exceeds limit (allows last team overflow)
     if (totalParticipants >= 400) {
       return NextResponse.json({ error: 'Event registrations are closed' }, { status: 400 });
     }
     
-    if (registrationData.workshop_track === 'Cloud' && workshopParticipants >= 200) {
-      return NextResponse.json({ error: 'Cloud workshop registrations are closed' }, { status: 400 });
+    // Skip workshop validation for startup_only tickets
+    if (registrationData.ticket_type !== 'startup_only') {
+      if (actualWorkshopTrack === 'Cloud' && workshopParticipants >= 200) {
+        return NextResponse.json({ error: 'Cloud workshop registrations are closed' }, { status: 400 });
+      }
+      
+      if (actualWorkshopTrack === 'AI' && workshopParticipants >= 200) {
+        return NextResponse.json({ error: 'AI workshop registrations are closed' }, { status: 400 });
+      }
+      
+      if (actualWorkshopTrack === 'Cybersecurity' && workshopParticipants >= 100) {
+        return NextResponse.json({ error: 'Cybersecurity workshop registrations are closed' }, { status: 400 });
+      }
     }
     
-    if (registrationData.workshop_track === 'AI' && workshopParticipants >= 200) {
-      return NextResponse.json({ error: 'AI workshop registrations are closed' }, { status: 400 });
-    }
-    
-    if (registrationData.competition_track === 'Hackathon' && competitionParticipants >= 250) {
+    if (actualCompetitionTrack === 'Hackathon' && competitionParticipants >= 250) {
       return NextResponse.json({ error: 'Hackathon registrations are closed' }, { status: 400 });
     }
     
-    if (registrationData.competition_track === 'Pitch' && competitionParticipants >= 250) {
+    if (actualCompetitionTrack === 'Pitch' && competitionParticipants >= 250) {
       return NextResponse.json({ error: 'Startup Pitch registrations are closed' }, { status: 400 });
     }
     

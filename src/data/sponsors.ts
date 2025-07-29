@@ -165,11 +165,14 @@ export const PARTNERS_DATA = [
   "AWS Educate",
   "Google Cloud",
   "GeeksforGeeks",
-  "Institute's Innovation Council",
+  "Institute's Innovation Council [IIC]",
+  "TIE Vizag",
   "AMTZ",
+  "BizVerve",
+  "Prismatica",
+  "MMK Universe",
   "UniGlobal",
   "Interview Buddy",
-  "MMK Universe"
 ] as const;
 
 // Event Statistics

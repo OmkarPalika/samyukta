@@ -42,7 +42,7 @@ export interface RegistrationSchema {
   college: string;
   team_size: number;
   ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount: number;
   transaction_id?: string;
@@ -83,7 +83,7 @@ export interface TeamMemberSchema {
 export interface WorkshopSchema {
   _id?: ObjectId;
   name: string;
-  track: 'Cloud' | 'AI';
+  track: 'Cloud' | 'AI' | 'Cybersecurity';
   instructor: string;
   description: string;
   schedule: Date;

@@ -16,7 +16,8 @@ import {
   Target,
   Brain,
   Cloud,
-  ArrowRight
+  ArrowRight,
+  Gamepad2
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -95,12 +96,12 @@ export default function Home() {
       .catch(() => setUser(null));
   }, []);
 
-  const iconMap = useMemo(() => ({ Cloud, Brain, Trophy, Target }), []);
+  const iconMap = useMemo(() => ({ Cloud, Brain, Trophy, Target, Shield: Users, Gamepad2 }), []); // Using Users icon as a temporary Shield icon
   
   const highlights = useMemo(() => 
     EVENT_CONFIG.tracks?.map((track: { title: string; description: string; color: string; icon: string }) => ({
       ...track,
-      icon: iconMap[track.icon as keyof typeof iconMap]
+      icon: iconMap[track.icon as keyof typeof iconMap] || Target // Fallback to Target icon if the icon is not found
     })) || [], 
     [iconMap]
   );
@@ -286,7 +287,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <div className="flex flex-wrap justify-center xl:justify-between gap-4 md:gap-8">
+            <div className="flex flex-wrap justify-center gap-4 md:gap-8 max-w-5xl mx-auto">
               {partners.map((partner, index) => (
                 <motion.div
                   key={partner}

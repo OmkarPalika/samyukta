@@ -48,7 +48,7 @@ export const FAQ_DATA = [
     id: 5,
     category: 'event',
     question: 'Which tracks are available?',
-    answer: 'We offer 4 main tracks: 1) Cloud Computing (AWS-powered), 2) AI & Machine Learning (Google Cloud), 3) Hackathon & Startup Pitch, 4) Interactive Games & Networking. You can participate in multiple tracks!'
+    answer: 'We offer 5 main tracks: 1) Cloud Computing (AWS-powered), 2) AI & Machine Learning (Google Cloud), 3) Cybersecurity & Ethical Hacking, 4) Hackathon & Startup Pitch, 5) Interactive Games & Networking. You can participate in multiple tracks!'
   },
   {
     id: 6,
@@ -84,7 +84,13 @@ export const FAQ_DATA = [
     id: 11,
     category: 'technical',
     question: 'What software/tools will I learn?',
-    answer: 'You\'ll get hands-on experience with AWS services, Google Cloud Platform, popular AI/ML frameworks, development tools, and more. We provide free credits and accounts for all major platforms.'
+    answer: 'You\'ll get hands-on experience with AWS services, Google Cloud Platform, popular AI/ML frameworks, cybersecurity tools, development tools, and more. We provide free credits and accounts for all major platforms.'
+  },
+  {
+    id: 19,
+    category: 'technical',
+    question: 'What will I learn in the Cybersecurity track?',
+    answer: 'The Cybersecurity track covers ethical hacking fundamentals, penetration testing, vulnerability assessment, network security, and hands-on labs with industry-standard tools. Perfect for beginners and those looking to enhance their security skills!'
   },
   {
     id: 12,
