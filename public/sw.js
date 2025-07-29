@@ -6,7 +6,7 @@ const DYNAMIC_CACHE_NAME = 'samyukta-dynamic-v1';
 // Assets to cache immediately
 const STATIC_ASSETS = [
   '/',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/favicon.ico',
   '/logo.png',
   '/offline.html',

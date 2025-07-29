@@ -19,6 +19,7 @@ const getTicketTheme = (data: RegistrationData) => {
   const isPitch = data.ticketType.toLowerCase().includes('pitch');
   const isCloud = data.workshopTrack?.toLowerCase().includes('cloud');
   const isAI = data.workshopTrack?.toLowerCase().includes('ai');
+  const isCybersecurity = data.workshopTrack?.toLowerCase().includes('cybersecurity');
   const teamSize = data.teamMembers?.length || 1;
 
   if (isCombo && isHackathon) {
@@ -66,6 +67,18 @@ const getTicketTheme = (data: RegistrationData) => {
       pattern: 'ai',
       title: 'AI/ML MASTERY PASS',
       subtitle: 'Google Cloud Intelligence Track'
+    };
+  }
+  
+  if (isCybersecurity) {
+    return {
+      gradient: 'linear-gradient(135deg, #DC2626 0%, #EF4444 50%, #F87171 100%)',
+      accent: '#DC2626',
+      secondary: '#EF4444',
+      icon: '🔒',
+      pattern: 'cybersecurity',
+      title: 'CYBERSECURITY PASS',
+      subtitle: 'Ethical Hacking & Security Track'
     };
   }
   

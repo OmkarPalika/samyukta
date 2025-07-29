@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,10 +36,12 @@ interface TeamTrackSelectionProps {
   memberTracks: TeamMemberTrack[];
   startupPitchData: Record<number, StartupPitchData>;
   isComboTicket: boolean;
+  isStartupOnly?: boolean;
   slots: {
     workshops: {
       cloud: { remaining: number; closed: boolean };
       ai: { remaining: number; closed: boolean };
+      cybersecurity: { remaining: number; closed: boolean };
     };
     competitions: {
       hackathon: { remaining: number; closed: boolean };
@@ -56,6 +58,7 @@ export default function TeamTrackSelection({
   memberTracks,
   startupPitchData,
   isComboTicket,
+  isStartupOnly = false,
   slots,
   onTrackChange,
   onOpenPitchDialog
@@ -81,6 +84,116 @@ export default function TeamTrackSelection({
     return newTracks;
   };
 
+  // Initialize tracks for startup-only tickets
+  useEffect(() => {
+    if (isStartupOnly) {
+      const tracksNeedUpdate = memberTracks.length !== members.length || 
+        memberTracks.some(track => track.competitionTrack !== "Startup Pitch" || track.workshopTrack !== "");
+      
+      if (tracksNeedUpdate) {
+        const newTracks = Array(members.length).fill({
+          workshopTrack: "",
+          competitionTrack: "Startup Pitch"
+        });
+        onTrackChange(newTracks);
+      }
+    }
+  }, [isStartupOnly, members.length, memberTracks, onTrackChange]);
+
+  // Handle pitch data updates separately
+  useEffect(() => {
+    if (isStartupOnly && startupPitchData[0]?.startupName && memberTracks.length > 0) {
+      // Only trigger if tracks are not already set correctly
+      const tracksAreCorrect = memberTracks.every(track => 
+        track.competitionTrack === "Startup Pitch" && track.workshopTrack === ""
+      );
+      
+      if (!tracksAreCorrect) {
+        const newTracks = Array(members.length).fill({
+          workshopTrack: "",
+          competitionTrack: "Startup Pitch"
+        });
+        onTrackChange(newTracks);
+      }
+    }
+  }, [isStartupOnly, startupPitchData, members.length, memberTracks, onTrackChange]);
+
+  if (isStartupOnly) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-pink-500/10 border-pink-500/20">
+          <CardHeader>
+            <CardTitle className="text-pink-400">Startup Pitch Only - Track Selection</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-pink-500/10 border border-pink-500/20 rounded-lg p-4">
+              <h4 className="text-pink-400 font-medium mb-2">Your Registration Includes:</h4>
+              <ul className="text-gray-300 space-y-1">
+                <li>• Startup Pitch Competition</li>
+                <li>• Mentorship Sessions</li>
+                <li>• Networking Access</li>
+                <li>• Meals & Refreshments</li>
+                <li>• Certificate of Participation</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Competition Track (Pre-selected)</Label>
+              <div className="bg-gray-700/50 border border-gray-600 rounded-md p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white">Startup Pitch Competition</span>
+                  <Badge className="bg-pink-500/10 text-pink-400">Included</Badge>
+                </div>
+              </div>
+            </div>
+
+            {/* Pitch details section */}
+            <div className="space-y-2">
+              {startupPitchData[0] ? (
+                <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h4 className="text-purple-400 font-medium text-sm mb-1">Pitch Details Added</h4>
+                      <p className="text-gray-300 text-sm">
+                        <strong>Startup:</strong> {startupPitchData[0].startupName}
+                      </p>
+                      <p className="text-gray-300 text-sm">
+                        <strong>Category:</strong> {startupPitchData[0].pitchCategory}
+                      </p>
+                      <p className="text-gray-300 text-sm">
+                        <strong>Team Size:</strong> {startupPitchData[0].teamSize} members
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onOpenPitchDialog(0)}
+                      className="text-purple-400 border-purple-400 hover:bg-purple-400/10 ml-2"
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onOpenPitchDialog(0)}
+                  className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
+                >
+                  Add Pitch Details for Team
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Default return for non-startup-only tickets
   return (
     <div className="space-y-8">
       {/* Shared track selection section */}
@@ -118,6 +231,14 @@ export default function TeamTrackSelection({
                     <span>AI/ML (Google)</span>
                     <Badge className={`ml-2 text-xs ${slots?.workshops.ai.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
                       {slots?.workshops.ai.closed ? 'FULL' : `${slots?.workshops.ai.remaining || 0} left`}
+                    </Badge>
+                  </div>
+                </SelectItem>
+                <SelectItem value="Cybersecurity" disabled={slots?.workshops.cybersecurity?.closed}>
+                  <div className="flex items-center justify-between w-full">
+                    <span>Cybersecurity</span>
+                    <Badge className={`ml-2 text-xs ${slots?.workshops.cybersecurity?.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
+                      {slots?.workshops.cybersecurity?.closed ? 'FULL' : `${slots?.workshops.cybersecurity?.remaining || 0} left`}
                     </Badge>
                   </div>
                 </SelectItem>

@@ -53,6 +53,13 @@ export function NotificationPopover({ className }: NotificationPopoverProps) {
         credentials: 'include'
       });
 
+      if (response.status === 401) {
+        // User not logged in - silently fail
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to load notifications');
       }
@@ -63,6 +70,8 @@ export function NotificationPopover({ className }: NotificationPopoverProps) {
     } catch (error) {
       console.error('Failed to load notifications:', error);
       // Don't show error toast for notifications as it's not critical
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }

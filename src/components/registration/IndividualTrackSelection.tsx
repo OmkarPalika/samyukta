@@ -36,10 +36,12 @@ interface IndividualTrackSelectionProps {
   memberTracks: TeamMemberTrack[];
   startupPitchData: Record<number, StartupPitchData>;
   isComboTicket: boolean;
+  isStartupOnly?: boolean;
   slots: {
     workshops: {
       cloud: { remaining: number; closed: boolean };
       ai: { remaining: number; closed: boolean };
+      cybersecurity: { remaining: number; closed: boolean };
     };
     competitions: {
       hackathon: { remaining: number; closed: boolean };
@@ -56,6 +58,7 @@ export default function IndividualTrackSelection({
   memberTracks,
   startupPitchData,
   isComboTicket,
+  isStartupOnly = false,
   slots,
   errors,
   onTrackChange,
@@ -107,6 +110,12 @@ export default function IndividualTrackSelection({
     onTrackChange(updatedTracks);
   };
 
+  // For startup-only tickets, this component should not be used
+  // The TeamTrackSelection component handles startup-only tickets
+  if (isStartupOnly) {
+    return null;
+  }
+
   return (
     <div className="space-y-6">
       {members.map((member, index) => {
@@ -143,6 +152,14 @@ export default function IndividualTrackSelection({
                         <span>AI/ML (Google)</span>
                         <Badge className={`ml-2 text-xs ${slots?.workshops.ai.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
                           {slots?.workshops.ai.closed ? 'FULL' : `${slots?.workshops.ai.remaining || 0} left`}
+                        </Badge>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Cybersecurity" disabled={slots?.workshops.cybersecurity?.closed}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>Cybersecurity</span>
+                        <Badge className={`ml-2 text-xs ${slots?.workshops.cybersecurity?.closed ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'}`}>
+                          {slots?.workshops.cybersecurity?.closed ? 'FULL' : `${slots?.workshops.cybersecurity?.remaining || 0} left`}
                         </Badge>
                       </div>
                     </SelectItem>

@@ -36,7 +36,8 @@ export const EVENT_DATA = {
     days: 4,
     partners: 5,
     cloud_workshop: 200,
-    ai_workshop: 200
+    ai_workshop: 200,
+    cybersecurity_workshop: 100
   },
   
   // Pricing
@@ -44,6 +45,7 @@ export const EVENT_DATA = {
     entry_workshop: 800,
     combo_hackathon: 950,
     combo_pitch: 900,
+    startup_only: 200,
     hackathon_addon: 150,
     pitch_addon: 100,
     direct_join_hackathon: 250,
@@ -82,6 +84,12 @@ export const EVENT_DATA = {
       icon: "Brain"
     },
     {
+      title: "Cybersecurity Workshop",
+      description: "Hands-on cybersecurity training and ethical hacking",
+      color: "from-red-500 to-orange-500",
+      icon: "Shield"
+    },
+    {
       title: "Hackathon & Pitch",
       description: "Compete for exciting prizes and recognition", 
       color: "from-pink-500 to-rose-500",
@@ -90,12 +98,16 @@ export const EVENT_DATA = {
     {
       title: "Interactive Games",
       description: "QR Quest and Imposter Hunt across campus",
-      color: "from-green-500 to-emerald-500", 
+      color: "from-green-500 to-emerald-500",
       icon: "Target"
+    },
+    {
+      title: "Simulation Games",
+      description: "Mind-bending games series blending Squid Game and Alice in Borderland",
+      color: "from-amber-500 to-yellow-500",
+      icon: "Gamepad2"
     }
-  ],
-  
-  // Benefits
+  ],  // Benefits
   benefits: [
     "Exclusive starter kit with swag and resources",
     "Access to all interactive games and competitions",

@@ -24,6 +24,7 @@ interface StartupPitchData {
 
 interface PriceSummaryProps {
   isComboTicket: boolean;
+  isStartupOnly?: boolean;
   teamSize: number;
   memberTracks: TeamMemberTrack[];
   startupPitchData?: Record<number, StartupPitchData>;
@@ -32,6 +33,7 @@ interface PriceSummaryProps {
 
 export default function PriceSummary({
   isComboTicket,
+  isStartupOnly = false,
   teamSize,
   memberTracks,
   startupPitchData = {},
@@ -41,7 +43,10 @@ export default function PriceSummary({
   const calculatePrice = useCallback(() => {
     let total = 0;
     
-    if (isComboTicket) {
+    if (isStartupOnly) {
+      // Startup-only ticket: ₹200 per person, only startup pitch competition
+      total = 200 * teamSize;
+    } else if (isComboTicket) {
       // Calculate combo pass price based on individual competition track selections
       // Ensure we calculate for all team members, even if memberTracks is shorter
       for (let i = 0; i < teamSize; i++) {
@@ -105,7 +110,7 @@ export default function PriceSummary({
     }
     
     return total;
-  }, [isComboTicket, teamSize, memberTracks, trackSelectionMode, startupPitchData]);
+  }, [isComboTicket, isStartupOnly, teamSize, memberTracks, trackSelectionMode, startupPitchData]);
 
   // Count how many members selected each competition track
   const countCompetitionTracks = useCallback(() => {
@@ -174,7 +179,20 @@ export default function PriceSummary({
     <Card className="bg-gray-800/40 rounded-lg p-6 border border-gray-700">
       <h4 className="text-lg font-bold text-white mb-4">Price Summary</h4>
       <div className="space-y-2">
-        {isComboTicket ? (
+        {isStartupOnly ? (
+          // Show startup-only pricing
+          <>
+            <div className="flex justify-between text-gray-300">
+              <span>Startup Pitch Only</span>
+              <span>₹200</span>
+            </div>
+            
+            <div className="flex justify-between text-gray-300">
+              <span>Team Size</span>
+              <span>x{teamSize}</span>
+            </div>
+          </>
+        ) : isComboTicket ? (
           // Show individual combo pass pricing breakdown
           <>
             {Array.from({ length: teamSize }, (_, index) => {
@@ -208,7 +226,7 @@ export default function PriceSummary({
           </>
         )}
         
-        {!isComboTicket && trackCounts.hackathon > 0 && (
+        {!isComboTicket && !isStartupOnly && trackCounts.hackathon > 0 && (
           <div className="flex justify-between text-gray-300">
             <span>
               {trackSelectionMode === 'shared' && teamSize > 1
@@ -220,7 +238,7 @@ export default function PriceSummary({
           </div>
         )}
         
-        {!isComboTicket && trackCounts.pitch > 0 && (
+        {!isComboTicket && !isStartupOnly && trackCounts.pitch > 0 && (
           <div className="flex justify-between text-gray-300">
             <span>
               {trackSelectionMode === 'shared' && teamSize > 1
@@ -229,6 +247,13 @@ export default function PriceSummary({
               }
             </span>
             <span>+₹{100 * trackCounts.pitch}</span>
+          </div>
+        )}
+        
+        {isStartupOnly && (
+          <div className="flex justify-between text-gray-300">
+            <span>Startup Pitch Competition</span>
+            <span>Included</span>
           </div>
         )}
         
