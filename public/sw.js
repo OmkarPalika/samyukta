@@ -6,11 +6,10 @@ const DYNAMIC_CACHE_NAME = 'samyukta-dynamic-v1';
 // Assets to cache immediately
 const STATIC_ASSETS = [
   '/',
-  '/manifest.webmanifest',
   '/favicon.ico',
   '/logo.png',
   '/offline.html',
-  // Add critical CSS and JS files
+  '/manifest.webmanifest'
 ];
 
 // API endpoints to cache
@@ -27,16 +26,26 @@ self.addEventListener('install', (event) => {
   
   event.waitUntil(
     caches.open(STATIC_CACHE_NAME)
-      .then((cache) => {
+      .then(async (cache) => {
         console.log('Service Worker: Caching static assets');
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => {
-        console.log('Service Worker: Static assets cached');
+        
+        // Cache assets individually to handle failures gracefully
+        const cachePromises = STATIC_ASSETS.map(async (asset) => {
+          try {
+            await cache.add(asset);
+            console.log(`Service Worker: Cached ${asset}`);
+          } catch (error) {
+            console.warn(`Service Worker: Failed to cache ${asset}:`, error);
+          }
+        });
+        
+        await Promise.allSettled(cachePromises);
+        console.log('Service Worker: Static assets caching completed');
         return self.skipWaiting();
       })
       .catch((error) => {
-        console.error('Service Worker: Failed to cache static assets', error);
+        console.error('Service Worker: Failed to open cache', error);
+        return self.skipWaiting(); // Continue installation even if caching fails
       })
   );
 });
