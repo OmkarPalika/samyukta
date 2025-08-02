@@ -21,25 +21,29 @@ export const EVENT_SCHEDULE = [
         time: "11:00–12:30 PM", 
         duration: 1.5, 
         track_a: { title: "Workshop Session 1", description: "Cloud Computing Fundamentals", type: "workshop" }, 
-        track_b: { title: "Workshop Session 1", description: "AI/ML Fundamentals", type: "workshop" } 
+        track_b: { title: "Workshop Session 1", description: "AI/ML Fundamentals", type: "workshop" },
+        track_c: { title: "Workshop Session 1", description: "Cybersecurity Fundamentals", type: "workshop" }
       },
       { 
         time: "12:30–1:30 PM", 
         duration: 1, 
         track_a: { title: "Lunch Break", type: "break" }, 
-        track_b: { title: "Workshop Continues", description: "Advanced AI Concepts", type: "workshop" } 
+        track_b: { title: "Workshop Continues", description: "Advanced AI Concepts", type: "workshop" },
+        track_c: { title: "Workshop Continues", description: "Network Security Basics", type: "workshop" }
       },
       { 
         time: "1:00–2:00 PM", 
         duration: 1, 
         track_a: { title: "Workshop Continues", description: "AWS Services Deep Dive", type: "workshop" }, 
-        track_b: { title: "Lunch Break", type: "break" } 
+        track_b: { title: "Lunch Break", type: "break" },
+        track_c: { title: "Lunch Break", type: "break" }
       },
       { 
         time: "2:00–4:30 PM", 
         duration: 2.5, 
         track_a: { title: "Workshop Session 2", description: "Hands-on AWS Projects", type: "workshop" }, 
-        track_b: { title: "Workshop Session 2", description: "Google Cloud AI Tools", type: "workshop" } 
+        track_b: { title: "Workshop Session 2", description: "Google Cloud AI Tools", type: "workshop" },
+        track_c: { title: "Workshop Session 2", description: "Ethical Hacking & Penetration Testing", type: "workshop" }
       },
       { 
         time: "4:30–5:00 PM", 
@@ -69,25 +73,29 @@ export const EVENT_SCHEDULE = [
         time: "9:00–12:30 PM", 
         duration: 3.5, 
         track_a: { title: "Workshop Session 3", description: "Advanced AWS Architecture", type: "workshop" }, 
-        track_b: { title: "Workshop Session 3", description: "Machine Learning Models", type: "workshop" } 
+        track_b: { title: "Workshop Session 3", description: "Machine Learning Models", type: "workshop" },
+        track_c: { title: "Workshop Session 3", description: "Advanced Threat Detection", type: "workshop" }
       },
       { 
         time: "12:30–1:30 PM", 
         duration: 1, 
         track_a: { title: "Workshop Continues", description: "Serverless Computing", type: "workshop" }, 
-        track_b: { title: "Lunch Break", type: "break" } 
+        track_b: { title: "Lunch Break", type: "break" },
+        track_c: { title: "Workshop Continues", description: "Incident Response & Forensics", type: "workshop" }
       },
       { 
         time: "1:00–2:00 PM", 
         duration: 1, 
         track_a: { title: "Lunch Break", type: "break" }, 
-        track_b: { title: "Workshop Continues", description: "Neural Networks", type: "workshop" } 
+        track_b: { title: "Workshop Continues", description: "Neural Networks", type: "workshop" },
+        track_c: { title: "Lunch Break", type: "break" }
       },
       { 
         time: "2:00–4:30 PM", 
         duration: 1.5, 
         track_a: { title: "Workshop Session 4", description: "DevOps with AWS", type: "workshop" }, 
-        track_b: { title: "Workshop Session 4", description: "AI Ethics & Deployment", type: "workshop" } 
+        track_b: { title: "Workshop Session 4", description: "AI Ethics & Deployment", type: "workshop" },
+        track_c: { title: "Workshop Session 4", description: "Security Compliance & Best Practices", type: "workshop" }
       },
       { 
         time: "4:30–5:00 PM", 

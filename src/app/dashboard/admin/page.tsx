@@ -31,6 +31,11 @@ interface DashboardStats {
   totalRevenue: number;
   pendingApprovals: number;
   recentActivity: RecentActivity[];
+  growth: {
+    revenue: number;
+    users: number;
+    registrations: number;
+  };
 }
 
 export default function AdminDashboard() {
@@ -142,7 +147,9 @@ export default function AdminDashboard() {
                   <p className="text-2xl lg:text-3xl font-bold text-white">
                     ₹{stats?.totalRevenue?.toLocaleString() || '0'}
                   </p>
-                  <p className="text-green-400 text-xs mt-1">+12% from last week</p>
+                  <p className={`text-xs mt-1 ${(stats?.growth?.revenue ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(stats?.growth?.revenue ?? 0) >= 0 ? '+' : ''}{stats?.growth?.revenue ?? 0}% from last week
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
                   <DollarSign className="h-6 w-6 text-blue-400" />
@@ -159,7 +166,9 @@ export default function AdminDashboard() {
                   <p className="text-2xl lg:text-3xl font-bold text-white">
                     {stats?.totalUsers || 0}
                   </p>
-                  <p className="text-green-400 text-xs mt-1">+8% from last week</p>
+                  <p className={`text-xs mt-1 ${(stats?.growth?.users ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(stats?.growth?.users ?? 0) >= 0 ? '+' : ''}{stats?.growth?.users ?? 0}% from last week
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
                   <Users className="h-6 w-6 text-green-400" />
@@ -176,7 +185,9 @@ export default function AdminDashboard() {
                   <p className="text-2xl lg:text-3xl font-bold text-white">
                     {stats?.totalRegistrations || 0}
                   </p>
-                  <p className="text-green-400 text-xs mt-1">+15% from last week</p>
+                  <p className={`text-xs mt-1 ${(stats?.growth?.registrations ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {(stats?.growth?.registrations ?? 0) >= 0 ? '+' : ''}{stats?.growth?.registrations ?? 0}% from last week
+                  </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
                   <FileText className="h-6 w-6 text-purple-400" />

@@ -43,6 +43,7 @@ import { toast } from 'sonner';
 
 interface TeamMember {
   _id: string;
+  participant_id?: string;
   full_name: string;
   email: string;
   phone?: string;
@@ -207,8 +208,20 @@ export function RegistrationManagementTable({
     setUpdating(true);
     try {
       console.log('Updating member with data:', editForm);
+      console.log('Editing member object:', editingMember);
+      console.log('Member ID being used:', editingMember._id);
+      console.log('Participant ID available:', editingMember.participant_id);
       
-      const response = await fetch(`/api/team-members/${editingMember._id}`, {
+      // Use participant_id if available, otherwise use _id
+      const memberId = editingMember.participant_id || editingMember._id;
+      console.log('Using member identifier:', memberId);
+      console.log('Available identifiers:', {
+        _id: editingMember._id,
+        participant_id: editingMember.participant_id,
+        chosen: memberId
+      });
+      
+      const response = await fetch(`/api/team-members/${memberId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

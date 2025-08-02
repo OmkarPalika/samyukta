@@ -85,6 +85,7 @@ export async function GET(request: NextRequest) {
           updated_at: registration.updated_at.toISOString(),
           members: members.map(member => ({
             _id: member._id.toString(),
+            participant_id: member.participant_id,
             full_name: member.full_name,
             email: member.email,
             phone: member.phone,

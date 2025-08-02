@@ -253,7 +253,7 @@ export function ParticipationChart({ data, loading }: ParticipationChartProps) {
             <div className="bg-gray-700/30 rounded-lg p-3 sm:p-4">
               <h4 className="text-white font-medium mb-3 sm:mb-4 text-sm sm:text-base">Participation Distribution</h4>
               <div className="w-full overflow-hidden">
-                <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80">
+                <ChartContainer config={chartConfig} className="h-48 sm:h-56 md:h-64 lg:h-72">
                   {chartType === 'pie' ? (
                     <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                       <ChartTooltip 

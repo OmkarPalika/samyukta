@@ -526,8 +526,20 @@ export default function Register() {
     let total = 0;
     
     if (formData.tickets.startupOnly) {
-      // Startup-only ticket: ₹200 per person, only startup pitch competition
+      // Startup-only ticket: ₹200 per person with group discounts
       total = 200 * formData.teamSize;
+      
+      // Apply group discounts for startup-only tickets
+      if (formData.teamSize >= 5) {
+        // 5+ members: ₹50 discount per person
+        total -= formData.teamSize * 50;
+      } else if (formData.teamSize >= 3) {
+        // 3-4 members: ₹30 discount per person
+        total -= formData.teamSize * 30;
+      } else if (formData.teamSize === 2) {
+        // 2 members: ₹20 discount per person
+        total -= formData.teamSize * 20;
+      }
     } else if (formData.tickets.combo) {
       // Calculate combo pass price based on individual competition track selections
       // Ensure we calculate for all team members, even if memberTracks is shorter
@@ -774,11 +786,23 @@ export default function Register() {
                   id="lead-accommodation"
                   checked={teamLead.accommodation}
                   onCheckedChange={(checked) => handleMemberChange(0, 'accommodation', !!checked)}
+                  disabled={!!(slots && teamLead.gender && (
+                    (teamLead.gender === 'Male' && slots.accommodation.male.remaining <= 0) ||
+                    (teamLead.gender === 'Female' && slots.accommodation.female.remaining <= 0)
+                  ))}
                 />
                 <Label htmlFor="lead-accommodation" className="text-gray-300">
                   Accommodation required
                   <Badge className={`ml-2 text-xs ${teamLead.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : teamLead.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                    {teamLead.gender === 'Female' ? `Female: ${slots?.accommodation?.female?.remaining || 50} slots left` : teamLead.gender === 'Male' ? `Male: ${slots?.accommodation?.male?.remaining || 50} slots left` : `${slots?.accommodation?.male?.remaining || 50}M/${slots?.accommodation?.female?.remaining || 50}F slots left`}
+                    {!slots ? 'Loading...' : 
+                      teamLead.gender === 'Female' ? 
+                        slots.accommodation.female.remaining <= 0 ? 'Female: FULL 🚫' :
+                        `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` : 
+                      teamLead.gender === 'Male' ? 
+                        slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
+                        `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` : 
+                        `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
+                    }
                   </Badge>
                 </Label>
               </div>
@@ -887,6 +911,7 @@ export default function Register() {
                     <li>• Networking Access</li>
                     <li>• Meals & Refreshments</li>
                     <li>• Certificate</li>
+                    <li className="text-green-400">• Group discounts available</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -1065,11 +1090,23 @@ export default function Register() {
                         id={`accommodation-${memberIndex}`}
                         checked={member.accommodation}
                         onCheckedChange={(checked) => handleMemberChange(memberIndex, 'accommodation', !!checked)}
+                        disabled={!!(slots && member.gender && (
+                          (member.gender === 'Male' && slots.accommodation.male.remaining <= 0) ||
+                          (member.gender === 'Female' && slots.accommodation.female.remaining <= 0)
+                        ))}
                       />
                       <Label htmlFor={`accommodation-${memberIndex}`} className="text-gray-300">
                         Accommodation required
                         <Badge className={`ml-2 text-xs ${member.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : member.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                          {member.gender === 'Female' ? `Female: ${slots?.accommodation?.female?.remaining || 50} slots left` : member.gender === 'Male' ? `Male: ${slots?.accommodation?.male?.remaining || 50} slots left` : `${slots?.accommodation?.male?.remaining || 50}M/${slots?.accommodation?.female?.remaining || 50}F slots left`}
+                          {!slots ? 'Loading...' : 
+                            member.gender === 'Female' ? 
+                              slots.accommodation.female.remaining <= 0 ? 'Female: FULL 🚫' :
+                              `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` : 
+                            member.gender === 'Male' ? 
+                              slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
+                              `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` : 
+                              `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
+                          }
                         </Badge>
                       </Label>
                     </div>

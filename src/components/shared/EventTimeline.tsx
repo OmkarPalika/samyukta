@@ -19,6 +19,11 @@ interface TimelineEvent {
     readonly description?: string;
     readonly type: string;
   };
+  readonly track_c?: {
+    readonly title: string;
+    readonly description?: string;
+    readonly type: string;
+  };
   readonly unified?: {
     readonly title: string;
     readonly description?: string;
@@ -61,6 +66,22 @@ export default function EventTimeline({ day }: EventTimelineProps) {
     break: 'from-gray-500 to-gray-600',
     logistics: 'from-indigo-500 to-purple-500'
   }), []);
+
+  // Dynamic track labels based on day
+  const getTrackLabels = useMemo(() => {
+    if (day.id === 'day3') {
+      return {
+        trackA: 'Track A (GFG)',
+        trackB: 'Track B (IIC)',
+        trackC: 'Track C (Cybersecurity)'
+      };
+    }
+    return {
+      trackA: 'Track A (Cloud - AWS)',
+      trackB: 'Track B (AI - Google)',
+      trackC: 'Track C (Cybersecurity)'
+    };
+  }, [day.id]);
 
   return (
     <div className="relative">
@@ -115,15 +136,15 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                   </CardContent>
                 </Card>
               ) : (
-                // Dual track events
-                <div className="grid md:grid-cols-2 gap-4">
+                // Multi track events
+                <div className={`grid gap-4 ${event.track_c ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
                   {/* Track A */}
                   {event.track_a && (
                     <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all">
                       <CardContent className="p-6">
                         <div className="mb-3">
                           <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 mb-2">
-                            Track A (Cloud - AWS)
+                            {getTrackLabels.trackA}
                           </Badge>
                         </div>
                         <div className="flex items-start space-x-3">
@@ -150,7 +171,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                       <CardContent className="p-6">
                         <div className="mb-3">
                           <Badge className="bg-green-500/10 text-green-400 border-green-500/20 mb-2">
-                            Track B (AI - Google)
+                            {getTrackLabels.trackB}
                           </Badge>
                         </div>
                         <div className="flex items-start space-x-3">
@@ -164,6 +185,33 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                             <h4 className="text-lg font-semibold text-white mb-1">{event.track_b.title}</h4>
                             {event.track_b.description && (
                               <p className="text-gray-400 text-sm">{event.track_b.description}</p>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Track C */}
+                  {event.track_c && (
+                    <Card className="bg-gray-800/40 backdrop-blur-sm border-gray-700 hover:border-gray-600 transition-all">
+                      <CardContent className="p-6">
+                        <div className="mb-3">
+                          <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/20 mb-2">
+                            {getTrackLabels.trackC}
+                          </Badge>
+                        </div>
+                        <div className="flex items-start space-x-3">
+                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-r ${typeColors[event.track_c.type]} flex items-center justify-center flex-shrink-0`}>
+                            {(() => {
+                              const IconComponent = typeIcons[event.track_c.type] || Users;
+                              return <IconComponent className="w-5 h-5 text-white" />;
+                            })()}
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="text-lg font-semibold text-white mb-1">{event.track_c.title}</h4>
+                            {event.track_c.description && (
+                              <p className="text-gray-400 text-sm">{event.track_c.description}</p>
                             )}
                           </div>
                         </div>

@@ -24,6 +24,7 @@ import { RevenueChart } from '@/components/admin/analytics/RevenueChart';
 import { DemographicsChart } from '@/components/admin/analytics/DemographicsChart';
 import { ParticipationChart } from '@/components/admin/analytics/ParticipationChart';
 import { TeamSizeAnalysis } from '@/components/admin/analytics/TeamSizeAnalysis';
+import { ParticipantInsights } from '@/components/admin/analytics/ParticipantInsights';
 import { ExportTools } from '@/components/admin/analytics/ExportTools';
 
 // Chart component types
@@ -149,7 +150,24 @@ export default function AnalyticsPage() {
     };
   } | null>(null);
   const [teamAnalysisLoading, setTeamAnalysisLoading] = useState(false);
-  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('30d');
+  const [participantInsightsData, setParticipantInsightsData] = useState<{
+    foodPreferences: Array<{ name: string; count: number; percentage: number }>;
+    accommodationPreferences: Array<{ name: string; count: number; percentage: number }>;
+    accommodationByGender: Array<{ name: string; count: number; percentage: number }>;
+    genderDistribution: Array<{ name: string; count: number; percentage: number }>;
+    teamLeadOrganizations: Array<{ name: string; count: number; percentage: number }>;
+    organizationTypes: Array<{ name: string; count: number; percentage: number }>;
+    roleDistribution: Array<{ name: string; count: number; percentage: number }>;
+    totalParticipants: number;
+    accommodationStats: {
+      totalRequested: number;
+      maleRequested: number;
+      femaleRequested: number;
+      otherRequested: number;
+    };
+  } | null>(null);
+  const [participantInsightsLoading, setParticipantInsightsLoading] = useState(false);
+  const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d' | 'all'>('7d');
   const [refreshing, setRefreshing] = useState(false);
 
   const loadUserData = useCallback(async () => {
@@ -215,16 +233,40 @@ export default function AnalyticsPage() {
     }
   }, [currentUser]);
 
+  const loadParticipantInsightsData = useCallback(async () => {
+    if (!currentUser) return;
+    
+    setParticipantInsightsLoading(true);
+    try {
+      const response = await fetch('/api/admin/analytics?type=participant-insights', {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to load participant insights data');
+      }
+      
+      const data = await response.json();
+      setParticipantInsightsData(data);
+    } catch (error) {
+      console.error('Error loading participant insights data:', error);
+      toast.error('Failed to load participant insights data');
+    } finally {
+      setParticipantInsightsLoading(false);
+    }
+  }, [currentUser]);
+
   useEffect(() => {
     if (currentUser) {
       loadAnalyticsData();
       loadTeamAnalysisData();
+      loadParticipantInsightsData();
     }
-  }, [currentUser, dateRange, loadAnalyticsData, loadTeamAnalysisData]);
+  }, [currentUser, dateRange, loadAnalyticsData, loadTeamAnalysisData, loadParticipantInsightsData]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await Promise.all([loadAnalyticsData(), loadTeamAnalysisData()]);
+    await Promise.all([loadAnalyticsData(), loadTeamAnalysisData(), loadParticipantInsightsData()]);
     setRefreshing(false);
     toast.success('Analytics data refreshed');
   };
@@ -435,6 +477,12 @@ export default function AnalyticsPage() {
                 Teams
               </TabsTrigger>
               <TabsTrigger 
+                value="participant-insights" 
+                className="text-gray-400 data-[state=active]:bg-cyan-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
+              >
+                Insights
+              </TabsTrigger>
+              <TabsTrigger 
                 value="export" 
                 className="text-gray-400 data-[state=active]:bg-red-600 data-[state=active]:text-white text-xs px-2 py-2 whitespace-nowrap"
               >
@@ -533,6 +581,28 @@ export default function AnalyticsPage() {
                 }
               }}
               loading={teamAnalysisLoading}
+            />
+          </TabsContent>
+
+          <TabsContent value="participant-insights" className="space-y-4 sm:space-y-6">
+            <ParticipantInsights 
+              data={participantInsightsData || {
+                foodPreferences: [],
+                accommodationPreferences: [],
+                accommodationByGender: [],
+                genderDistribution: [],
+                teamLeadOrganizations: [],
+                organizationTypes: [],
+                roleDistribution: [],
+                totalParticipants: 0,
+                accommodationStats: {
+                  totalRequested: 0,
+                  maleRequested: 0,
+                  femaleRequested: 0,
+                  otherRequested: 0
+                }
+              }}
+              loading={participantInsightsLoading}
             />
           </TabsContent>
 

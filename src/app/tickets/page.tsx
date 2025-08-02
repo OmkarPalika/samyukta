@@ -111,7 +111,22 @@ export default function Tickets() {
       }
     }
 
-    const teamDiscount = (ticketChoice === 'combo' && currentTeamSize > 1) ? currentTeamSize * 10 : 0;
+    let teamDiscount = 0;
+    
+    // Calculate team discounts
+    if (ticketChoice === 'combo' && currentTeamSize > 1) {
+      teamDiscount = currentTeamSize * 10;
+    } else if (ticketChoice === 'startup_only' && currentTeamSize > 1) {
+      // Group discounts for startup-only tickets
+      if (currentTeamSize >= 5) {
+        teamDiscount = currentTeamSize * 50; // ₹50 discount per person
+      } else if (currentTeamSize >= 3) {
+        teamDiscount = currentTeamSize * 30; // ₹30 discount per person
+      } else if (currentTeamSize === 2) {
+        teamDiscount = currentTeamSize * 20; // ₹20 discount per person
+      }
+    }
+    
     const totalForTeam = (basePrice * currentTeamSize) - teamDiscount;
     const totalPerPerson = totalForTeam / currentTeamSize;
 
@@ -340,6 +355,7 @@ export default function Tickets() {
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Networking Access</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Meals & Refreshments</li>
                       <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-green-400" />Certificate of Participation</li>
+                      <li className="flex items-center"><Check className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 text-yellow-400" />Group discounts available</li>
                     </ul>
                   </div>
                 </CardContent>
@@ -465,7 +481,18 @@ export default function Tickets() {
                       ))}
                       {pricing.teamDiscount > 0 && (
                         <div className="flex justify-between text-xs sm:text-sm text-green-400">
-                          <span>Team Discount ({pricing.teamSize} x ₹10)</span>
+                          <span>
+                            {ticketChoice === 'combo' 
+                              ? `Team Discount (${pricing.teamSize} x ₹10)`
+                              : ticketChoice === 'startup_only'
+                                ? `Group Discount (${
+                                    pricing.teamSize >= 5 ? '5+ members' :
+                                    pricing.teamSize >= 3 ? '3-4 members' :
+                                    '2 members'
+                                  })`
+                                : 'Team Discount'
+                            }
+                          </span>
                           <span>-₹{pricing.teamDiscount}</span>
                         </div>
                       )}

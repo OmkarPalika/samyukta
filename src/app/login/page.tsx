@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { Mail, Lock, AlertCircle, ArrowRight } from 'lucide-react';
@@ -28,6 +28,28 @@ export default function Login() {
       passkey: ''
     }
   });
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkSession = async () => {
+      try {
+        const response = await fetch('/api/auth/session', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+        
+        if (data.user) {
+          // If user is logged in, redirect to appropriate dashboard
+          const redirectPath = data.user.role === 'admin' ? '/dashboard/admin' : '/dashboard';
+          router.replace(redirectPath);
+        }
+      } catch (err) {
+        console.error('Failed to check session:', err);
+      }
+    };
+
+    checkSession();
+  }, [router]);
 
   const checkEmail = async (email: string) => {
     setLoading(true);

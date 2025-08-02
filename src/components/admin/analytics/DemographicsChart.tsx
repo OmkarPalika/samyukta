@@ -167,7 +167,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
         <div className="space-y-6">
           {/* Chart Visualization */}
           <div className="w-full overflow-hidden">
-            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 mx-auto w-full">
+            <ChartContainer config={chartConfig} className="h-48 sm:h-56 md:h-64 lg:h-72 mx-auto w-full">
               {chartType === 'pie' ? (
                 <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <ChartTooltip
@@ -238,11 +238,11 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
           </div>
 
           {/* Summary Stats */}
-          <div className="mt-6 p-4 bg-gray-700/30 rounded-lg">
-            <h4 className="text-white font-medium mb-3">Distribution Summary</h4>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-4 sm:mt-6 p-3 sm:p-4 bg-gray-700/30 rounded-lg">
+            <h4 className="text-white font-medium mb-2 sm:mb-3 text-sm sm:text-base">Distribution Summary</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-blue-400">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-400">
                   {currentData.length}
                 </div>
                 <div className="text-xs text-gray-400 capitalize">
@@ -251,7 +251,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
               </div>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-green-400">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-green-400">
                   {Number.isFinite(currentData[0]?.count) ? currentData[0].count : 0}
                 </div>
                 <div className="text-xs text-gray-400">
@@ -260,7 +260,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
               </div>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-purple-400">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-purple-400">
                   {currentData.length > 0 && safeData.totalUsers > 0
                     ? Math.round(safeData.totalUsers / currentData.length)
                     : 0}
@@ -271,7 +271,7 @@ export function DemographicsChart({ data, loading }: DemographicsChartProps) {
               </div>
 
               <div className="text-center">
-                <div className="text-2xl font-bold text-orange-400">
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-orange-400">
                   {Number.isFinite(currentData[0]?.percentage) ? currentData[0].percentage.toFixed(1) : '0.0'}%
                 </div>
                 <div className="text-xs text-gray-400">

@@ -35,6 +35,48 @@ export async function GET(request: NextRequest) {
       status: { $in: ['pending', 'pending_review'] }
     });
 
+    // Calculate growth percentages (last 7 days vs previous 7 days)
+    const now = new Date();
+    const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const previous7Days = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+    // Revenue growth
+    const [currentWeekRevenue, previousWeekRevenue] = await Promise.all([
+      db.collection('registrations').aggregate([
+        { $match: { created_at: { $gte: last7Days } } },
+        { $group: { _id: null, total: { $sum: '$total_amount' } } }
+      ]).toArray(),
+      db.collection('registrations').aggregate([
+        { $match: { created_at: { $gte: previous7Days, $lt: last7Days } } },
+        { $group: { _id: null, total: { $sum: '$total_amount' } } }
+      ]).toArray()
+    ]);
+
+    // User growth
+    const [currentWeekUsers, previousWeekUsers] = await Promise.all([
+      db.collection('users').countDocuments({ created_at: { $gte: last7Days } }),
+      db.collection('users').countDocuments({ created_at: { $gte: previous7Days, $lt: last7Days } })
+    ]);
+
+    // Registration growth
+    const [currentWeekRegistrations, previousWeekRegistrations] = await Promise.all([
+      db.collection('registrations').countDocuments({ created_at: { $gte: last7Days } }),
+      db.collection('registrations').countDocuments({ created_at: { $gte: previous7Days, $lt: last7Days } })
+    ]);
+
+    // Calculate percentage changes
+    const revenueGrowth = previousWeekRevenue[0]?.total > 0 
+      ? Math.round(((currentWeekRevenue[0]?.total || 0) - previousWeekRevenue[0].total) / previousWeekRevenue[0].total * 100)
+      : currentWeekRevenue[0]?.total > 0 ? 100 : 0;
+
+    const userGrowth = previousWeekUsers > 0 
+      ? Math.round((currentWeekUsers - previousWeekUsers) / previousWeekUsers * 100)
+      : currentWeekUsers > 0 ? 100 : 0;
+
+    const registrationGrowth = previousWeekRegistrations > 0 
+      ? Math.round((currentWeekRegistrations - previousWeekRegistrations) / previousWeekRegistrations * 100)
+      : currentWeekRegistrations > 0 ? 100 : 0;
+
     // Get recent activity (last 10 activities)
     const recentUsers = await db.collection('users')
       .find({})
@@ -68,7 +110,12 @@ export async function GET(request: NextRequest) {
       totalRegistrations,
       totalRevenue,
       pendingApprovals,
-      recentActivity
+      recentActivity,
+      growth: {
+        revenue: revenueGrowth,
+        users: userGrowth,
+        registrations: registrationGrowth
+      }
     });
 
   } catch (error) {

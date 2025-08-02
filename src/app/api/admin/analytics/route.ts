@@ -128,6 +128,8 @@ export async function GET(request: NextRequest) {
         return await getParticipationData(db);
       case 'team-size-analysis':
         return await getTeamSizeAnalysis(db);
+      case 'participant-insights':
+        return await getParticipantInsights(db);
       default:
         return await getOverviewData(db, startDate, now);
     }
@@ -867,4 +869,160 @@ async function getOverviewData(db: Db, startDate: Date, endDate: Date) {
     demographics: await demographics.json(),
     participation: await participation.json()
   });
+}
+
+async function getParticipantInsights(db: Db) {
+  try {
+    // Get food preferences distribution
+    const foodPreferences = await db.collection('team_members').aggregate([
+      { $group: { _id: "$food_preference", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    // Get accommodation preferences distribution (boolean to readable format)
+    const accommodationPreferences = await db.collection('team_members').aggregate([
+      {
+        $group: {
+          _id: {
+            $cond: {
+              if: { $eq: ["$accommodation", true] },
+              then: "Required",
+              else: "Not Required"
+            }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    // Get accommodation breakdown by gender
+    const accommodationByGender = await db.collection('team_members').aggregate([
+      { $match: { accommodation: true } },
+      { $group: { _id: "$gender", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    // Get gender distribution
+    const genderDistribution = await db.collection('team_members').aggregate([
+      { $group: { _id: "$gender", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    // Get team leads (first member of each team)
+    const teamLeads = await db.collection('registrations').aggregate([
+      {
+        $lookup: {
+          from: 'team_members',
+          localField: 'team_id',
+          foreignField: 'registration_id',
+          as: 'members'
+        }
+      },
+      {
+        $addFields: {
+          team_lead: { $arrayElemAt: ["$members", 0] }
+        }
+      },
+      {
+        $group: {
+          _id: "$team_lead.organization",
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]).toArray() as AggregationResult[];
+
+    // Get organization/university distribution (more detailed)
+    const organizationTypes = await db.collection('team_members').aggregate([
+      {
+        $addFields: {
+          org_type: {
+            $cond: {
+              if: { $eq: ["$organization", "College/University"] },
+              then: "College/University",
+              else: {
+                $cond: {
+                  if: { $eq: ["$organization", "Company"] },
+                  then: "Company",
+                  else: {
+                    $cond: {
+                      if: { $eq: ["$organization", "Startup"] },
+                      then: "Startup",
+                      else: "Other"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      { $group: { _id: "$org_type", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    // Get role distribution (Student vs Professional vs Others)
+    const roleDistribution = await db.collection('team_members').aggregate([
+      {
+        $addFields: {
+          role_category: {
+            $cond: {
+              if: { $eq: ["$role", "Student"] },
+              then: "Student",
+              else: {
+                $cond: {
+                  if: { $in: ["$role", ["Working Professional", "Entrepreneur"]] },
+                  then: "Professional",
+                  else: {
+                    $cond: {
+                      if: { $in: ["$role", ["Academician", "Researcher"]] },
+                      then: "Academic",
+                      else: "Other"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      { $group: { _id: "$role_category", count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]).toArray() as AggregationResult[];
+
+    const totalParticipants = await db.collection('team_members').countDocuments();
+
+    // Format data with percentages
+    const formatInsightData = (data: AggregationResult[]) => 
+      data.map(item => ({
+        name: item._id || 'Unknown',
+        count: item.count,
+        percentage: totalParticipants > 0 ? (item.count / totalParticipants) * 100 : 0
+      }));
+
+    return NextResponse.json({
+      foodPreferences: formatInsightData(foodPreferences),
+      accommodationPreferences: formatInsightData(accommodationPreferences),
+      accommodationByGender: formatInsightData(accommodationByGender),
+      genderDistribution: formatInsightData(genderDistribution),
+      teamLeadOrganizations: formatInsightData(teamLeads),
+      organizationTypes: formatInsightData(organizationTypes),
+      roleDistribution: formatInsightData(roleDistribution),
+      totalParticipants,
+      accommodationStats: {
+        totalRequested: accommodationByGender.reduce((sum, item) => sum + item.count, 0),
+        maleRequested: accommodationByGender.find(item => item._id === 'Male')?.count || 0,
+        femaleRequested: accommodationByGender.find(item => item._id === 'Female')?.count || 0,
+        otherRequested: accommodationByGender.find(item => item._id && item._id !== 'Male' && item._id !== 'Female')?.count || 0
+      }
+    });
+  } catch (error) {
+    console.error('Participant insights error:', error);
+    return NextResponse.json({ 
+      error: 'Failed to get participant insights',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 });
+  }
 }

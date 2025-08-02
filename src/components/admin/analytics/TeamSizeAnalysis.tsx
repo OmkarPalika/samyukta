@@ -170,7 +170,7 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
             <CardTitle className="text-white text-base sm:text-lg">Team Size Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
+            <div className="h-48 sm:h-56 md:h-64 lg:h-72 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={teamSizeChartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -212,7 +212,7 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
             <CardTitle className="text-white text-base sm:text-lg">Revenue by Team Size</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
+            <div className="h-48 sm:h-56 md:h-64 lg:h-72 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={revenueByTeamSizeData} margin={{ top: 5, right: 10, left: 10, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
@@ -266,7 +266,7 @@ export function TeamSizeAnalysis({ data, loading }: TeamSizeAnalysisProps) {
             <CardTitle className="text-white text-base sm:text-lg">Ticket Type Distribution</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-64 sm:h-72 lg:h-80 w-full overflow-hidden">
+            <div className="h-48 sm:h-56 md:h-64 lg:h-72 w-full overflow-hidden">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart margin={{ top: 5, right: 5, left: 5, bottom: 5 }}>
                   <Pie

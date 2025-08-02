@@ -123,12 +123,24 @@ export function UserManagementTable({
     
     setUpdating(true);
     try {
+      // Transform the form data to match API expectations
+      const apiData = {
+        full_name: editForm.full_name,
+        email: editForm.email,
+        phone: editForm.phone,
+        role: editForm.role,
+        dept: editForm.academic?.department || '',
+        year: editForm.academic?.year || '',
+        designation: editForm.designation || editForm.position || '',
+        committee: editForm.committee || ''
+      };
+
       const response = await fetch(`/api/users/${editingUser.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(editForm),
+        body: JSON.stringify(apiData),
         credentials: 'include',
       });
 

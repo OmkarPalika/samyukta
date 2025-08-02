@@ -137,7 +137,7 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
       <CardContent>
         {viewType === 'daily' && (
           <div className="w-full overflow-hidden">
-            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <ChartContainer config={chartConfig} className="h-48 sm:h-56 md:h-64 lg:h-72 w-full">
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <defs>
                 <linearGradient id="dailyGradient" x1="0" y1="0" x2="0" y2="1">
@@ -181,7 +181,7 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
         
         {viewType === 'cumulative' && (
           <div className="w-full overflow-hidden">
-            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <ChartContainer config={chartConfig} className="h-48 sm:h-56 md:h-64 lg:h-72 w-full">
             <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <defs>
                 <linearGradient id="cumulativeGradient" x1="0" y1="0" x2="0" y2="1">
@@ -225,7 +225,7 @@ export function RevenueChart({ data, totalRevenue, pendingRevenue, loading }: Re
 
         {viewType === 'breakdown' && (
           <div className="w-full overflow-hidden">
-            <ChartContainer config={chartConfig} className="h-64 sm:h-72 lg:h-80 w-full">
+            <ChartContainer config={chartConfig} className="h-48 sm:h-56 md:h-64 lg:h-72 w-full">
             <ComposedChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
               <XAxis 

@@ -36,14 +36,24 @@ export async function GET() {
       { $group: { _id: null, total: { $sum: '$team_size' } } }
     ]).toArray().then(result => result[0]?.total || 0);
     
+    // Get all confirmed registrations first
+    const confirmedRegistrations = await collections.registrations.find(
+      { status: 'confirmed' }
+    ).toArray();
+    
+    const confirmedTeamIds = confirmedRegistrations.map(reg => reg.team_id);
+    
+    // Count accommodation requests only from confirmed registrations
     const maleAccommodationCount = await collections.teamMembers.countDocuments({
       accommodation: true,
-      gender: 'Male'
+      gender: 'Male',
+      registration_id: { $in: confirmedTeamIds }
     });
     
     const femaleAccommodationCount = await collections.teamMembers.countDocuments({
       accommodation: true,
-      gender: 'Female'
+      gender: 'Female',
+      registration_id: { $in: confirmedTeamIds }
     });
     
     // Define limits

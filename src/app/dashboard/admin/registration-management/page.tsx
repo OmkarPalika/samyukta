@@ -12,6 +12,7 @@ import { FileText } from 'lucide-react';
 
 interface TeamMember {
   _id: string;
+  participant_id?: string;
   full_name: string;
   email: string;
   phone?: string;

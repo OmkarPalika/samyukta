@@ -93,13 +93,13 @@ export const SPONSORS_DATA = [
       {
         logo: "/sponsors/bizverve.png",
         name: "BizVerve Club",
-        website: "#",
+        website: "https://www.instagram.com/biz_verve/",
         description: "Student entrepreneurship club"
       },
       {
-        logo: "/sponsors/a-hub-tie.png",
-        name: "A-Hub/TIE",
-        website: "#",
+        logo: "/sponsors/tie.jpeg",
+        name: "TiE Vizag",
+        website: "https://vizag.tie.org/",
         description: "Startup incubation and mentorship"
       }
     ]
