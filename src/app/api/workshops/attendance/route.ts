@@ -23,6 +23,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Registration not found' }, { status: 404 });
     }
 
+    // Check if workshop track is available (startup_only tickets don't have workshop tracks)
+    if (!registration.workshop_track) {
+      return NextResponse.json({ error: 'No workshop track for this registration' }, { status: 400 });
+    }
+
     const now = new Date();
     const attendanceRecord = {
       participant_id,

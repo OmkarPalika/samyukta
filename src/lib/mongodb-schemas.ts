@@ -41,8 +41,8 @@ export interface RegistrationSchema {
   team_id: string;
   college: string;
   team_size: number;
-  ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None';
+  ticket_type: 'Combo' | 'Custom' | 'startup_only';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None' | null;
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount: number;
   transaction_id?: string;

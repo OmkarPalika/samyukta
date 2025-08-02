@@ -60,12 +60,36 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .toArray();
     
-    // Get team members for each registration
+    // Get team members and startup pitch data for each registration
     const registrationsWithMembers = await Promise.all(
       registrations.map(async (registration) => {
         const members = await collections.teamMembers
           .find({ registration_id: registration.team_id })
           .toArray();
+        
+        // Get startup pitch data if it's a startup_only ticket
+        let startupPitchData = null;
+        if (registration.ticket_type === 'startup_only') {
+          const competitionRegistration = await collections.competitionRegistrations
+            .findOne({ team_id: registration.team_id });
+          
+          if (competitionRegistration) {
+            startupPitchData = {
+              startup_name: competitionRegistration.startup_name,
+              pitch_category: competitionRegistration.pitch_category,
+              brief_description: competitionRegistration.brief_description,
+              problem_statement: competitionRegistration.problem_statement,
+              target_market: competitionRegistration.target_market,
+              current_stage: competitionRegistration.current_stage,
+              team_size: competitionRegistration.team_size,
+              funding_status: competitionRegistration.funding_status,
+              pitch_deck_url: competitionRegistration.pitch_deck_url,
+              demo_url: competitionRegistration.demo_url,
+              team_members: competitionRegistration.team_members,
+              external_members: competitionRegistration.external_members
+            };
+          }
+        }
         
         return {
           _id: registration._id?.toString(),
@@ -83,6 +107,7 @@ export async function GET(request: NextRequest) {
           qr_code_url: registration.qr_code_url,
           created_at: registration.created_at.toISOString(),
           updated_at: registration.updated_at.toISOString(),
+          startup_pitch_data: startupPitchData,
           members: members.map(member => ({
             _id: member._id.toString(),
             participant_id: member.participant_id,
@@ -280,7 +305,7 @@ export async function POST(request: NextRequest) {
         competition_id: 'startup-pitch-2025', // You might want to make this dynamic
         user_id: registrationData.members[0].email, // Using team lead email as user_id
         team_id: teamId,
-        registration_type: registrationData.members.length > 1 ? 'team' : 'individual',
+        registration_type: (registrationData.members.length > 1 ? 'team' : 'individual') as 'team' | 'individual',
         transaction_id: registrationData.transaction_id,
         payment_screenshot_url: registrationData.payment_screenshot_url,
         // Startup Pitch specific fields

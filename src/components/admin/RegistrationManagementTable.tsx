@@ -768,6 +768,83 @@ export function RegistrationManagementTable({
                 </div>
               </div>
 
+              {/* Startup Pitch Details (if applicable) */}
+              {selectedRegistration.ticket_type === 'startup_only' && selectedRegistration.startup_pitch_data && (
+                <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold text-purple-300 mb-4 flex items-center gap-2">
+                    🚀 Startup Pitch Details
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label className="text-gray-300">Startup Name</Label>
+                      <p className="text-white font-medium">{selectedRegistration.startup_pitch_data.startup_name}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-gray-300">Category</Label>
+                      <p className="text-white">{selectedRegistration.startup_pitch_data.pitch_category}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-gray-300">Current Stage</Label>
+                      <p className="text-white">{selectedRegistration.startup_pitch_data.current_stage}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-gray-300">Funding Status</Label>
+                      <p className="text-white">{selectedRegistration.startup_pitch_data.funding_status}</p>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <Label className="text-gray-300">Target Market</Label>
+                      <p className="text-white">{selectedRegistration.startup_pitch_data.target_market}</p>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <Label className="text-gray-300">Brief Description</Label>
+                      <p className="text-white text-sm leading-relaxed">{selectedRegistration.startup_pitch_data.brief_description}</p>
+                    </div>
+                    <div className="space-y-1 col-span-2">
+                      <Label className="text-gray-300">Problem Statement</Label>
+                      <p className="text-white text-sm leading-relaxed">{selectedRegistration.startup_pitch_data.problem_statement}</p>
+                    </div>
+                    {selectedRegistration.startup_pitch_data.pitch_deck_url && (
+                      <div className="space-y-1">
+                        <Label className="text-gray-300">Pitch Deck</Label>
+                        <a 
+                          href={selectedRegistration.startup_pitch_data.pitch_deck_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 underline"
+                        >
+                          View Pitch Deck
+                        </a>
+                      </div>
+                    )}
+                    {selectedRegistration.startup_pitch_data.demo_url && (
+                      <div className="space-y-1">
+                        <Label className="text-gray-300">Demo URL</Label>
+                        <a 
+                          href={selectedRegistration.startup_pitch_data.demo_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 underline"
+                        >
+                          View Demo
+                        </a>
+                      </div>
+                    )}
+                    {selectedRegistration.startup_pitch_data.team_members && selectedRegistration.startup_pitch_data.team_members.length > 0 && (
+                      <div className="space-y-1 col-span-2">
+                        <Label className="text-gray-300">Pitch Team Members</Label>
+                        <p className="text-white">{selectedRegistration.startup_pitch_data.team_members.join(', ')}</p>
+                      </div>
+                    )}
+                    {selectedRegistration.startup_pitch_data.external_members && selectedRegistration.startup_pitch_data.external_members.length > 0 && (
+                      <div className="space-y-1 col-span-2">
+                        <Label className="text-gray-300">External Team Members</Label>
+                        <p className="text-white">{selectedRegistration.startup_pitch_data.external_members.join(', ')}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Team Members */}
               <div className="bg-gray-700/30 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-white mb-4">Team Members</h3>

@@ -32,8 +32,8 @@ interface Registration {
   team_id: string;
   college: string;
   team_size: number;
-  ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
+  ticket_type: 'Combo' | 'Custom' | 'startup_only';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None' | null;
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount: number;
   transaction_id?: string;
@@ -44,6 +44,21 @@ interface Registration {
   created_at: string;
   updated_at: string;
   members: TeamMember[];
+  // Startup pitch specific data (if available)
+  startup_pitch_data?: {
+    startup_name: string;
+    pitch_category: string;
+    brief_description: string;
+    problem_statement: string;
+    target_market: string;
+    current_stage: string;
+    team_size: string;
+    funding_status: string;
+    pitch_deck_url?: string;
+    demo_url?: string;
+    team_members?: string[];
+    external_members?: string[];
+  };
 }
 
 // Fetch registrations function
