@@ -135,6 +135,19 @@ export interface CompetitionRegistrationSchema {
   transaction_id: string;
   payment_screenshot_url: string;
   status: 'pending' | 'approved' | 'rejected';
+  // Startup Pitch specific fields
+  startup_name?: string;
+  pitch_category?: string;
+  brief_description?: string;
+  problem_statement?: string;
+  target_market?: string;
+  current_stage?: string;
+  team_size?: string;
+  funding_status?: string;
+  pitch_deck_url?: string;
+  demo_url?: string;
+  team_members?: string[]; // Array of team member names
+  external_members?: string[]; // Array of external member names
   created_at: Date;
   updated_at: Date;
 }

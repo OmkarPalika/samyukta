@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;
+    const ticketType = formData.get('ticketType') as string;
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -25,8 +26,13 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const fileName = `payment_${timestamp}_${file.name}`;
     
-    // Upload to Google Drive with payment screenshots type
-    const fileUrl = await uploadToGoogleDrive(file, fileName, UPLOAD_TYPES.PAYMENT_SCREENSHOTS);
+    // Choose upload type based on ticket type
+    const uploadType = ticketType === 'startup_only' 
+      ? UPLOAD_TYPES.COMPETITION_PAYMENTS 
+      : UPLOAD_TYPES.PAYMENT_SCREENSHOTS;
+    
+    // Upload to Google Drive with appropriate folder
+    const fileUrl = await uploadToGoogleDrive(file, fileName, uploadType);
     
     return NextResponse.json({ 
       success: true,

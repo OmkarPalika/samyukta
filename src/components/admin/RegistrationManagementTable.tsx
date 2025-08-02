@@ -63,8 +63,8 @@ interface Registration {
   team_id: string;
   college: string;
   team_size: number;
-  ticket_type: 'Combo' | 'Custom';
-  workshop_track: 'Cloud' | 'AI' | 'None';
+  ticket_type: 'Combo' | 'Custom' | 'startup_only';
+  workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None' | null;
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount: number;
   transaction_id?: string;
@@ -75,6 +75,21 @@ interface Registration {
   created_at: string;
   updated_at: string;
   members: TeamMember[];
+  // Startup pitch specific data (if available)
+  startup_pitch_data?: {
+    startup_name: string;
+    pitch_category: string;
+    brief_description: string;
+    problem_statement: string;
+    target_market: string;
+    current_stage: string;
+    team_size: string;
+    funding_status: string;
+    pitch_deck_url?: string;
+    demo_url?: string;
+    team_members?: string[];
+    external_members?: string[];
+  };
 }
 
 interface RegistrationManagementTableProps {
@@ -388,9 +403,24 @@ export function RegistrationManagementTable({
       ),
       cell: ({ row }) => (
         <div>
-          <div className="text-sm text-white">{row.original.ticket_type}</div>
-          <div className="text-sm text-gray-400">Workshop: {row.original.workshop_track}</div>
-          <div className="text-sm text-gray-400">Competition: {row.original.competition_track}</div>
+          <div className="text-sm text-white">
+            {row.original.ticket_type === 'startup_only' ? 'Startup Only' : row.original.ticket_type}
+          </div>
+          {row.original.ticket_type === 'startup_only' ? (
+            <div>
+              <div className="text-sm text-purple-400">
+                🚀 {row.original.startup_pitch_data?.startup_name || 'Startup Pitch'}
+              </div>
+              <div className="text-sm text-gray-400">
+                Category: {row.original.startup_pitch_data?.pitch_category || 'N/A'}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div className="text-sm text-gray-400">Workshop: {row.original.workshop_track || 'None'}</div>
+              <div className="text-sm text-gray-400">Competition: {row.original.competition_track}</div>
+            </div>
+          )}
         </div>
       ),
     },

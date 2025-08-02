@@ -1,8 +1,13 @@
-export async function uploadFile(file: File, endpoint: string = '/api/upload', uploadType?: string) {
+export async function uploadFile(file: File, endpoint: string = '/api/upload', uploadType?: string, additionalData?: Record<string, string>) {
   const formData = new FormData()
   formData.append('file', file)
   if (uploadType) {
     formData.append('uploadType', uploadType)
+  }
+  if (additionalData) {
+    Object.entries(additionalData).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
   }
   
   const response = await fetch(endpoint, {

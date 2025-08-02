@@ -271,6 +271,47 @@ export async function POST(request: NextRequest) {
     
     const emailResults = await Promise.all(memberPromises);
     
+    // Save startup pitch data to competition_registrations collection if it's a startup-only ticket
+    if (registrationData.ticket_type === 'startup_only' && registrationData.startup_pitch_data) {
+      const pitchData = registrationData.startup_pitch_data;
+      
+      // Create competition registration document
+      const competitionRegistration = {
+        competition_id: 'startup-pitch-2025', // You might want to make this dynamic
+        user_id: registrationData.members[0].email, // Using team lead email as user_id
+        team_id: teamId,
+        registration_type: registrationData.members.length > 1 ? 'team' : 'individual',
+        transaction_id: registrationData.transaction_id,
+        payment_screenshot_url: registrationData.payment_screenshot_url,
+        // Startup Pitch specific fields
+        startup_name: pitchData.startupName,
+        pitch_category: pitchData.pitchCategory,
+        brief_description: pitchData.briefDescription,
+        problem_statement: pitchData.problemStatement,
+        target_market: pitchData.targetMarket,
+        current_stage: pitchData.currentStage,
+        team_size: pitchData.teamSize,
+        funding_status: pitchData.fundingStatus,
+        pitch_deck_url: pitchData.pitchDeckUrl || null,
+        demo_url: pitchData.demoUrl,
+        team_members: pitchData.teamMembers ? 
+          pitchData.teamMembers.map((index: number) => registrationData.members[index]?.full_name).filter(Boolean) : 
+          registrationData.members.map((m: { full_name: string }) => m.full_name),
+        external_members: pitchData.externalMembers || [],
+        status: 'pending' as const,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      
+      try {
+        await collections.competitionRegistrations.insertOne(competitionRegistration);
+        console.log(`✅ Startup pitch data saved for team ${teamId}`);
+      } catch (pitchError) {
+        console.error(`❌ Failed to save startup pitch data for team ${teamId}:`, pitchError);
+        // Don't fail the entire registration if pitch data save fails
+      }
+    }
+    
     // Log email sending results
     const successfulEmails = emailResults.filter(result => result.success).length;
     const failedEmails = emailResults.filter(result => !result.success);
