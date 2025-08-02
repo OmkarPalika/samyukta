@@ -469,18 +469,20 @@ export default function Register() {
       case 4:
         formData.members.forEach((member, index) => {
           const memberTrack = formData.memberTracks[index];
-          if (!memberTrack?.workshopTrack) {
+          if (!memberTrack?.workshopTrack && !formData.tickets.startupOnly) {
             newErrors[`member${index}Workshop`] = "Workshop track required";
           }
           if (formData.tickets.combo && !memberTrack?.competitionTrack) {
             newErrors[`member${index}Competition`] = "Competition track required for combo pass";
           }
-          if (memberTrack?.competitionTrack === "Startup Pitch") {
+          if (memberTrack?.competitionTrack === "Startup Pitch" || formData.tickets.startupOnly) {
             // In shared mode (or team size 1), check if pitch data exists for member 0 (team lead)
             // In individual mode, check for specific member's pitch data
-            const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1) 
+            const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1 || formData.tickets.startupOnly) 
               ? formData.startupPitchData[0] 
               : formData.startupPitchData[index];
+            
+
             
             if (!pitchDataExists) {
               newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
@@ -493,6 +495,7 @@ export default function Register() {
         if (!formData.payment.screenshot) newErrors.paymentScreenshot = "Payment screenshot required";
         break;
     }
+
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0 && Object.keys(emailErrors).length === 0;
@@ -1213,6 +1216,18 @@ export default function Register() {
                   }
                 }}
               />
+            )}
+
+            {/* Display validation errors */}
+            {Object.keys(errors).length > 0 && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                <h4 className="text-red-400 font-medium mb-2">Please fix the following errors:</h4>
+                <ul className="text-red-300 text-sm space-y-1">
+                  {Object.entries(errors).map(([key, message]) => (
+                    <li key={key}>• {message}</li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             {/* Using the PriceSummary component */}
