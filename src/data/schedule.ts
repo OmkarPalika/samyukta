@@ -4,7 +4,7 @@ export const EVENT_SCHEDULE = [
     id: "day1",
     title: "Day 1: Inauguration & AI/ML Track",
     date: "August 6, 2025",
-    dress_code: "Professional",
+    dress_code: "Professional/Business Attire",
     color: "from-blue-500 to-cyan-500",
     events: [
       {
@@ -53,7 +53,7 @@ export const EVENT_SCHEDULE = [
     id: "day2",
     title: "Day 2: Cloud Computing Track Deep Dive",
     date: "August 7, 2025",
-    dress_code: "Cultural",
+    dress_code: "Cultural/Traditional Attire",
     color: "from-violet-500 to-purple-500",
     events: [
       {
