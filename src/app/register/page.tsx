@@ -17,6 +17,7 @@ import { uploadFile, validateFile } from "@/lib/file-upload";
 import StartupPitchDialog from '@/components/StartupPitchDialog';
 import PitchModeDialog from "@/components/PitchModeDialog";
 import { TeamTrackSelection, PriceSummary, TrackSelectionMode, IndividualTrackSelection } from "@/components/registration";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 type Role = 'Student' | 'Working Professional' | 'Academician' | 'Entrepreneur' | 'Researcher' | 'Other';
@@ -81,6 +82,7 @@ interface FormData {
 
 export default function Register() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -107,6 +109,15 @@ export default function Register() {
       female: { remaining: number; closed: boolean };
     };
   } | null>(null);
+
+  // Authentication check - redirect authenticated users to dashboard
+  useEffect(() => {
+    if (!authLoading && user) {
+      // Already logged in - redirect to appropriate dashboard
+      const redirectPath = user.role === 'admin' ? '/dashboard/admin' : '/dashboard';
+      router.replace(redirectPath);
+    }
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     const fetchSlots = async () => {
@@ -467,28 +478,34 @@ export default function Register() {
         }
         break;
       case 4:
-        formData.members.forEach((member, index) => {
-          const memberTrack = formData.memberTracks[index];
-          if (!memberTrack?.workshopTrack && !formData.tickets.startupOnly) {
-            newErrors[`member${index}Workshop`] = "Workshop track required";
+        if (formData.tickets.startupOnly) {
+          // For startup-only tickets, only validate pitch data (no workshop tracks needed)
+          if (!formData.startupPitchData[0]) {
+            newErrors.startupPitchDetails = "Startup pitch details required for startup-only registration";
           }
-          if (formData.tickets.combo && !memberTrack?.competitionTrack) {
-            newErrors[`member${index}Competition`] = "Competition track required for combo pass";
-          }
-          if (memberTrack?.competitionTrack === "Startup Pitch" || formData.tickets.startupOnly) {
-            // In shared mode (or team size 1), check if pitch data exists for member 0 (team lead)
-            // In individual mode, check for specific member's pitch data
-            const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1 || formData.tickets.startupOnly) 
-              ? formData.startupPitchData[0] 
-              : formData.startupPitchData[index];
-            
-
-            
-            if (!pitchDataExists) {
-              newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
+        } else {
+          // For other ticket types, validate tracks normally
+          formData.members.forEach((member, index) => {
+            const memberTrack = formData.memberTracks[index];
+            if (!memberTrack?.workshopTrack) {
+              newErrors[`member${index}Workshop`] = "Workshop track required";
             }
-          }
-        });
+            if (formData.tickets.combo && !memberTrack?.competitionTrack) {
+              newErrors[`member${index}Competition`] = "Competition track required for combo pass";
+            }
+            if (memberTrack?.competitionTrack === "Startup Pitch") {
+              // In shared mode (or team size 1), check if pitch data exists for member 0 (team lead)
+              // In individual mode, check for specific member's pitch data
+              const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1) 
+                ? formData.startupPitchData[0] 
+                : formData.startupPitchData[index];
+              
+              if (!pitchDataExists) {
+                newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
+              }
+            }
+          });
+        }
         break;
       case 5:
         if (!formData.payment.transactionId) newErrors.transactionId = "Transaction ID required";
@@ -907,7 +924,15 @@ export default function Register() {
               </Card>
 
               <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.startupOnly ? 'ring-2 ring-pink-500' : ''}`}
-                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: true } })}>
+                onClick={() => {
+                  setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: true } });
+                  // Show a helpful message for mobile users about the next steps
+                  if (window.innerWidth <= 768) {
+                    setTimeout(() => {
+                      alert('Great choice! After completing team details, you\'ll need to add your startup pitch information. Make sure you have your pitch deck ready (PDF/PPT format, max 50MB).');
+                    }, 500);
+                  }
+                }}>
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <CreditCard className="w-5 h-5 mr-2" />
@@ -1235,6 +1260,31 @@ export default function Register() {
                     <li key={key}>• {message}</li>
                   ))}
                 </ul>
+                {/* Special help for startup-only pitch details error */}
+                {errors.startupPitchDetails && (
+                  <div className="mt-3 pt-3 border-t border-red-500/20">
+                    <p className="text-red-300 text-sm mb-2">
+                      📱 <strong>Mobile users:</strong> If the pitch dialog isn&apos;t opening, try:
+                    </p>
+                    <ul className="text-red-300 text-xs space-y-1 ml-4">
+                      <li>• Scroll up and tap &quot;Add Pitch Details for Team&quot; button</li>
+                      <li>• Refresh the page and try again</li>
+                      <li>• Use a stable WiFi connection</li>
+                    </ul>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setCurrentPitchMember(0);
+                        setTimeout(() => setShowPitchDialog(true), 200);
+                      }}
+                      className="text-red-400 border-red-400 hover:bg-red-400/10 mt-2"
+                    >
+                      Open Pitch Dialog Now
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1419,7 +1469,23 @@ export default function Register() {
     }
   };
 
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <Card className="bg-gray-800/50 border-gray-700">
+          <CardContent className="flex items-center justify-center p-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
+  // Don't render if user is authenticated (will be redirected to dashboard)
+  if (user) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen max-w-4xl mx-auto">

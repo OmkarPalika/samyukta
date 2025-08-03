@@ -129,12 +129,6 @@ export const SPONSORS_DATA = [
     amount: "Merchandise & Goodies",
     sponsors: [
       {
-        logo: "/sponsors/uniglobal.jpeg",
-        name: "UNIGLOBAL",
-        website: "http://uniglobaleducon.com/",
-        description: "Overseas consultancy firm"
-      },
-      {
         logo: "/sponsors/interview-buddy.svg",
         name: "Interview Buddy",
         website: "https://interviewbuddy.net/",
@@ -171,7 +165,6 @@ export const PARTNERS_DATA = [
   "BizVerve",
   "Prismatica",
   "MMK Universe",
-  "UniGlobal",
   "Interview Buddy",
 ] as const;
 

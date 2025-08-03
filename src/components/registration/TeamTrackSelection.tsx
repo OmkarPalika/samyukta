@@ -176,15 +176,23 @@ export default function TeamTrackSelection({
                   </div>
                 </div>
               ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onOpenPitchDialog(0)}
-                  className="text-purple-400 border-purple-400 hover:bg-purple-400/10"
-                >
-                  Add Pitch Details for Team
-                </Button>
+                <div className="space-y-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      // Add a small delay for mobile devices to ensure proper dialog opening
+                      setTimeout(() => onOpenPitchDialog(0), 100);
+                    }}
+                    className="text-purple-400 border-purple-400 hover:bg-purple-400/10 w-full sm:w-auto"
+                  >
+                    Add Pitch Details for Team
+                  </Button>
+                  <p className="text-xs text-gray-400">
+                    📱 <strong>Mobile users:</strong> If the dialog doesn&apos;t open, try tapping again or refresh the page.
+                  </p>
+                </div>
               )}
             </div>
           </CardContent>
