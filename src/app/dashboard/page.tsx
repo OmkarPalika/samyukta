@@ -24,11 +24,13 @@ export default function DashboardPage() {
         
         setUser(user);
 
-        // Only redirect admins and coordinators
+        // Redirect based on user role
         if (user.role === 'admin') {
           router.push('/dashboard/admin');
         } else if (user.role === 'coordinator') {
           router.push('/dashboard/coordinator');
+        } else {
+          router.push('/dashboard/participant');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);

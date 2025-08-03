@@ -1285,31 +1285,6 @@ export default function Register() {
                     </Button>
                   </div>
                 )}
-                {/* Special help for startup-only pitch details error */}
-                {errors.startupPitchDetails && (
-                  <div className="mt-3 pt-3 border-t border-red-500/20">
-                    <p className="text-red-300 text-sm mb-2">
-                      📱 <strong>Mobile users:</strong> If the pitch dialog isn&apos;t opening, try:
-                    </p>
-                    <ul className="text-red-300 text-xs space-y-1 ml-4">
-                      <li>• Scroll up and tap &quot;Add Pitch Details for Team&quot; button</li>
-                      <li>• Refresh the page and try again</li>
-                      <li>• Use a stable WiFi connection</li>
-                    </ul>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setCurrentPitchMember(0);
-                        setTimeout(() => setShowPitchDialog(true), 200);
-                      }}
-                      className="text-red-400 border-red-400 hover:bg-red-400/10 mt-2"
-                    >
-                      Open Pitch Dialog Now
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
 

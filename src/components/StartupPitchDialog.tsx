@@ -173,10 +173,40 @@ export default function StartupPitchDialog({
           clearTimeout(timeoutId);
           
           if (response.ok) {
-            const result = await response.json();
+            const responseText = await response.text();
+            console.log('Upload response received:', responseText);
+            let result;
+            try {
+              result = JSON.parse(responseText);
+              console.log('Upload response parsed successfully:', result);
+            } catch (parseError) {
+              console.error('JSON Parse Error Details:', {
+                error: parseError.message,
+                responseText: responseText,
+                responseLength: responseText.length,
+                firstChars: responseText.substring(0, 50),
+                lastChars: responseText.substring(responseText.length - 50)
+              });
+              throw new Error(`Invalid response from upload service. Parse error: ${parseError.message}`);
+            }
             uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.file_url };
           } else {
-            const errorData = await response.json();
+            const responseText = await response.text();
+            console.log('Upload error response received:', responseText);
+            let errorData;
+            try {
+              errorData = JSON.parse(responseText);
+              console.log('Error response parsed successfully:', errorData);
+            } catch (parseError) {
+              console.error('Error Response Parse Error Details:', {
+                error: parseError.message,
+                responseText: responseText,
+                responseLength: responseText.length,
+                status: response.status,
+                statusText: response.statusText
+              });
+              throw new Error(`Upload failed with status ${response.status}. Parse error: ${parseError.message}`);
+            }
             throw new Error(errorData.error || 'Upload failed');
           }
         } catch (error) {
@@ -192,6 +222,10 @@ export default function StartupPitchDialog({
               errorMessage += 'File is too large. Please compress your file or use a smaller file (max 50MB).';
             } else if (error.message.includes('Invalid file type')) {
               errorMessage += 'Invalid file type. Please use PDF or PowerPoint files only.';
+            } else if (error.message.includes('Invalid response') || error.message.includes('Failed to parse') || error.message.includes('Parse error') || error.message.includes('Unexpected token')) {
+              errorMessage += 'Upload service returned invalid data. Please try again or contact support if this persists.';
+            } else if (error.message.includes('GAS service')) {
+              errorMessage += 'Upload service configuration issue. Please contact support if this persists.';
             } else {
               errorMessage += error.message;
             }
