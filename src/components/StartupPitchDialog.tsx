@@ -180,14 +180,15 @@ export default function StartupPitchDialog({
               result = JSON.parse(responseText);
               console.log('Upload response parsed successfully:', result);
             } catch (parseError) {
+              const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
               console.error('JSON Parse Error Details:', {
-                error: parseError.message,
+                error: errorMessage,
                 responseText: responseText,
                 responseLength: responseText.length,
                 firstChars: responseText.substring(0, 50),
                 lastChars: responseText.substring(responseText.length - 50)
               });
-              throw new Error(`Invalid response from upload service. Parse error: ${parseError.message}`);
+              throw new Error(`Invalid response from upload service. Parse error: ${errorMessage}`);
             }
             uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.file_url };
           } else {
@@ -198,14 +199,15 @@ export default function StartupPitchDialog({
               errorData = JSON.parse(responseText);
               console.log('Error response parsed successfully:', errorData);
             } catch (parseError) {
+              const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
               console.error('Error Response Parse Error Details:', {
-                error: parseError.message,
+                error: errorMessage,
                 responseText: responseText,
                 responseLength: responseText.length,
                 status: response.status,
                 statusText: response.statusText
               });
-              throw new Error(`Upload failed with status ${response.status}. Parse error: ${parseError.message}`);
+              throw new Error(`Upload failed with status ${response.status}. Parse error: ${errorMessage}`);
             }
             throw new Error(errorData.error || 'Upload failed');
           }
