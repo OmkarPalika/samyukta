@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Upload, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface StartupPitchData {
   startupName: string;
@@ -18,8 +18,6 @@ interface StartupPitchData {
   currentStage: string;
   teamSize: string;
   fundingStatus: string;
-  pitchDeck: File | null;
-  pitchDeckUrl?: string;
   demoUrl: string;
   teamMembers?: number[]; // Indices of team members participating in the pitch
   externalMembers?: string[]; // Names of external team members not in registration
@@ -44,7 +42,6 @@ const defaultData: StartupPitchData = {
   currentStage: '',
   teamSize: '',
   fundingStatus: '',
-  pitchDeck: null,
   demoUrl: '',
   externalMembers: []
 };
@@ -71,7 +68,6 @@ export default function StartupPitchDialog({
     return baseData;
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
 
   // Handle team size change and initialize external members if needed
   const handleTeamSizeChange = (value: string) => {
@@ -147,110 +143,7 @@ export default function StartupPitchDialog({
 
   const handleSave = async () => {
     if (validateForm()) {
-      setUploading(true);
-      let uploadedData = { ...data };
-      
-      if (data.pitchDeck) {
-        try {
-          // Check file size before upload (mobile-friendly check)
-          if (data.pitchDeck.size > 50 * 1024 * 1024) {
-            throw new Error('File too large. Maximum size is 50MB.');
-          }
-          
-          const formData = new FormData();
-          formData.append('file', data.pitchDeck);
-          
-          // Add timeout for mobile networks (2 minutes)
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 120000);
-          
-          const response = await fetch('/api/upload/pitch-deck', {
-            method: 'POST',
-            body: formData,
-            signal: controller.signal
-          });
-          
-          clearTimeout(timeoutId);
-          
-          if (response.ok) {
-            const responseText = await response.text();
-            console.log('Upload response received:', responseText);
-            let result;
-            try {
-              result = JSON.parse(responseText);
-              console.log('Upload response parsed successfully:', result);
-              
-              // Validate that we have the expected response structure
-              if (!result.success || !result.file_url) {
-                throw new Error('Upload service returned invalid response structure');
-              }
-              
-            } catch (parseError) {
-              const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-              console.error('JSON Parse Error Details:', {
-                error: errorMessage,
-                responseText: responseText,
-                responseLength: responseText.length,
-                firstChars: responseText.substring(0, 50),
-                lastChars: responseText.substring(responseText.length - 50)
-              });
-              setUploading(false);
-              throw new Error(`Invalid response from upload service. Parse error: ${errorMessage}`);
-            }
-            uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.file_url };
-          } else {
-            const responseText = await response.text();
-            console.log('Upload error response received:', responseText);
-            let errorData;
-            try {
-              errorData = JSON.parse(responseText);
-              console.log('Error response parsed successfully:', errorData);
-            } catch (parseError) {
-              const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
-              console.error('Error Response Parse Error Details:', {
-                error: errorMessage,
-                responseText: responseText,
-                responseLength: responseText.length,
-                status: response.status,
-                statusText: response.statusText
-              });
-              setUploading(false);
-              throw new Error(`Upload failed with status ${response.status}. Response: ${responseText.substring(0, 100)}`);
-            }
-            setUploading(false);
-            throw new Error(errorData.error || `Upload failed with status ${response.status}`);
-          }
-        } catch (error) {
-          console.error('Upload failed:', error);
-          setUploading(false);
-          
-          // Better error messages for mobile users
-          let errorMessage = 'Upload failed. ';
-          if (error instanceof Error) {
-            if (error.name === 'AbortError') {
-              errorMessage += 'Upload timed out. Please check your internet connection and try again.';
-            } else if (error.message.includes('File too large')) {
-              errorMessage += 'File is too large. Please compress your file or use a smaller file (max 50MB).';
-            } else if (error.message.includes('Invalid file type')) {
-              errorMessage += 'Invalid file type. Please use PDF or PowerPoint files only.';
-            } else if (error.message.includes('Invalid response') || error.message.includes('Failed to parse') || error.message.includes('Parse error') || error.message.includes('Unexpected token')) {
-              errorMessage += 'Upload service returned invalid data. Please try again or contact support if this persists.';
-            } else if (error.message.includes('GAS service')) {
-              errorMessage += 'Upload service configuration issue. Please contact support if this persists.';
-            } else {
-              errorMessage += error.message;
-            }
-          } else {
-            errorMessage += 'Unknown error occurred. Please try again.';
-          }
-          
-          alert(errorMessage);
-          return;
-        }
-      }
-      
-      setUploading(false);
-      onSave(uploadedData);
+      onSave(data);
       onOpenChange(false);
     }
   };
@@ -494,110 +387,30 @@ export default function StartupPitchDialog({
           </div>
 
           <div className="space-y-2">
-            <Label className="text-gray-300">Pitch Deck Upload (Optional, PDF/PPT max 50MB)</Label>
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mb-2">
-              <p className="text-blue-400 text-xs">
-                💡 <strong>Mobile Tip:</strong> For faster uploads, compress your file or use a stable WiFi connection. Upload may take 1-2 minutes on mobile networks.
-              </p>
-            </div>
-            <div className="border-2 border-dashed border-gray-600 rounded-lg p-4">
-              {data.pitchDeck ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <span className="text-gray-300 text-sm block truncate">{data.pitchDeck.name}</span>
-                      <span className="text-gray-400 text-xs">
-                        {(data.pitchDeck.size / (1024 * 1024)).toFixed(1)} MB
-                      </span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setData({ ...data, pitchDeck: null })}
-                      className="text-red-400 hover:text-red-300 ml-2"
-                    >
-                      <X className="w-4 h-4" />
-                    </Button>
+            <Label className="text-gray-300">Pitch Deck Submission (Optional)</Label>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0">
+                  <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-blue-400 font-medium text-sm mb-2">📧 Email Your Pitch Deck</h4>
+                  <p className="text-gray-300 text-sm mb-3">
+                    Please reply to your confirmation email with your pitch deck attached, or send it directly to:
+                  </p>
+                  <div className="bg-gray-700/50 rounded-lg p-3 mb-3">
+                    <p className="text-white font-mono text-sm">samyukta.summit@gmail.com</p>
+                  </div>
+                  <div className="text-gray-400 text-xs space-y-1">
+                    <p>• <strong>Subject:</strong> Pitch Deck - [Your Startup Name] - [Team Name]</p>
+                    <p>• <strong>Format:</strong> PDF or PowerPoint (.pdf, .ppt, .pptx)</p>
+                    <p>• <strong>Size:</strong> Maximum 25MB</p>
+                    <p>• <strong>Include:</strong> Your registration details and team information</p>
                   </div>
                 </div>
-              ) : data.pitchDeckUrl ? (
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-green-500/10 border border-green-500/20 rounded-lg p-3 space-y-2 sm:space-y-0">
-                  <div className="flex items-center space-x-2">
-                    <Upload className="w-4 h-4 text-green-400" />
-                    <span className="text-green-400 text-sm">Pitch deck uploaded successfully</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => window.open(data.pitchDeckUrl, '_blank')}
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      View
-                    </Button>
-                    <label className="cursor-pointer">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-gray-400 hover:text-gray-300"
-                        asChild
-                      >
-                        <span>Replace</span>
-                      </Button>
-                      <input
-                        type="file"
-                        accept=".pdf,.ppt,.pptx"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 50 * 1024 * 1024) {
-                              alert('File size must be less than 50MB. Please compress your file and try again.');
-                              return;
-                            }
-                            const allowedTypes = ['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
-                            if (!allowedTypes.includes(file.type)) {
-                              alert('Please upload only PDF or PowerPoint files (.pdf, .ppt, .pptx)');
-                              return;
-                            }
-                            setData({ ...data, pitchDeck: file, pitchDeckUrl: undefined });
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center cursor-pointer hover:bg-gray-700/20 rounded-lg p-4 transition-colors">
-                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                  <span className="text-gray-400 text-sm text-center">
-                    Tap to upload PDF or PowerPoint file
-                  </span>
-                  <span className="text-gray-500 text-xs mt-1">
-                    Maximum size: 50MB
-                  </span>
-                  <input
-                    type="file"
-                    accept=".pdf,.ppt,.pptx"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        if (file.size > 50 * 1024 * 1024) {
-                          alert('File size must be less than 50MB. Please compress your file and try again.');
-                          return;
-                        }
-                        const allowedTypes = ['application/pdf', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
-                        if (!allowedTypes.includes(file.type)) {
-                          alert('Please upload only PDF or PowerPoint files (.pdf, .ppt, .pptx)');
-                          return;
-                        }
-                        setData({ ...data, pitchDeck: file });
-                      }
-                    }}
-                  />
-                </label>
-              )}
+              </div>
             </div>
           </div>
 
@@ -617,36 +430,17 @@ export default function StartupPitchDialog({
           <Button 
             variant="outline" 
             onClick={handleCancel} 
-            disabled={uploading}
             className="border-gray-600 text-gray-600 w-full sm:w-auto"
           >
             Cancel
           </Button>
           <Button 
             onClick={handleSave} 
-            disabled={uploading} 
-            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto relative"
+            className="bg-purple-600 hover:bg-purple-700 w-full sm:w-auto"
           >
-            {uploading ? (
-              <div className="flex items-center space-x-2">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                <span>
-                  {data.pitchDeck ? 'Uploading pitch deck...' : 'Saving details...'}
-                </span>
-              </div>
-            ) : (
-              'Save Details'
-            )}
+            Save Details
           </Button>
         </div>
-        
-        {uploading && data.pitchDeck && (
-          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 mt-4">
-            <p className="text-blue-400 text-sm text-center">
-              📤 Uploading your pitch deck... This may take 1-2 minutes on mobile networks. Please don&apos;t close this dialog.
-            </p>
-          </div>
-        )}
       </DialogContent>
     </Dialog>
   );
