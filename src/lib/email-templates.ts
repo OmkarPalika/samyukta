@@ -17,6 +17,7 @@ const getTicketTheme = (data: RegistrationData) => {
   const isCombo = data.ticketType.toLowerCase().includes('combo');
   const isHackathon = data.ticketType.toLowerCase().includes('hackathon');
   const isPitch = data.ticketType.toLowerCase().includes('pitch');
+  const isStartupOnly = data.ticketType.toLowerCase().includes('startup_only');
   const isCloud = data.workshopTrack?.toLowerCase().includes('cloud');
   const isAI = data.workshopTrack?.toLowerCase().includes('ai');
   const isCybersecurity = data.workshopTrack?.toLowerCase().includes('cybersecurity');
@@ -43,6 +44,18 @@ const getTicketTheme = (data: RegistrationData) => {
       pattern: 'pitch',
       title: 'COMBO STARTUP PASS',
       subtitle: `${teamSize}-Member Entrepreneur Team`
+    };
+  }
+  
+  if (isStartupOnly) {
+    return {
+      gradient: 'linear-gradient(135deg, #8B5CF6 0%, #EC4899 50%, #F59E0B 100%)',
+      accent: '#8B5CF6',
+      secondary: '#EC4899',
+      icon: '💡',
+      pattern: 'startup',
+      title: 'ENTRY + COMPETITION PASS',
+      subtitle: `${teamSize}-Member Startup Team`
     };
   }
   
