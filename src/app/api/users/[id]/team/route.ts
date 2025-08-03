@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getTypedCollections } from '@/lib/db-utils';
+import { ObjectId } from 'mongodb';
 
 export async function GET(
-  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -21,15 +21,15 @@ export async function GET(
       return NextResponse.json({ error: 'User is not part of any team' }, { status: 404 });
     }
 
-    // Get team registration details
-    const registration = await collections.registrations.findOne({ team_id: teamMember.team_id });
+    // Get team registration details using the registration_id from team member
+    const registration = await collections.registrations.findOne({ _id: new ObjectId(teamMember.registration_id) });
 
     if (!registration) {
       return NextResponse.json({ error: 'Team registration not found' }, { status: 404 });
     }
 
     return NextResponse.json({
-      team_id: teamMember.team_id,
+      team_id: registration.team_id,
       registration_id: teamMember.registration_id,
       college: registration.college,
       team_size: registration.team_size,
