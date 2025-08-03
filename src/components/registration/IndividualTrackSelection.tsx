@@ -36,6 +36,7 @@ interface IndividualTrackSelectionProps {
   startupPitchData: Record<number, StartupPitchData>;
   isComboTicket: boolean;
   isStartupOnly?: boolean;
+  isHackathonOnly?: boolean;
   slots: {
     workshops: {
       cloud: { remaining: number; closed: boolean };
@@ -58,6 +59,7 @@ export default function IndividualTrackSelection({
   startupPitchData,
   isComboTicket,
   isStartupOnly = false,
+  isHackathonOnly = false,
   slots,
   errors,
   onTrackChange,
@@ -109,9 +111,9 @@ export default function IndividualTrackSelection({
     onTrackChange(updatedTracks);
   };
 
-  // For startup-only tickets, this component should not be used
-  // The TeamTrackSelection component handles startup-only tickets
-  if (isStartupOnly) {
+  // For startup-only and hackathon-only tickets, this component should not be used
+  // The TeamTrackSelection component handles these special ticket types
+  if (isStartupOnly || isHackathonOnly) {
     return null;
   }
 

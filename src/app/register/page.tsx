@@ -65,6 +65,7 @@ interface FormData {
   tickets: {
     combo: boolean;
     startupOnly?: boolean;
+    hackathonOnly?: boolean;
     workshop: string;
     competition: string;
   };
@@ -156,7 +157,7 @@ export default function Register() {
       clubDesignation: "",
       sameAsLead: false
     }],
-    tickets: { combo: false, startupOnly: false, workshop: "", competition: "" },
+    tickets: { combo: false, startupOnly: false, hackathonOnly: false, workshop: "", competition: "" },
     memberTracks: [],
     startupPitchData: {},
     payment: { transactionId: "", screenshot: null }
@@ -482,6 +483,9 @@ export default function Register() {
           if (!formData.startupPitchData[0]) {
             newErrors.startupPitchDetails = "Startup pitch details required for startup-only registration";
           }
+        } else if (formData.tickets.hackathonOnly) {
+          // For hackathon-only tickets, no additional validation needed
+          // Hackathon track is automatically assigned
         } else {
           // For other ticket types, validate tracks normally
           formData.members.forEach((member, index) => {
@@ -495,10 +499,10 @@ export default function Register() {
             if (memberTrack?.competitionTrack === "Startup Pitch") {
               // In shared mode (or team size 1), check if pitch data exists for member 0 (team lead)
               // In individual mode, check for specific member's pitch data
-              const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1) 
-                ? formData.startupPitchData[0] 
+              const pitchDataExists = (trackSelectionMode === 'shared' || formData.teamSize === 1)
+                ? formData.startupPitchData[0]
                 : formData.startupPitchData[index];
-              
+
               if (!pitchDataExists) {
                 newErrors[`member${index}PitchDetails`] = "Startup pitch details required";
               }
@@ -543,21 +547,22 @@ export default function Register() {
 
   const calculatePrice = () => {
     let total = 0;
-    
+
     if (formData.tickets.startupOnly) {
-      // Startup-only ticket: ₹200 per person with group discounts
+      // Startup-only ticket: ₹200 per person with team discounts (same as combo)
       total = 200 * formData.teamSize;
-      
-      // Apply group discounts for startup-only tickets
-      if (formData.teamSize >= 5) {
-        // 5+ members: ₹50 discount per person
-        total -= formData.teamSize * 50;
-      } else if (formData.teamSize >= 3) {
-        // 3-4 members: ₹30 discount per person
-        total -= formData.teamSize * 30;
-      } else if (formData.teamSize === 2) {
-        // 2 members: ₹20 discount per person
-        total -= formData.teamSize * 20;
+
+      // Apply team discount for startup-only tickets (same as combo)
+      if (formData.teamSize > 1) {
+        total -= formData.teamSize * 10; // ₹10 discount per person for teams
+      }
+    } else if (formData.tickets.hackathonOnly) {
+      // Hackathon-only ticket: ₹250 per person with team discounts
+      total = 250 * formData.teamSize;
+
+      // Apply team discount for hackathon-only tickets (same as combo)
+      if (formData.teamSize > 1) {
+        total -= formData.teamSize * 10; // ₹10 discount per person for teams
       }
     } else if (formData.tickets.combo) {
       // Calculate combo pass price based on individual competition track selections
@@ -573,7 +578,7 @@ export default function Register() {
           total += 900;
         }
       }
-      
+
       // Apply team discount for combo tickets
       if (formData.teamSize > 1) {
         total -= formData.teamSize * 10;
@@ -581,11 +586,11 @@ export default function Register() {
     } else {
       // Base price for workshop-only tickets
       total = 800 * formData.teamSize;
-      
+
       if (trackSelectionMode === 'shared' || formData.teamSize === 1) {
         // In shared mode, apply the same competition track to all members
         const sharedTrack = formData.memberTracks[0] || { workshopTrack: "", competitionTrack: "" };
-        
+
         if (sharedTrack.competitionTrack === "Hackathon") {
           // Add hackathon fee for all members
           total += 150 * formData.teamSize;
@@ -598,10 +603,10 @@ export default function Register() {
         // Count unique pitches for pricing
         const pitchOwners = new Set();
         const pitchParticipants = new Set();
-        
+
         // Track hackathon participants
         let hackathonCount = 0;
-        
+
         formData.memberTracks.forEach((track, index) => {
           if (track.competitionTrack === "Hackathon") {
             hackathonCount++;
@@ -621,22 +626,22 @@ export default function Register() {
             }
           }
         });
-        
+
         // For members who selected Startup Pitch but aren't part of any pitch yet
         formData.memberTracks.forEach((track, index) => {
           if (track.competitionTrack === "Startup Pitch" && !pitchParticipants.has(index)) {
             total += 100; // Add individual pitch fee
           }
         });
-        
+
         // Add the cost for unique pitches
         total += pitchOwners.size * 100;
-        
+
         // Add hackathon fees
         total += hackathonCount * 150;
       }
     }
-    
+
     return total;
   };
 
@@ -650,7 +655,7 @@ export default function Register() {
         validateFile(formData.payment.screenshot);
         const ticketType = formData.tickets.startupOnly ? 'startup_only' : 'regular';
         const result = await uploadFile(
-          formData.payment.screenshot, 
+          formData.payment.screenshot,
           '/api/registrations/upload-payment',
           undefined,
           { ticketType }
@@ -688,15 +693,18 @@ export default function Register() {
           ? (formData.members[0].college === "Other" ? formData.members[0].customOrganization : formData.members[0].college)
           : formData.members[0].customOrganization,
         members: membersData,
-        ticket_type: formData.tickets.combo ? "Combo" : formData.tickets.startupOnly ? "startup_only" : "Custom",
+        ticket_type: formData.tickets.combo ? "Combo" : formData.tickets.startupOnly ? "startup_only" : formData.tickets.hackathonOnly ? "hackathon_only" : "Custom",
         workshop_track: formData.memberTracks[0]?.workshopTrack?.includes("Cloud") ? "Cloud" : "AI",
-        competition_track: formData.memberTracks[0]?.competitionTrack === "Hackathon" ? "Hackathon" :
-          formData.memberTracks[0]?.competitionTrack === "Startup Pitch" ? "Pitch" : "None",
+        competition_track: formData.tickets.hackathonOnly ? "Hackathon" :
+          formData.memberTracks[0]?.competitionTrack === "Hackathon" ? "Hackathon" :
+            formData.memberTracks[0]?.competitionTrack === "Startup Pitch" ? "Pitch" : "None",
         total_amount: calculatePrice(),
         transaction_id: formData.payment.transactionId,
         payment_screenshot_url: paymentScreenshotUrl,
         // Include startup pitch data for startup-only tickets
-        startup_pitch_data: formData.tickets.startupOnly ? formData.startupPitchData[0] : null
+        startup_pitch_data: formData.tickets.startupOnly ? formData.startupPitchData[0] : null,
+        // Set hackathon track for hackathon-only tickets
+        hackathon_only: formData.tickets.hackathonOnly
       };
       const response = await fetch('/api/registrations', {
         method: 'POST',
@@ -821,14 +829,14 @@ export default function Register() {
                 <Label htmlFor="lead-accommodation" className="text-gray-300">
                   Accommodation required
                   <Badge className={`ml-2 text-xs ${teamLead.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : teamLead.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                    {!slots ? 'Loading...' : 
-                      teamLead.gender === 'Female' ? 
+                    {!slots ? 'Loading...' :
+                      teamLead.gender === 'Female' ?
                         slots.accommodation.female.remaining <= 0 ? 'Female: FULL 🚫' :
-                        `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` : 
-                      teamLead.gender === 'Male' ? 
-                        slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
-                        `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` : 
-                        `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
+                          `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` :
+                        teamLead.gender === 'Male' ?
+                          slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
+                            `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` :
+                          `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
                     }
                   </Badge>
                 </Label>
@@ -902,9 +910,9 @@ export default function Register() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo === false && !formData.tickets.startupOnly ? 'ring-2 ring-blue-500' : ''}`}
-                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false } })}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo === false && !formData.tickets.startupOnly && !formData.tickets.hackathonOnly ? 'ring-2 ring-blue-500' : ''}`}
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false, hackathonOnly: false } })}>
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <FileText className="w-5 h-5 mr-2" />
@@ -922,9 +930,51 @@ export default function Register() {
                 </CardContent>
               </Card>
 
+              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo ? 'ring-2 ring-violet-500' : ''}`}
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: true, startupOnly: false, hackathonOnly: false } })}>
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Star className="w-5 h-5 mr-2" />
+                    Combo Pass
+                    <Badge className="ml-2 bg-violet-500/20 text-violet-300">Popular</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-violet-400">₹900-₹950</div>
+                  <ul className="space-y-2 text-gray-300 mt-4">
+                    <li>• Everything in Entry + Workshop</li>
+                    <li>• Competition access</li>
+                    <li>• ₹900 for Startup Pitch</li>
+                    <li>• ₹950 for Hackathon</li>
+                    <li className="text-green-400">• Team discounts available</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.hackathonOnly ? 'ring-2 ring-green-500' : ''}`}
+                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false, hackathonOnly: true } })}>
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Users className="w-5 h-5 mr-2" />
+                    Hackathon Only
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-400">₹250</div>
+                  <ul className="space-y-2 text-gray-300 mt-4">
+                    <li>• 6-hour Hackathon</li>
+                    <li>• Mentorship & Support</li>
+                    <li>• Networking Access</li>
+                    <li>• Meals & Refreshments</li>
+                    <li>• Certificate</li>
+                    <li className="text-green-400">• Team discounts available</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
               <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.startupOnly ? 'ring-2 ring-pink-500' : ''}`}
                 onClick={() => {
-                  setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: true } });
+                  setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: true, hackathonOnly: false } });
                   // Show a helpful message for mobile users about the next steps
                   if (window.innerWidth <= 768) {
                     setTimeout(() => {
@@ -947,27 +997,6 @@ export default function Register() {
                     <li>• Meals & Refreshments</li>
                     <li>• Certificate</li>
                     <li className="text-green-400">• Group discounts available</li>
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo ? 'ring-2 ring-violet-500' : ''}`}
-                onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: true, startupOnly: false } })}>
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <Star className="w-5 h-5 mr-2" />
-                    Combo Pass
-                    <Badge className="ml-2 bg-violet-500/20 text-violet-300">Popular</Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-violet-400">₹900-₹950</div>
-                  <ul className="space-y-2 text-gray-300 mt-4">
-                    <li>• Everything in Entry + Workshop</li>
-                    <li>• Competition access</li>
-                    <li>• ₹900 for Startup Pitch</li>
-                    <li>• ₹950 for Hackathon</li>
-                    <li>• Team discounts available</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -1133,14 +1162,14 @@ export default function Register() {
                       <Label htmlFor={`accommodation-${memberIndex}`} className="text-gray-300">
                         Accommodation required
                         <Badge className={`ml-2 text-xs ${member.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' : member.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' : 'bg-green-500/10 text-green-400'}`}>
-                          {!slots ? 'Loading...' : 
-                            member.gender === 'Female' ? 
+                          {!slots ? 'Loading...' :
+                            member.gender === 'Female' ?
                               slots.accommodation.female.remaining <= 0 ? 'Female: FULL 🚫' :
-                              `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` : 
-                            member.gender === 'Male' ? 
-                              slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
-                              `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` : 
-                              `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
+                                `Female: ${slots.accommodation.female.remaining} slots left${slots.accommodation.female.remaining <= 5 ? ' ⚠️' : ''}` :
+                              member.gender === 'Male' ?
+                                slots.accommodation.male.remaining <= 0 ? 'Male: FULL 🚫' :
+                                  `Male: ${slots.accommodation.male.remaining} slots left${slots.accommodation.male.remaining <= 5 ? ' ⚠️' : ''}` :
+                                `${slots.accommodation.male.remaining}M/${slots.accommodation.female.remaining}F slots left`
                           }
                         </Badge>
                       </Label>
@@ -1190,112 +1219,153 @@ export default function Register() {
         return (
           <div className="space-y-8 overflow-x-hidden">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-white mb-2">Tracks & Pricing</h3>
-              <p className="text-gray-300">Select workshop and competition tracks for each team member</p>
+              <h3 className="text-xl font-bold text-white mb-2">
+                {formData.tickets.hackathonOnly ? "Pricing Summary" : "Tracks & Pricing"}
+              </h3>
+              <p className="text-gray-300">
+                {formData.tickets.hackathonOnly 
+                  ? "Review your hackathon registration details" 
+                  : "Select workshop and competition tracks for each team member"
+                }
+              </p>
             </div>
 
-            {/* Only show track selection mode if team size > 1 */}
-            {formData.teamSize > 1 && (
-              <TrackSelectionMode
-                value={trackSelectionMode}
-                onChange={(mode) => {
-                  setTrackSelectionMode(mode);
-                  // Reset member tracks when changing modes
-                  setFormData({ ...formData, memberTracks: [] });
-                }}
-              />
-            )}
+            {/* For hackathon-only tickets, show only the track selection component and price summary */}
+            {formData.tickets.hackathonOnly ? (
+              <>
+                <TeamTrackSelection
+                  members={formData.members}
+                  memberTracks={formData.memberTracks}
+                  startupPitchData={formData.startupPitchData}
+                  isComboTicket={formData.tickets.combo}
+                  isHackathonOnly={formData.tickets.hackathonOnly}
+                  slots={slots}
+                  errors={errors}
+                  onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
+                  onOpenPitchDialog={(memberIndex) => {
+                    setCurrentPitchMember(memberIndex);
+                    if (slots && slots.total.remaining <= 50) {
+                      setShowPitchModeDialog(true);
+                    } else {
+                      setShowPitchDialog(true);
+                    }
+                  }}
+                />
+                <PriceSummary
+                  isComboTicket={formData.tickets.combo}
+                  isHackathonOnly={formData.tickets.hackathonOnly}
+                  teamSize={formData.teamSize}
+                  memberTracks={formData.memberTracks}
+                  startupPitchData={formData.startupPitchData}
+                  trackSelectionMode={trackSelectionMode}
+                />
+              </>
+            ) : (
+              <>
+                {/* Only show track selection mode if team size > 1 */}
+                {formData.teamSize > 1 && (
+                  <TrackSelectionMode
+                    value={trackSelectionMode}
+                    onChange={(mode) => {
+                      setTrackSelectionMode(mode);
+                      // Reset member tracks when changing modes
+                      setFormData({ ...formData, memberTracks: [] });
+                    }}
+                  />
+                )}
 
-            {/* Show team track selection only in shared mode */}
-            {(trackSelectionMode === 'shared' || formData.teamSize === 1) && (
-              <TeamTrackSelection
-                members={formData.members}
-                memberTracks={formData.memberTracks}
-                startupPitchData={formData.startupPitchData}
-                isComboTicket={formData.tickets.combo}
-                isStartupOnly={formData.tickets.startupOnly}
-                slots={slots}
-                errors={errors}
-                onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
-                onOpenPitchDialog={(memberIndex) => {
-                  setCurrentPitchMember(memberIndex);
-                  if (slots && slots.total.remaining <= 50) {
-                    setShowPitchModeDialog(true);
-                  } else {
-                    setShowPitchDialog(true);
-                  }
-                }}
-              />
-            )}
-            
-            {/* Show individual track selection UI only in individual mode */}
-            {trackSelectionMode === 'individual' && formData.teamSize > 1 && (
-              <IndividualTrackSelection
-                members={formData.members}
-                memberTracks={formData.memberTracks}
-                startupPitchData={formData.startupPitchData}
-                isComboTicket={formData.tickets.combo}
-                isStartupOnly={formData.tickets.startupOnly}
-                slots={slots}
-                errors={errors}
-                onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
-                onOpenPitchDialog={(memberIndex) => {
-                  setCurrentPitchMember(memberIndex);
-                  if (slots && slots.total.remaining <= 50) {
-                    setShowPitchModeDialog(true);
-                  } else {
-                    setShowPitchDialog(true);
-                  }
-                }}
-              />
-            )}
+                {/* Show team track selection only in shared mode */}
+                {(trackSelectionMode === 'shared' || formData.teamSize === 1) && (
+                  <TeamTrackSelection
+                    members={formData.members}
+                    memberTracks={formData.memberTracks}
+                    startupPitchData={formData.startupPitchData}
+                    isComboTicket={formData.tickets.combo}
+                    isStartupOnly={formData.tickets.startupOnly}
+                    slots={slots}
+                    errors={errors}
+                    onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
+                    onOpenPitchDialog={(memberIndex) => {
+                      setCurrentPitchMember(memberIndex);
+                      if (slots && slots.total.remaining <= 50) {
+                        setShowPitchModeDialog(true);
+                      } else {
+                        setShowPitchDialog(true);
+                      }
+                    }}
+                  />
+                )}
 
-            {/* Display validation errors */}
-            {Object.keys(errors).length > 0 && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
-                <h4 className="text-red-400 font-medium mb-2">Please fix the following errors:</h4>
-                <ul className="text-red-300 text-sm space-y-1">
-                  {Object.entries(errors).map(([key, message]) => (
-                    <li key={key}>• {message}</li>
-                  ))}
-                </ul>
-                {/* Special help for startup-only pitch details error */}
-                {errors.startupPitchDetails && (
-                  <div className="mt-3 pt-3 border-t border-red-500/20">
-                    <p className="text-red-300 text-sm mb-2">
-                      📱 <strong>Mobile users:</strong> If the pitch dialog isn&apos;t opening, try:
-                    </p>
-                    <ul className="text-red-300 text-xs space-y-1 ml-4">
-                      <li>• Scroll up and tap &quot;Add Pitch Details for Team&quot; button</li>
-                      <li>• Refresh the page and try again</li>
-                      <li>• Use a stable WiFi connection</li>
+                {/* Show individual track selection UI only in individual mode */}
+                {trackSelectionMode === 'individual' && formData.teamSize > 1 && (
+                  <IndividualTrackSelection
+                    members={formData.members}
+                    memberTracks={formData.memberTracks}
+                    startupPitchData={formData.startupPitchData}
+                    isComboTicket={formData.tickets.combo}
+                    isStartupOnly={formData.tickets.startupOnly}
+                    slots={slots}
+                    errors={errors}
+                    onTrackChange={(newTracks) => setFormData(prev => ({ ...prev, memberTracks: newTracks }))}
+                    onOpenPitchDialog={(memberIndex) => {
+                      setCurrentPitchMember(memberIndex);
+                      if (slots && slots.total.remaining <= 50) {
+                        setShowPitchModeDialog(true);
+                      } else {
+                        setShowPitchDialog(true);
+                      }
+                    }}
+                  />
+                )}
+
+                {/* Display validation errors */}
+                {Object.keys(errors).length > 0 && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                    <h4 className="text-red-400 font-medium mb-2">Please fix the following errors:</h4>
+                    <ul className="text-red-300 text-sm space-y-1">
+                      {Object.entries(errors).map(([key, message]) => (
+                        <li key={key}>• {message}</li>
+                      ))}
                     </ul>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setCurrentPitchMember(0);
-                        setTimeout(() => setShowPitchDialog(true), 200);
-                      }}
-                      className="text-red-400 border-red-400 hover:bg-red-400/10 mt-2"
-                    >
-                      Open Pitch Dialog Now
-                    </Button>
+                    {/* Special help for startup-only pitch details error */}
+                    {errors.startupPitchDetails && (
+                      <div className="mt-3 pt-3 border-t border-red-500/20">
+                        <p className="text-red-300 text-sm mb-2">
+                          📱 <strong>Mobile users:</strong> If the pitch dialog isn&apos;t opening, try:
+                        </p>
+                        <ul className="text-red-300 text-xs space-y-1 ml-4">
+                          <li>• Scroll up and tap &quot;Add Pitch Details for Team&quot; button</li>
+                          <li>• Refresh the page and try again</li>
+                          <li>• Use a stable WiFi connection</li>
+                        </ul>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setCurrentPitchMember(0);
+                            setTimeout(() => setShowPitchDialog(true), 200);
+                          }}
+                          className="text-red-400 border-red-400 hover:bg-red-400/10 mt-2"
+                        >
+                          Open Pitch Dialog Now
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
 
-            {/* Using the PriceSummary component */}
-            <PriceSummary
-              isComboTicket={formData.tickets.combo}
-              isStartupOnly={formData.tickets.startupOnly}
-              teamSize={formData.teamSize}
-              memberTracks={formData.memberTracks}
-              startupPitchData={formData.startupPitchData}
-              trackSelectionMode={trackSelectionMode}
-            />
+                {/* Using the PriceSummary component */}
+                <PriceSummary
+                  isComboTicket={formData.tickets.combo}
+                  isStartupOnly={formData.tickets.startupOnly}
+                  teamSize={formData.teamSize}
+                  memberTracks={formData.memberTracks}
+                  startupPitchData={formData.startupPitchData}
+                  trackSelectionMode={trackSelectionMode}
+                />
+              </>
+            )}
           </div>
         );
 

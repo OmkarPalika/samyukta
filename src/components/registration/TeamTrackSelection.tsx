@@ -36,6 +36,7 @@ interface TeamTrackSelectionProps {
   startupPitchData: Record<number, StartupPitchData>;
   isComboTicket: boolean;
   isStartupOnly?: boolean;
+  isHackathonOnly?: boolean;
   slots: {
     workshops: {
       cloud: { remaining: number; closed: boolean };
@@ -58,6 +59,7 @@ export default function TeamTrackSelection({
   startupPitchData,
   isComboTicket,
   isStartupOnly = false,
+  isHackathonOnly = false,
   slots,
   onTrackChange,
   onOpenPitchDialog
@@ -98,6 +100,22 @@ export default function TeamTrackSelection({
       }
     }
   }, [isStartupOnly, members.length, memberTracks, onTrackChange]);
+
+  // Initialize tracks for hackathon-only tickets
+  useEffect(() => {
+    if (isHackathonOnly) {
+      const tracksNeedUpdate = memberTracks.length !== members.length || 
+        memberTracks.some(track => track.competitionTrack !== "Hackathon" || track.workshopTrack !== "");
+      
+      if (tracksNeedUpdate) {
+        const newTracks = Array(members.length).fill({
+          workshopTrack: "",
+          competitionTrack: "Hackathon"
+        });
+        onTrackChange(newTracks);
+      }
+    }
+  }, [isHackathonOnly, members.length, memberTracks, onTrackChange]);
 
   // Handle pitch data updates separately
   useEffect(() => {
@@ -193,6 +211,48 @@ export default function TeamTrackSelection({
                   </p>
                 </div>
               )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isHackathonOnly) {
+    return (
+      <div className="space-y-6">
+        <Card className="bg-green-500/10 border-green-500/20">
+          <CardHeader>
+            <CardTitle className="text-green-400">Hackathon Only - Track Selection</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+              <h4 className="text-green-400 font-medium mb-2">Your Registration Includes:</h4>
+              <ul className="text-gray-300 space-y-1">
+                <li>• 6-hour Hackathon Competition</li>
+                <li>• Mentorship & Technical Support</li>
+                <li>• Meals & Refreshments</li>
+                <li>• Certificate of Participation</li>
+                <li>• Access to Prize Pool</li>
+                <li>• Networking Opportunities</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-gray-300">Competition Track (Pre-selected)</Label>
+              <div className="bg-gray-700/50 border border-gray-600 rounded-md p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white">6-hour Hackathon</span>
+                  <Badge className="bg-green-500/10 text-green-400">Included</Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+              <h4 className="text-blue-400 font-medium mb-2">Ready to Code!</h4>
+              <p className="text-gray-300 text-sm">
+                You&apos;re all set for the hackathon. No additional setup required - just bring your coding skills and creativity!
+              </p>
             </div>
           </CardContent>
         </Card>

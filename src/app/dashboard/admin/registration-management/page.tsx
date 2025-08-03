@@ -63,7 +63,7 @@ interface Registration {
 
 // Fetch registrations function
 const fetchRegistrations = async (): Promise<Registration[]> => {
-  const response = await fetch('/api/registrations', {
+  const response = await fetch('/api/registrations?limit=250', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

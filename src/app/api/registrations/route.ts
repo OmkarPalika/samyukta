@@ -173,8 +173,10 @@ export async function POST(request: NextRequest) {
       college: registrationData.college,
       team_size: registrationData.members.length,
       ticket_type: registrationData.ticket_type,
-      workshop_track: registrationData.ticket_type === 'startup_only' ? null : registrationData.workshop_track,
-      competition_track: registrationData.ticket_type === 'startup_only' ? 'Pitch' : registrationData.competition_track,
+      workshop_track: (registrationData.ticket_type === 'startup_only' || registrationData.ticket_type === 'hackathon_only') ? null : registrationData.workshop_track,
+      competition_track: registrationData.ticket_type === 'startup_only' ? 'Pitch' : 
+                        registrationData.ticket_type === 'hackathon_only' ? 'Hackathon' : 
+                        registrationData.competition_track,
       total_amount: registrationData.total_amount,
       transaction_id: registrationData.transaction_id,
       payment_screenshot_url: registrationData.payment_screenshot_url,
@@ -186,9 +188,11 @@ export async function POST(request: NextRequest) {
     // Check slot availability with participant counts (allow overflow for last team)
     const totalParticipants = await collections.teamMembers.countDocuments({});
     
-    // For startup_only tickets, skip workshop validation and use Pitch competition
-    const actualWorkshopTrack = registrationData.ticket_type === 'startup_only' ? null : registrationData.workshop_track;
-    const actualCompetitionTrack = registrationData.ticket_type === 'startup_only' ? 'Pitch' : registrationData.competition_track;
+    // For startup_only and hackathon_only tickets, skip workshop validation
+    const actualWorkshopTrack = (registrationData.ticket_type === 'startup_only' || registrationData.ticket_type === 'hackathon_only') ? null : registrationData.workshop_track;
+    const actualCompetitionTrack = registrationData.ticket_type === 'startup_only' ? 'Pitch' : 
+                                  registrationData.ticket_type === 'hackathon_only' ? 'Hackathon' : 
+                                  registrationData.competition_track;
     
     const workshopParticipants = actualWorkshopTrack ? await collections.registrations.aggregate([
       { $match: { workshop_track: actualWorkshopTrack } },
@@ -205,8 +209,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Event registrations are closed' }, { status: 400 });
     }
     
-    // Skip workshop validation for startup_only tickets
-    if (registrationData.ticket_type !== 'startup_only') {
+    // Skip workshop validation for startup_only and hackathon_only tickets
+    if (registrationData.ticket_type !== 'startup_only' && registrationData.ticket_type !== 'hackathon_only') {
       if (actualWorkshopTrack === 'Cloud' && workshopParticipants >= 200) {
         return NextResponse.json({ error: 'Cloud workshop registrations are closed' }, { status: 400 });
       }
@@ -296,7 +300,7 @@ export async function POST(request: NextRequest) {
     
     const emailResults = await Promise.all(memberPromises);
     
-    // Save startup pitch data to competition_registrations collection if it's a startup-only ticket
+    // Save competition data to competition_registrations collection for startup-only and hackathon-only tickets
     if (registrationData.ticket_type === 'startup_only' && registrationData.startup_pitch_data) {
       const pitchData = registrationData.startup_pitch_data;
       
@@ -334,6 +338,29 @@ export async function POST(request: NextRequest) {
       } catch (pitchError) {
         console.error(`❌ Failed to save startup pitch data for team ${teamId}:`, pitchError);
         // Don't fail the entire registration if pitch data save fails
+      }
+    }
+    
+    // Save hackathon competition data for hackathon-only tickets
+    if (registrationData.ticket_type === 'hackathon_only') {
+      const competitionRegistration = {
+        competition_id: 'hackathon-2025',
+        user_id: registrationData.members[0].email,
+        team_id: teamId,
+        registration_type: (registrationData.members.length > 1 ? 'team' : 'individual') as 'team' | 'individual',
+        transaction_id: registrationData.transaction_id,
+        payment_screenshot_url: registrationData.payment_screenshot_url,
+        status: 'pending' as const,
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+      
+      try {
+        await collections.competitionRegistrations.insertOne(competitionRegistration);
+        console.log(`✅ Hackathon competition data saved for team ${teamId}`);
+      } catch (hackathonError) {
+        console.error(`❌ Failed to save hackathon competition data for team ${teamId}:`, hackathonError);
+        // Don't fail the entire registration if competition data save fails
       }
     }
     

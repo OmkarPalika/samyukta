@@ -24,6 +24,7 @@ interface StartupPitchData {
 interface PriceSummaryProps {
   isComboTicket: boolean;
   isStartupOnly?: boolean;
+  isHackathonOnly?: boolean;
   teamSize: number;
   memberTracks: TeamMemberTrack[];
   startupPitchData?: Record<number, StartupPitchData>;
@@ -33,6 +34,7 @@ interface PriceSummaryProps {
 export default function PriceSummary({
   isComboTicket,
   isStartupOnly = false,
+  isHackathonOnly = false,
   teamSize,
   memberTracks,
   startupPitchData = {},
@@ -43,12 +45,20 @@ export default function PriceSummary({
     let total = 0;
     
     if (isStartupOnly) {
-      // Startup-only ticket: ₹200 per person with group discounts (same as combo)
+      // Startup-only ticket: ₹200 per person with team discounts (same as combo)
       total = 200 * teamSize;
       
-      // Apply team discount for startup pitch only (same as combo)
+      // Apply team discount for startup-only tickets (same as combo)
       if (teamSize > 1) {
-        total -= teamSize * 10;
+        total -= teamSize * 10; // ₹10 discount per person for teams
+      }
+    } else if (isHackathonOnly) {
+      // Hackathon-only ticket: ₹250 per person with team discounts
+      total = 250 * teamSize;
+      
+      // Apply team discount for hackathon-only tickets (same as combo)
+      if (teamSize > 1) {
+        total -= teamSize * 10; // ₹10 discount per person for teams
       }
     } else if (isComboTicket) {
       // Calculate combo pass price based on individual competition track selections
@@ -114,7 +124,7 @@ export default function PriceSummary({
     }
     
     return total;
-  }, [isComboTicket, isStartupOnly, teamSize, memberTracks, trackSelectionMode, startupPitchData]);
+  }, [isComboTicket, isStartupOnly, isHackathonOnly, teamSize, memberTracks, trackSelectionMode, startupPitchData]);
 
   // Count how many members selected each competition track
   const countCompetitionTracks = useCallback(() => {
@@ -203,6 +213,26 @@ export default function PriceSummary({
               </div>
             )}
           </>
+        ) : isHackathonOnly ? (
+          // Show hackathon-only pricing
+          <>
+            <div className="flex justify-between text-gray-300">
+              <span>Hackathon Only</span>
+              <span>₹250</span>
+            </div>
+            
+            <div className="flex justify-between text-gray-300">
+              <span>Team Size</span>
+              <span>x{teamSize}</span>
+            </div>
+            
+            {teamSize > 1 && (
+              <div className="flex justify-between text-green-400">
+                <span>Team Discount</span>
+                <span>-₹{teamSize * 10}</span>
+              </div>
+            )}
+          </>
         ) : isComboTicket ? (
           // Show individual combo pass pricing breakdown
           <>
@@ -237,7 +267,7 @@ export default function PriceSummary({
           </>
         )}
         
-        {!isComboTicket && !isStartupOnly && trackCounts.hackathon > 0 && (
+        {!isComboTicket && !isStartupOnly && !isHackathonOnly && trackCounts.hackathon > 0 && (
           <div className="flex justify-between text-gray-300">
             <span>
               {trackSelectionMode === 'shared' && teamSize > 1
@@ -249,7 +279,7 @@ export default function PriceSummary({
           </div>
         )}
         
-        {!isComboTicket && !isStartupOnly && trackCounts.pitch > 0 && (
+        {!isComboTicket && !isStartupOnly && !isHackathonOnly && trackCounts.pitch > 0 && (
           <div className="flex justify-between text-gray-300">
             <span>
               {trackSelectionMode === 'shared' && teamSize > 1
@@ -264,6 +294,13 @@ export default function PriceSummary({
         {isStartupOnly && (
           <div className="flex justify-between text-gray-300">
             <span>Startup Pitch Competition</span>
+            <span>Included</span>
+          </div>
+        )}
+        
+        {isHackathonOnly && (
+          <div className="flex justify-between text-gray-300">
+            <span>24-hour Hackathon</span>
             <span>Included</span>
           </div>
         )}

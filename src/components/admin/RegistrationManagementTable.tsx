@@ -63,7 +63,7 @@ interface Registration {
   team_id: string;
   college: string;
   team_size: number;
-  ticket_type: 'Combo' | 'Custom' | 'startup_only';
+  ticket_type: 'Combo' | 'Custom' | 'startup_only' | 'hackathon_only';
   workshop_track: 'Cloud' | 'AI' | 'Cybersecurity' | 'None' | null;
   competition_track: 'Hackathon' | 'Pitch' | 'None';
   total_amount: number;
@@ -129,7 +129,7 @@ export function RegistrationManagementTable({
   const [sendingEmail, setSendingEmail] = useState(false);
 
   // Custom global filter function for comprehensive search
-  const customGlobalFilter = (row: { original: Registration }, columnId: string, value: string) => {
+  const customGlobalFilter = (row: { original: Registration }, _columnId: string, value: string) => {
     if (!value || value.trim() === '') return true;
     
     const searchValue = value.toLowerCase().trim();
@@ -404,7 +404,9 @@ export function RegistrationManagementTable({
       cell: ({ row }) => (
         <div>
           <div className="text-sm text-white">
-            {row.original.ticket_type === 'startup_only' ? 'Startup Only' : row.original.ticket_type}
+            {row.original.ticket_type === 'startup_only' ? 'Startup Only' : 
+             row.original.ticket_type === 'hackathon_only' ? 'Hackathon Only' : 
+             row.original.ticket_type}
           </div>
           {row.original.ticket_type === 'startup_only' ? (
             <div>
@@ -413,6 +415,15 @@ export function RegistrationManagementTable({
               </div>
               <div className="text-sm text-gray-400">
                 Category: {row.original.startup_pitch_data?.pitch_category || 'N/A'}
+              </div>
+            </div>
+          ) : row.original.ticket_type === 'hackathon_only' ? (
+            <div>
+              <div className="text-sm text-green-400">
+                🏆 6-hour Hackathon
+              </div>
+              <div className="text-sm text-gray-400">
+                Competition Only
               </div>
             </div>
           ) : (
@@ -1022,7 +1033,7 @@ export function RegistrationManagementTable({
                 <Label className="text-gray-300">Ticket Type</Label>
                 <Select
                   value={registrationForm.ticket_type || 'Combo'}
-                  onValueChange={(value: 'Combo' | 'Custom') => setRegistrationForm({ ...registrationForm, ticket_type: value })}
+                  onValueChange={(value: 'Combo' | 'Custom' | 'startup_only' | 'hackathon_only') => setRegistrationForm({ ...registrationForm, ticket_type: value })}
                 >
                   <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
                     <SelectValue />
@@ -1030,6 +1041,8 @@ export function RegistrationManagementTable({
                   <SelectContent className="bg-gray-800 border-gray-700">
                     <SelectItem value="Combo">Combo</SelectItem>
                     <SelectItem value="Custom">Custom</SelectItem>
+                    <SelectItem value="startup_only">Startup Only</SelectItem>
+                    <SelectItem value="hackathon_only">Hackathon Only</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
