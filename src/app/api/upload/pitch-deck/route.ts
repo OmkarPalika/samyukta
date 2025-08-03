@@ -23,14 +23,16 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
     
-    if (file.size > 50 * 1024 * 1024) {
+    // Google Apps Script has a 10MB payload limit
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
       return NextResponse.json({ 
-        error: 'File too large. Maximum size is 50MB.' 
-      }, { status: 400 });
+        error: `File too large. Maximum size is ${Math.round(maxSize / (1024 * 1024))}MB due to Google Apps Script limitations.` 
+      }, { status: 413 });
     }
 
-    // Add mobile-specific file size warning
-    if (file.size > 10 * 1024 * 1024) {
+    // Add file size logging
+    if (file.size > 5 * 1024 * 1024) {
       console.log(`Large file upload (${(file.size / (1024 * 1024)).toFixed(1)}MB): ${file.name}`);
     }
 
