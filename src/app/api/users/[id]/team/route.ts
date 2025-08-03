@@ -16,7 +16,7 @@ export async function GET(
     const collections = await getTypedCollections();
 
     // Find user's team membership
-    const teamMember = await collections.team_members.findOne({ participant_id: id });
+    const teamMember = await collections.teamMembers.findOne({ participant_id: id });
 
     if (!teamMember) {
       return NextResponse.json({ error: 'User is not part of any team' }, { status: 404 });

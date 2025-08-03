@@ -184,12 +184,46 @@ export interface SocialItemSchema {
 export interface GameSchema {
   _id?: ObjectId;
   user_id: string;
-  action: 'qr_scan' | 'suspect_added';
+  team_id?: string;
+  action: 'qr_scan' | 'suspect_added' | 'imposter_guess';
+  game_type?: 'qr_quest' | 'imposter_hunt';
   data?: string;
   suspect_id?: string;
+  qr_id?: string;
+  guessed_imposter_id?: string;
+  is_correct?: boolean;
+  actual_imposter_id?: string;
+  points_earned?: number;
+  bonus_completed?: boolean;
   timestamp: Date;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface ImposterTeamSchema {
+  _id?: ObjectId;
+  team_id: string;
+  college: string;
+  member_ids: string[];
+  imposter_id: string;
+  imposter_name: string;
+  is_active: boolean;
+  created_at: Date;
+}
+
+export interface QRQuestLocationSchema {
+  _id?: ObjectId;
+  id: string;
+  name: string;
+  description: string;
+  location: string;
+  points: number;
+  bonus_question?: string;
+  bonus_answer?: string;
+  bonus_points?: number;
+  hint?: string;
+  is_active: boolean;
+  created_at: Date;
 }
 
 export interface PitchRatingSchema {
@@ -562,6 +596,29 @@ export async function initializeDatabase(db: Db) {
       { key: { user_id: 1 } },
       { key: { 'subscription.endpoint': 1 }, unique: true },
       { key: { created_at: -1 } }
+    ]),
+
+    // Imposter teams collection
+    db.collection('imposter_teams').createIndexes([
+      { key: { team_id: 1 }, unique: true },
+      { key: { imposter_id: 1 } },
+      { key: { is_active: 1 } },
+      { key: { college: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // QR Quest locations collection
+    db.collection('qr_quest_locations').createIndexes([
+      { key: { id: 1 }, unique: true },
+      { key: { is_active: 1 } },
+      { key: { points: 1 } },
+      { key: { created_at: -1 } }
+    ]),
+
+    // Game statistics collection
+    db.collection('game_statistics').createIndexes([
+      { key: { type: 1 } },
+      { key: { updated_at: -1 } }
     ])
   ]);
 
@@ -583,24 +640,27 @@ export function getCollections(db: Db) {
     registrations: db.collection<RegistrationSchema>('registrations'),
     teamMembers: db.collection<TeamMemberSchema>('team_members'),
     workshops: db.collection<WorkshopSchema>('workshops'),
-    workshopAttendance: db.collection<WorkshopAttendanceSchema>('workshop_attendance'),
+    workshop_attendance: db.collection<WorkshopAttendanceSchema>('workshop_attendance'),
     competitions: db.collection<CompetitionSchema>('competitions'),
-    competitionRegistrations: db.collection<CompetitionRegistrationSchema>('competition_registrations'),
-    competitionCheckins: db.collection<CompetitionCheckinSchema>('competition_checkins'),
-    helpTickets: db.collection<HelpTicketSchema>('help_tickets'),
-    socialItems: db.collection<SocialItemSchema>('social_items'),
+    competition_registrations: db.collection<CompetitionRegistrationSchema>('competition_registrations'),
+    competition_checkins: db.collection<CompetitionCheckinSchema>('competition_checkins'),
+    help_tickets: db.collection<HelpTicketSchema>('help_tickets'),
+    social_items: db.collection<SocialItemSchema>('social_items'),
     games: db.collection<GameSchema>('games'),
-    pitchRatings: db.collection<PitchRatingSchema>('pitch_ratings'),
+    pitch_ratings: db.collection<PitchRatingSchema>('pitch_ratings'),
     sessions: db.collection<SessionSchema>('sessions'),
     meals: db.collection<MealSchema>('meals'),
-    workshopAttendanceLogs: db.collection<WorkshopAttendanceLogSchema>('workshop_attendance_logs'),
-    accommodationLogs: db.collection<AccommodationLogSchema>('accommodation_logs'),
-    webpageContent: db.collection<WebpageContentSchema>('webpage_content'),
-    emailTemplates: db.collection<EmailTemplateSchema>('email_templates'),
-    emailCampaigns: db.collection<EmailCampaignSchema>('email_campaigns'),
+    workshop_attendance_logs: db.collection<WorkshopAttendanceLogSchema>('workshop_attendance_logs'),
+    accommodation_logs: db.collection<AccommodationLogSchema>('accommodation_logs'),
+    webpage_content: db.collection<WebpageContentSchema>('webpage_content'),
+    email_templates: db.collection<EmailTemplateSchema>('email_templates'),
+    email_campaigns: db.collection<EmailCampaignSchema>('email_campaigns'),
     notifications: db.collection<NotificationSchema>('notifications'),
-    userNotifications: db.collection<UserNotificationSchema>('user_notifications'),
-    emailTracking: db.collection<EmailTrackingSchema>('email_tracking'),
-    pushSubscriptions: db.collection<PushSubscriptionSchema>('push_subscriptions')
+    user_notifications: db.collection<UserNotificationSchema>('user_notifications'),
+    email_tracking: db.collection<EmailTrackingSchema>('email_tracking'),
+    push_subscriptions: db.collection<PushSubscriptionSchema>('push_subscriptions'),
+    imposter_teams: db.collection<ImposterTeamSchema>('imposter_teams'),
+    qr_quest_locations: db.collection<QRQuestLocationSchema>('qr_quest_locations'),
+    game_statistics: db.collection('game_statistics')
   };
 }
