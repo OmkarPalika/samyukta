@@ -44,6 +44,7 @@ interface EventTimelineProps {
 
 export default function EventTimeline({ day }: EventTimelineProps) {
   const typeIcons: Record<string, LucideIcon> = useMemo(() => ({
+    registration: Users,
     ceremony: Trophy,
     workshop: Code,
     game: Users,
@@ -51,11 +52,12 @@ export default function EventTimeline({ day }: EventTimelineProps) {
     competition: Trophy,
     networking: Users,
     visit: MapPin,
-    break: Users,
+    break: Clock,
     logistics: Users
   }), []);
 
   const typeColors: Record<string, string> = useMemo(() => ({
+    registration: 'from-blue-500 to-indigo-500',
     ceremony: 'from-yellow-500 to-orange-500',
     workshop: 'from-blue-500 to-cyan-500',
     game: 'from-green-500 to-emerald-500',
@@ -107,7 +109,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
               {/* Time Badge */}
               <div className="mb-4">
                 <Badge className={`bg-gradient-to-r ${day.color} text-white px-4 py-2 text-sm font-semibold`}>
-                  {event.time} ({event.duration}h)
+                  {event.time} ({event.duration} min)
                 </Badge>
               </div>
 
@@ -128,7 +130,7 @@ export default function EventTimeline({ day }: EventTimelineProps) {
                         {event.unified.description && (
                           <p className="text-gray-400">{event.unified.description}</p>
                         )}
-                        <Badge variant="outline" className={`mt-3 bg-${event.unified.type === 'ceremony' ? 'yellow' : event.unified.type === 'workshop' ? 'blue' : 'gray'}-500/10 text-${event.unified.type === 'ceremony' ? 'yellow' : event.unified.type === 'workshop' ? 'blue' : 'gray'}-400 border-${event.unified.type === 'ceremony' ? 'yellow' : event.unified.type === 'workshop' ? 'blue' : 'gray'}-500/20`}>
+                        <Badge variant="outline" className="mt-3 bg-gray-500/10 text-gray-400 border-gray-500/20 capitalize">
                           {event.unified.type}
                         </Badge>
                       </div>
