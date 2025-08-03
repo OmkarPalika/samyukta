@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, X, Check, Info, AlertTriangle, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,23 @@ interface RealTimeNotificationsProps {
 
 export default function RealTimeNotifications({ className = '' }: RealTimeNotificationsProps) {
   const [notifications, setNotifications] = useState<RealTimeNotification[]>([]);
+
+  const addNotification = useCallback((notification: Omit<RealTimeNotification, 'id' | 'timestamp'>) => {
+    const newNotification: RealTimeNotification = {
+      ...notification,
+      id: Date.now().toString(),
+      timestamp: new Date()
+    };
+
+    setNotifications(prev => [newNotification, ...prev]);
+
+    // Auto-dismiss if duration is specified
+    if (notification.duration) {
+      setTimeout(() => {
+        dismissNotification(newNotification.id);
+      }, notification.duration);
+    }
+  }, []);
 
   useEffect(() => {
     // Simulate real-time notifications
@@ -85,24 +102,7 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
     const initialTimeout = setTimeout(simulateNotifications, 5000);
 
     return () => clearTimeout(initialTimeout);
-  }, []);
-
-  const addNotification = (notification: Omit<RealTimeNotification, 'id' | 'timestamp'>) => {
-    const newNotification: RealTimeNotification = {
-      ...notification,
-      id: Date.now().toString(),
-      timestamp: new Date()
-    };
-
-    setNotifications(prev => [newNotification, ...prev]);
-
-    // Auto-dismiss if duration is specified
-    if (notification.duration) {
-      setTimeout(() => {
-        dismissNotification(newNotification.id);
-      }, notification.duration);
-    }
-  };
+  }, [addNotification]);
 
   const dismissNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
@@ -132,8 +132,8 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
       announcement: 'from-purple-500/20 to-purple-600/10 border-purple-500/30'
     };
 
-    const priorityRing = priority === 'urgent' ? 'ring-2 ring-red-500/50' : 
-                       priority === 'high' ? 'ring-1 ring-orange-500/50' : '';
+    const priorityRing = priority === 'urgent' ? 'ring-2 ring-red-500/50' :
+      priority === 'high' ? 'ring-1 ring-orange-500/50' : '';
 
     return `${baseColors[type as keyof typeof baseColors]} ${priorityRing}`;
   };
@@ -158,11 +158,11 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
             initial={{ opacity: 0, x: 300, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 300, scale: 0.8 }}
-            transition={{ 
-              type: "spring", 
-              stiffness: 300, 
+            transition={{
+              type: "spring",
+              stiffness: 300,
               damping: 30,
-              delay: index * 0.1 
+              delay: index * 0.1
             }}
             className={`
               bg-gradient-to-r ${getNotificationColors(notification.type, notification.priority)}
@@ -175,7 +175,7 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
               <div className="flex-shrink-0 mt-0.5">
                 {getNotificationIcon(notification.type)}
               </div>
-              
+
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h4 className="text-white font-medium text-sm leading-tight">
@@ -197,16 +197,16 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
                     </Button>
                   </div>
                 </div>
-                
+
                 <p className="text-gray-300 text-xs mb-2 line-clamp-2">
                   {notification.message}
                 </p>
-                
+
                 <div className="flex items-center justify-between">
                   <span className="text-gray-400 text-xs">
                     {formatTimeAgo(notification.timestamp)}
                   </span>
-                  
+
                   {notification.action && (
                     <Button
                       size="sm"
@@ -222,7 +222,7 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
           </motion.div>
         ))}
       </AnimatePresence>
-      
+
       {notifications.length > 5 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -246,8 +246,6 @@ export default function RealTimeNotifications({ className = '' }: RealTimeNotifi
 
 // Hook for adding notifications from other components
 export const useRealTimeNotifications = () => {
-  const [notificationComponent, setNotificationComponent] = useState<React.ComponentType | null>(null);
-
   const addNotification = (notification: Omit<RealTimeNotification, 'id' | 'timestamp'>) => {
     // This would typically dispatch to a global state or context
     console.log('Adding notification:', notification);
