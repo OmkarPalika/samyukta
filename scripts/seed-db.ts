@@ -16,8 +16,8 @@ async function main() {
     client = await getClientPromise();
     const collections = await getTypedCollections();
     
-    // Seed users from mock data
-    console.log('👤 Seeding users...');
+    // Seed essential users only (admin and coordinator) - no sample/fake users
+    console.log('👤 Seeding essential users...');
     for (const user of MOCK_USERS) {
       await collections.users.updateOne(
         { email: user.email },

@@ -344,49 +344,7 @@ export function OfflineIndicator() {
   );
 }
 
-// Manual Update Check Button (for debugging)
-export function UpdateChecker() {
-  const [checking, setChecking] = useState(false);
 
-  const checkForUpdates = async () => {
-    setChecking(true);
-    try {
-      if ('serviceWorker' in navigator) {
-        const registration = await navigator.serviceWorker.getRegistration();
-        if (registration) {
-          console.log('Manual update check triggered');
-          await registration.update();
-          toast.info('Checked for updates');
-        }
-      }
-    } catch (error) {
-      console.error('Manual update check failed:', error);
-      toast.error('Update check failed');
-    } finally {
-      setChecking(false);
-    }
-  };
-
-  // Only show in development or when needed for debugging
-  if (process.env.NODE_ENV === 'production') {
-    return null;
-  }
-
-  return (
-    <div className="fixed bottom-20 right-4 z-50">
-      <Button
-        onClick={checkForUpdates}
-        disabled={checking}
-        size="sm"
-        variant="outline"
-        className="bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
-      >
-        <RefreshCw className={`w-4 h-4 mr-2 ${checking ? 'animate-spin' : ''}`} />
-        {checking ? 'Checking...' : 'Check Updates'}
-      </Button>
-    </div>
-  );
-}
 
 // Combined PWA Manager Component
 export function PWAManager() {
@@ -397,7 +355,6 @@ export function PWAManager() {
       <NetworkStatus />
       <NotificationPrompt />
       <OfflineIndicator />
-      <UpdateChecker />
     </>
   );
 }

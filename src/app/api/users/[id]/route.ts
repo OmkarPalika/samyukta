@@ -2,6 +2,48 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getTypedCollections } from '@/lib/db-utils';
 import { createObjectId } from '@/lib/objectid-utils';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    }
+
+    const collections = await getTypedCollections();
+
+    // Find user by ID
+    const user = await collections.users.findOne({ _id: createObjectId(id) });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Return safe user data (no sensitive information)
+    const safeUserData = {
+      id: user._id.toString(),
+      full_name: user.full_name,
+      college: user.college,
+      track: user.track,
+      year: user.year,
+      dept: user.dept,
+      role: user.role
+    };
+
+    return NextResponse.json(safeUserData);
+
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

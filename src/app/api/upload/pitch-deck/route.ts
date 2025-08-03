@@ -54,15 +54,25 @@ export async function POST(request: NextRequest) {
             error: 'Upload timed out. This often happens on mobile networks. Please try again with a smaller file or better internet connection.' 
           }, { status: 408 });
         }
-        if (uploadError.message.includes('<!DOCTYPE')) {
+        if (uploadError.message.includes('<!DOCTYPE') || uploadError.message.includes('GAS service returned HTML')) {
           return NextResponse.json({ 
             error: 'Upload service temporarily unavailable. Please wait a moment and try again.' 
+          }, { status: 503 });
+        }
+        if (uploadError.message.includes('Invalid response') || uploadError.message.includes('Failed to parse')) {
+          return NextResponse.json({ 
+            error: 'Upload service returned invalid response. Please try again.' 
           }, { status: 503 });
         }
         if (uploadError.message.includes('network') || uploadError.message.includes('connection')) {
           return NextResponse.json({ 
             error: 'Network error. Please check your internet connection and try again.' 
           }, { status: 503 });
+        }
+        if (uploadError.message.includes('GAS_UPLOAD_URL not configured')) {
+          return NextResponse.json({ 
+            error: 'Upload service not configured. Please contact support.' 
+          }, { status: 500 });
         }
       }
       
