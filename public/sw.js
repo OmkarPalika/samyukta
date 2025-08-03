@@ -1,6 +1,6 @@
 // Service Worker for Samyukta 2025
 // Auto-generate version based on timestamp for automatic updates
-const CACHE_VERSION = '2025-08-03-2137'; // Update this with each deployment
+const CACHE_VERSION = '2025-08-03-2152'; // Update this with each deployment
 const CACHE_NAME = `samyukta-2025-${CACHE_VERSION}`;
 const STATIC_CACHE_NAME = `samyukta-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE_NAME = `samyukta-dynamic-${CACHE_VERSION}`;
