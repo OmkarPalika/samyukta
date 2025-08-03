@@ -48,6 +48,9 @@ class PWAManager {
 
     // Handle online/offline status
     this.setupNetworkListeners();
+
+    // Check for updates periodically
+    this.setupUpdateChecker();
   }
 
   private checkInstallStatus() {
@@ -75,10 +78,14 @@ class PWAManager {
 
         // Listen for updates
         registration.addEventListener('updatefound', () => {
+          console.log('Service Worker: Update found!');
           const newWorker = registration.installing;
           if (newWorker) {
+            console.log('Service Worker: New worker installing...');
             newWorker.addEventListener('statechange', () => {
+              console.log('Service Worker: New worker state:', newWorker.state);
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Service Worker: Update available - notifying UI');
                 this.notifyUpdateAvailable();
               }
             });
@@ -103,6 +110,31 @@ class PWAManager {
 
     window.addEventListener('offline', () => {
       this.notifyNetworkStatus(false);
+    });
+  }
+
+  private setupUpdateChecker() {
+    // Check for updates every 30 seconds when page is visible
+    const checkForUpdates = () => {
+      if (this.serviceWorkerRegistration && !document.hidden) {
+        console.log('PWA: Checking for service worker updates...');
+        this.serviceWorkerRegistration.update().catch(error => {
+          console.log('PWA: Update check failed:', error);
+        });
+      }
+    };
+
+    // Initial check after 5 seconds
+    setTimeout(checkForUpdates, 5000);
+
+    // Periodic checks every 30 seconds
+    setInterval(checkForUpdates, 30000);
+
+    // Check when page becomes visible
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        setTimeout(checkForUpdates, 1000);
+      }
     });
   }
 
@@ -217,7 +249,10 @@ export function usePWA() {
       setIsInstalled(true);
       setIsInstallable(false);
     };
-    const handleUpdateAvailable = () => setUpdateAvailable(true);
+    const handleUpdateAvailable = () => {
+      console.log('PWA Hook: Update available event received');
+      setUpdateAvailable(true);
+    };
     const handleNetworkStatus = (event: CustomEvent) => {
       setIsOnline(event.detail.isOnline);
     };
