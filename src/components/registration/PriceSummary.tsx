@@ -18,7 +18,6 @@ interface StartupPitchData {
   currentStage: string;
   teamSize: string;
   fundingStatus: string;
-  pitchDeck: File | null;
   demoUrl: string;
 }
 
