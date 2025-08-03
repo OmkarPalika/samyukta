@@ -1,7 +1,11 @@
 // Service Worker for Samyukta 2025
-const CACHE_NAME = 'samyukta-2025-v1';
-const STATIC_CACHE_NAME = 'samyukta-static-v1';
-const DYNAMIC_CACHE_NAME = 'samyukta-dynamic-v1';
+// Auto-generate version based on timestamp for automatic updates
+const CACHE_VERSION = '2025-08-03-1118'; // Update this with each deployment
+const CACHE_NAME = `samyukta-2025-${CACHE_VERSION}`;
+const STATIC_CACHE_NAME = `samyukta-static-${CACHE_VERSION}`;
+const DYNAMIC_CACHE_NAME = `samyukta-dynamic-${CACHE_VERSION}`;
+
+console.log(`Service Worker: Cache version ${CACHE_VERSION}`);
 
 // Assets to cache immediately
 const STATIC_ASSETS = [
@@ -57,11 +61,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
+        const currentCaches = [STATIC_CACHE_NAME, DYNAMIC_CACHE_NAME, CACHE_NAME];
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== STATIC_CACHE_NAME && 
-                cacheName !== DYNAMIC_CACHE_NAME &&
-                cacheName !== CACHE_NAME) {
+            // Delete any cache that doesn't match current version
+            if (!currentCaches.includes(cacheName) && 
+                (cacheName.startsWith('samyukta-') || cacheName.startsWith('samyukta-2025-'))) {
               console.log('Service Worker: Deleting old cache', cacheName);
               return caches.delete(cacheName);
             }
@@ -69,7 +74,7 @@ self.addEventListener('activate', (event) => {
         );
       })
       .then(() => {
-        console.log('Service Worker: Activated');
+        console.log('Service Worker: Activated and old caches cleaned');
         return self.clients.claim();
       })
   );

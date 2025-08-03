@@ -44,19 +44,12 @@ export default function PriceSummary({
     let total = 0;
     
     if (isStartupOnly) {
-      // Startup-only ticket: ₹200 per person with group discounts
+      // Startup-only ticket: ₹200 per person with group discounts (same as combo)
       total = 200 * teamSize;
       
-      // Apply group discounts for startup-only tickets
-      if (teamSize >= 5) {
-        // 5+ members: ₹50 discount per person
-        total -= teamSize * 50;
-      } else if (teamSize >= 3) {
-        // 3-4 members: ₹30 discount per person
-        total -= teamSize * 30;
-      } else if (teamSize === 2) {
-        // 2 members: ₹20 discount per person
-        total -= teamSize * 20;
+      // Apply team discount for startup pitch only (same as combo)
+      if (teamSize > 1) {
+        total -= teamSize * 10;
       }
     } else if (isComboTicket) {
       // Calculate combo pass price based on individual competition track selections
@@ -204,24 +197,10 @@ export default function PriceSummary({
               <span>x{teamSize}</span>
             </div>
             
-            {teamSize >= 5 && (
+            {teamSize > 1 && (
               <div className="flex justify-between text-green-400">
-                <span>Group Discount (5+ members)</span>
-                <span>-₹{teamSize * 50}</span>
-              </div>
-            )}
-            
-            {teamSize >= 3 && teamSize < 5 && (
-              <div className="flex justify-between text-green-400">
-                <span>Group Discount (3-4 members)</span>
-                <span>-₹{teamSize * 30}</span>
-              </div>
-            )}
-            
-            {teamSize === 2 && (
-              <div className="flex justify-between text-green-400">
-                <span>Group Discount (2 members)</span>
-                <span>-₹{teamSize * 20}</span>
+                <span>Team Discount</span>
+                <span>-₹{teamSize * 10}</span>
               </div>
             )}
           </>
