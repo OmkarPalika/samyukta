@@ -179,6 +179,12 @@ export default function StartupPitchDialog({
             try {
               result = JSON.parse(responseText);
               console.log('Upload response parsed successfully:', result);
+              
+              // Validate that we have the expected response structure
+              if (!result.success || !result.file_url) {
+                throw new Error('Upload service returned invalid response structure');
+              }
+              
             } catch (parseError) {
               const errorMessage = parseError instanceof Error ? parseError.message : String(parseError);
               console.error('JSON Parse Error Details:', {
@@ -188,6 +194,7 @@ export default function StartupPitchDialog({
                 firstChars: responseText.substring(0, 50),
                 lastChars: responseText.substring(responseText.length - 50)
               });
+              setUploading(false);
               throw new Error(`Invalid response from upload service. Parse error: ${errorMessage}`);
             }
             uploadedData = { ...uploadedData, pitchDeck: null, pitchDeckUrl: result.file_url };
@@ -207,9 +214,11 @@ export default function StartupPitchDialog({
                 status: response.status,
                 statusText: response.statusText
               });
-              throw new Error(`Upload failed with status ${response.status}. Parse error: ${errorMessage}`);
+              setUploading(false);
+              throw new Error(`Upload failed with status ${response.status}. Response: ${responseText.substring(0, 100)}`);
             }
-            throw new Error(errorData.error || 'Upload failed');
+            setUploading(false);
+            throw new Error(errorData.error || `Upload failed with status ${response.status}`);
           }
         } catch (error) {
           console.error('Upload failed:', error);
