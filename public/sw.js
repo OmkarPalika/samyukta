@@ -136,7 +136,7 @@ async function handleApiRequest(request) {
     }
     
     return networkResponse;
-  } catch (error) {
+  } catch {
     console.log('Network failed, trying cache for:', request.url);
     
     // Fallback to cache
@@ -258,7 +258,7 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       notificationData = event.data.json();
-    } catch (e) {
+    } catch {
       notificationData = {
         title: 'Samyukta 2025',
         body: event.data.text() || 'New notification',
