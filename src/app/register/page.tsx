@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard, FileText, Copy, Upload, InfoIcon, AlertTriangle, Clock } from "lucide-react";
+import { Check, Users, Star, ArrowRight, ChevronLeft, User as UserIcon, CreditCard,
+  // FileText,
+  Copy, Upload, InfoIcon, AlertTriangle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -911,7 +913,7 @@ export default function Register() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo === false && !formData.tickets.startupOnly && !formData.tickets.hackathonOnly ? 'ring-2 ring-blue-500' : ''}`}
+              {/* <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.combo === false && !formData.tickets.startupOnly && !formData.tickets.hackathonOnly ? 'ring-2 ring-blue-500' : ''}`}
                 onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false, hackathonOnly: false } })}>
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
@@ -949,7 +951,7 @@ export default function Register() {
                     <li className="text-green-400">• Team discounts available</li>
                   </ul>
                 </CardContent>
-              </Card>
+              </Card> */}
 
               <Card className={`bg-gray-800/40 border-gray-700 cursor-pointer transition-all ${formData.tickets.hackathonOnly ? 'ring-2 ring-green-500' : ''}`}
                 onClick={() => setFormData({ ...formData, tickets: { ...formData.tickets, combo: false, startupOnly: false, hackathonOnly: true } })}>
@@ -1223,8 +1225,8 @@ export default function Register() {
                 {formData.tickets.hackathonOnly ? "Pricing Summary" : "Tracks & Pricing"}
               </h3>
               <p className="text-gray-300">
-                {formData.tickets.hackathonOnly 
-                  ? "Review your hackathon registration details" 
+                {formData.tickets.hackathonOnly
+                  ? "Review your hackathon registration details"
                   : "Select workshop and competition tracks for each team member"
                 }
               </p>
