@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
           This message was sent by the Samyukta 2025 administration team.
         </p>
         <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.4); font-size: 12px;">
-          ANITS Campus, Visakhapatnam | January 24-26, 2025
+          ANITS Campus, Visakhapatnam | August 6-9, 2025
         </p>
       </div>
     </div>

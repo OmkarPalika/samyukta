@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
             amount: registration.total_amount,
             workshopTrack: registration.workshop_track,
             teamMembers: members.map(m => m.full_name),
-            eventDates: "January 24-26, 2025",
+            eventDates: "Auguest 6-9, 2025",
             venue: "ANITS Campus, Visakhapatnam"
           },
           member.passkey || 'DEFAULT_PASSKEY'

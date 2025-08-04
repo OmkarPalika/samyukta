@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       registrationId: registration.team_id || registration._id.toString(),
       amount: registration.total_amount || 0,
       workshopTrack: registration.workshop_track || 'None',
-      eventDates: 'January 24-26, 2025',
+      eventDates: 'August 6-9, 2025',
       venue: 'ANITS Campus, Visakhapatnam',
       teamMembers: registration.members.map((m: { full_name: string }) => m.full_name)
     };
