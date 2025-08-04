@@ -29,8 +29,8 @@ export default function DashboardPage() {
           router.push('/dashboard/admin');
         } else if (user.role === 'coordinator') {
           router.push('/dashboard/coordinator');
-        } else {
-          router.push('/dashboard/participant');
+        // } else {
+        //   router.push('/dashboard/participant');
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
